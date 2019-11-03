@@ -1,7 +1,13 @@
 ---
-title: "Multivariate"
+title: "Multivariate analysis"
+knit: (function(input_file, encoding) {
+  out_dir <- 'docs';
+  rmarkdown::render(input_file,
+ encoding=encoding,
+ output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
+
 author: "Carlos"
-date: "03/11/2019"
+date: "02/11/2019"
 output: html_document
 ---
 
@@ -9,22 +15,303 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## R Markdown
+# Multivariate Analysis of Network data
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+Note: This tutorial is bascially the same as the on described in "Protocol_multivariate.R". Either download the repo or, much easier, just copy the script and paste into your r script.
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+## Intro & Basics
 
-```{r cars}
-summary(cars)
+The question addressed here is whether network traits "cluster" according to species identity
+For this we are using:
+
+  * PCA: To visualize whether there is any clustering
+  * RDA: To obtain a p-value associated to those clustering (in other words whether those
+     cluster are "significantly" different from each other). That said the wording
+     "significantly different" is becoming controversial
+
+To do that I use base R functions combined with functions from three other packages: vegan, tidyverse and RColorBrewer
+You might need to install those packages. You can do that via R studio or: 
+
+```{r, eval=FALSE}
+install.packages("vegan")
+install.packages("tidyverse")
+install.packages("RColorBrewer")
+
 ```
 
-## Including Plots
+## 1. Loading files.
 
-You can also embed plots, for example:
+Note: one can load directly excel files (.xlxs) using R studio. This is a relatively new
+feature. I am used to the function "read.csv" for which I need to save the excel sheet I am interested as
+a csv file first. In this case, I saved the "edge" sheet of each excel file of each of the 7 species as .csv
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+```{r }
+temp = list.files(path="processedData\\",pattern="*.csv")
+temp<-paste("processedData\\",temp,sep = "")
+myfiles = lapply(temp,function(x){read.csv(x,header = TRUE,stringsAsFactors = FALSE)} )
+Fung_Netw_Traits<-do.call(rbind,myfiles)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## 2. Getting to know the data.
+
+### 2.1 How R sees the data. 
+It is useful to have an idea on how R recognize the data. R is an "object oriented"
+program language. That is, every data is an object which has certain properties. R uses these properties to 
+categorized the object. It is useful to know what kind of object is your data because some functions only work
+on one object type but not in others.
+
+
+```{r}
+str(Fung_Netw_Traits)
+```
+
+### 2.2. Looking at the distribution of the data. 
+More impotantly, what is the distribution of the data? 
+To simply get means, min, max per fungal species:
+
+```{r}
+aggregate(
+        Fung_Netw_Traits[which(Fung_Netw_Traits$Type=="E"),#Removing the edges in the feature
+                         c("Length","Width","Area","Volume","Resistance_2","Tortuosity","Or_ij","Betweenness","Accessibility")],
+        by=list(Fung_Netw_Traits[which(Fung_Netw_Traits$Type=="E"),]$name),
+        range)#You can try functions other than "range". For example: "min", "max", "median" ; "summmary" is good because it gets you more than one summary statistics, but it can be confusing with so much data.
+```
+
+
+Visualinzing as simple historgrams helps. To make those, I use the suite of functions in the package tidyverse.
+
+```{r,message=FALSE}
+library(tidyverse)
+```
+
+First, reorganizing the dataframe helps so the figures are made easier
+
+```{r}
+Re_org<-
+        Fung_Netw_Traits%>%
+        filter(Type=="E")%>%
+        select(c("name","Length","Width","Area","Volume","Resistance_2",
+                 "Tortuosity","Or_ij","Betweenness","Accessibility"))%>%
+        group_by(name)%>%
+        gather(key=variable,
+               value=value,Length:Accessibility)
+```        
+        
+
+Now we can make simple histograms (because there are too many variables, zoom the graphic to better see)
+
+NOTE: I know, you can see nothing here, but when you run this in your r session and zoom in, you can check each histogram
+```{r,echo = FALSE,message=FALSE}
+Re_org%>%
+        ggplot()+
+        aes(value,fill=name)+
+        geom_histogram()+
+        facet_wrap(name ~ variable, scales = "free",nrow = 7,ncol = 9)+
+        theme(legend.position = "none")
+```
+
+Or as density plots
+
+```{r,message=FALSE}
+Re_org%>%
+        ggplot()+
+        aes(value,fill=name)+
+        geom_density(alpha=0.6)+
+        facet_wrap(name ~ variable, scales = "free",nrow = 7,ncol = 9)+
+        theme(legend.position = "none")
+```
+
+Or combining histograms and density plots
+
+NOTE: I decided to remove the headers on each histogram so you
+can see something here. Check the comment in the code.
+
+```{r,message=FALSE}
+Re_org%>%
+        ggplot()+
+        aes(value,fill=name)+
+        geom_histogram(aes(y=..density..), position="identity", alpha=0.5)+
+        geom_density(alpha=0.6)+
+        facet_wrap(name ~ variable, scales = "free",nrow = 7,ncol = 9)+
+        theme(legend.position = "none",
+              strip.text.x = element_blank())#because I want to save it I am removing the labels in each panel, then I can use illustrator or inkscape to add them manually
+```
+
+Form these plots one learns that:
+
+  * The distribution of the data for a given variable is similar across species.
+  * Almost all variables are right skewed (long right tail). Some more than others:
+    + Less skewed: "Accessibility","Area","Length","Width" (althouhg width has two peaks)
+    + Highly skewed: "Betweenness","Resistance_2","Tortuosity","Volume"
+  * Orientation has three peaks (this one will be tricky)
+       
+
+The following are the same plots, just splitted so it is easier to check the data. Again here, I am not printing headers to better check things
+
+Right skewed (but not so much)
+
+```{r,message=FALSE}
+Re_org%>%
+        filter(variable %in% c("Accessibility","Area","Length","Or_ij","Width"))%>%
+        ggplot()+
+        aes(value,fill=name)+
+        geom_histogram(aes(y=..density..), position="identity", alpha=0.5)+
+        geom_density(alpha=0.6)+
+        facet_wrap(name ~ variable, scales = "free",nrow = 7,ncol = 5)+
+        theme(legend.position = "none",
+              strip.text.x = element_blank())#because I want to save it I am removing the labels in each panel, then I can use illustrator or inkscape to add them manually
+```
+
+Highly right skewed (like Poisson distribution)
+```{r,echo = FALSE}
+Re_org%>%
+        filter(variable %in% c("Betweenness","Resistance_2","Tortuosity","Volume"))%>%
+        ggplot()+
+        aes(value,fill=name)+
+        geom_histogram(aes(y=..density..), position="identity", alpha=0.5)+
+        geom_density(alpha=0.6)+
+        facet_wrap(name ~ variable, scales = "free",nrow = 7,ncol = 4)+
+        theme(legend.position = "none",
+              strip.text.x = element_blank())#because I want to save it I am removing the labels in each panel, then I can use illustrator or inkscape to add them manually
+```
+
+### 2.3 Data transfomation
+
+So, I tried the log10 (Betweenness,Length,Volume,Reistance,Tortuosity) and sqrt (Area) tranformation. 
+It does not make it normal but it helps making them less skewed. As you can see I had to add 0.325 in 
+some cases because of zero´s):
+
+```{r,message=FALSE}
+Fung_Netw_Traits%>%
+        filter(Type=="E")%>%
+        select(c("name","Length","Width","Area","Volume","Resistance_2",
+                 "Tortuosity","Or_ij","Betweenness","Accessibility"))%>%
+        mutate(Betweenness=log10(Betweenness+0.325))%>%
+        mutate(Area=sqrt(Area+0.325))%>%
+        mutate(Volume=log10(Volume+0.325))%>%
+        mutate_at(c("Length","Resistance_2","Tortuosity"),log10)%>%
+        group_by(name)%>%
+        gather(key=variable,
+               value=value,Length:Accessibility)%>%
+        ggplot()+
+        aes(value,fill=name)+
+        #geom_histogram(aes(y=..density..), position="identity", alpha=0.5)+
+        geom_density(alpha=0.6)+
+        facet_wrap(name ~ variable, scales = "free",nrow = 7,ncol = 9)+
+        theme(legend.position = "none")
+
+```
+
+## 3. Preparing the functions and data for PCA
+
+### 3.1 Loading vegan package
+
+Note: Other functions from other packages are also available to do a PCA. rda from vegan is the one I am used to.
+
+```{r,message=FALSE}
+library(vegan)
+
+```
+### 3.2 Subsetting and transforming the data 
+
+To run a simple PCA with the rda function is necessary to only feed an object of type "matrix" or "dataframe" with the 
+varialbes one is interested and that are appropriate for a PCA (statistically speaking). 
+In general PCA is well suited for data that is continuous and that follows more or less normal distribution. 
+This excludes: count data, proportions, categorical variables.
+
+Dataframe using raw data
+```{r}
+Hyphae_char_raw<- Fung_Netw_Traits[which(Fung_Netw_Traits$Type=="E"),#Removing the edges in the feature
+        c("Length","Width","Area","Volume","Resistance_2","Tortuosity","Or_ij","Betweenness","Accessibility")]
+          #selecting only "descriptive" hyphal parameters that are numeric
+```
+
+Dataframe using transformed data (as described above)
+```{r}
+Hyphae_char_trans<-Fung_Netw_Traits%>%
+        filter(Type=="E")%>%
+        select(c("Length","Width","Area","Volume","Resistance_2",
+                 "Tortuosity","Or_ij","Betweenness","Accessibility"))%>%
+        mutate(Betweenness=log10(Betweenness+0.325))%>%
+        mutate(Area=sqrt(Area+0.325))%>%
+        mutate(Volume=log10(Volume+0.325))%>%
+        mutate_at(c("Length","Resistance_2","Tortuosity"),log10)
+```
+
+Creating a unique ID for each row in the datataframes
+```{r}
+Hyphae_ID<-Fung_Netw_Traits[which(Fung_Netw_Traits$Type=="E"),c("name","Name")]
+Hyphae_ID<-paste(Hyphae_ID$name,Hyphae_ID$Name,sep = "_")
+
+#Adding this ID as rownames
+rownames(Hyphae_char_raw)<-Hyphae_ID
+
+rownames(Hyphae_char_trans)<-Hyphae_ID
+
+```
+## 4 Performing a PCA
+
+Just need to run the rda function (As simple as that). In these cases I save the anaylsis so I can plotted (see below)
+
+```{r}
+Hyphae_pca<-rda(Hyphae_char_raw,scale = TRUE)
+#scale =TRUE standarize variances since each variable has a different scale
+
+Hyphae_pca_trans<-rda(Hyphae_char_trans,scale = TRUE)
+
+```
+### Plotting the results
+
+Vegan comes with its own ploting functions. One is biplot.rda (or simply biplot)
+The plots are not so nice looking. I will use later other functions
+
+I like to displayed each fungus with a color in the plot. To do this, I created a factor vector with the names of the seven fungi used and add a color code to each. (this is completely optional)
+
+```{r}
+Fungi<-as.factor(Fung_Netw_Traits[which(Fung_Netw_Traits$Type=="E"),c("name")])
+#And then adding "color" to those fungi
+library(RColorBrewer)#You might need to install this package
+colvec<-brewer.pal(n = 7, name = "Set1")#This is pure aesthetics, 
+#I like the color combinations in "Set1" that come in the package
+#RcolorBrewer. I chose 7 color because there are 7 fungi
+```
+
+Ploting PCA with raw data
+
+```{r,message=FALSE}
+#Making the basic PCA plot
+biplot(Hyphae_pca,scaling = 2,
+        display = "species", 
+        type = "text")
+       
+#Adding a lenged with the names of the fungi (colored)
+legend("topright", legend = levels(Fungi), bty = "n",
+       col = colvec, pch = 21, pt.bg = colvec,xjust=1,pt.cex = 2)
+
+# Adding the points, which in this case correspon to each hyphae
+points(Hyphae_pca, display = "sites", 
+       col = colvec[Fungi],
+       scaling = 2, pch = 21, bg = colvec[Fungi])
+
+```
+
+Ploting PCA with transformed data
+
+```{r,message=FALSE}
+#Making the basic PCA plot
+biplot(Hyphae_pca_trans,scaling = 2,
+       display = "species", 
+       type = "text")
+
+#Adding a lenged with the names of the fungi (colored)
+legend("topright", legend = levels(Fungi), bty = "n",
+       col = colvec, pch = 21, pt.bg = colvec,xjust=1,pt.cex = 2)
+
+#Adding the points, which in this case correspon to each hyphae
+points(Hyphae_pca, display = "sites", 
+       col = colvec[Fungi],
+       scaling = 2, pch = 21, bg = colvec[Fungi])
+
+```
+
+
