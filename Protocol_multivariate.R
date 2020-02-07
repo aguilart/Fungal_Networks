@@ -260,52 +260,36 @@ Edge_Traits%>%
         theme(legend.position = "none")
 
 
+#Before transforming it would be worth exploring the relationships among the variables
 
-#Interesting relationship'
+#Interesting relationships:
 
-#Log10(Width)~Log10(Length)
+# Log10(Width)~Log10(Length)
+Log_Length_Width<-#The only think I can tell from this one is that the thinnest hyphae have medium size length. Really long hyphae cannot be thin. There seems to be a lower boundary: the thinnest hypahe get longer up to a point
+                  #where it is impossible to go thinniest and long. Note! Assuming this follows the two are connected by a power law
+  
+#Length_Width<-
+  Edge_Traits%>%
+  ggplot()+
+  aes(x=log10(Width),y=log10(Length),color=name)+
+  #aes(x=Width,y=Length,color=name)+
+  geom_point(alpha=0.8)+
+  facet_wrap(. ~ Species, scales = "free",nrow = 6,ncol = 3)+
+  theme(legend.position = "none")
 
-#Log10(Length)~Distance and Length~Distance
 
-Edge_Traits%>%
+
+# Log10(Length)~Distance and Length~Distance
+Log_Length_Distance<-#Out of this one is clear that there is no relationship between length and sitance
+  Edge_Traits%>%
         ggplot()+
-        aes(Distance,log10(Length),color=name)+
-        geom_jitter(alpha=0.8)+
+        aes(x=Distance,y=log10(Length),color=name)+
+        geom_point(alpha=0.8)+
         facet_wrap(. ~ Species, scales = "free",nrow = 6,ncol = 3)+
         theme(legend.position = "none")
 
 
 
-
-# #Right skewed (but not so much)
-# Re_org%>%
-#         filter(variable %in% c("Accessibility","Area","Length","Or_ij","Width"))%>%
-#         ggplot()+
-#         aes(value,fill=name)+
-#         geom_histogram(aes(y=..density..), position="identity", alpha=0.5)+
-#         geom_density(alpha=0.6)+
-#         facet_wrap(name ~ variable, scales = "free",nrow = 7,ncol = 5)+
-#         theme(legend.position = "none",
-#               strip.text.x = element_blank())#This is just to remove the title on each plot. I do this to save those 
-# #then add them manually in illustrator or inkscape
-# 
-# #Highly right skewed (like Poisson distribution)
-# Re_org%>%
-#         filter(variable %in% c("Betweenness","Resistance_2","Tortuosity","Volume"))%>%
-#         ggplot()+
-#         aes(value,fill=name)+
-#         geom_histogram(aes(y=..density..), position="identity", alpha=0.5)+
-#         geom_density(alpha=0.6)+
-#         facet_wrap(name ~ variable, scales = "free",nrow = 7,ncol = 4)+
-#         theme(legend.position = "none",
-#               strip.text.x = element_blank())#This is just to remove the title on each plot. I do this to save those 
-# #then add them manually in illustrator or inkscape
-
-
-
-
-
-#Before transforming it would be worth exploring the relationships among the variables
 
 library(hexbin)
 
@@ -337,6 +321,7 @@ Log_Resistance_Width_Length<-
         theme_bw()+
         facet_wrap(.~Species, scales = "free",nrow = 6,ncol = 3)
 #
+
 Distance_Lengt_Width<-
         Edge_Traits%>%
         filter(Area!=0)%>%
@@ -460,7 +445,7 @@ Edge_Traits%>%
 #Note: Other functions from other packages are also available to do a PCA. rda from vegan is the one I am used to.
 
 
-library(vegan)
+#library(vegan)
 
 
 #3.2 Subsetting and transforming the data 
@@ -764,3 +749,31 @@ p+
 
 data(dune)
 data(dune.env)
+###############################################
+
+
+#OLD
+
+# #Right skewed (but not so much)
+# Re_org%>%
+#         filter(variable %in% c("Accessibility","Area","Length","Or_ij","Width"))%>%
+#         ggplot()+
+#         aes(value,fill=name)+
+#         geom_histogram(aes(y=..density..), position="identity", alpha=0.5)+
+#         geom_density(alpha=0.6)+
+#         facet_wrap(name ~ variable, scales = "free",nrow = 7,ncol = 5)+
+#         theme(legend.position = "none",
+#               strip.text.x = element_blank())#This is just to remove the title on each plot. I do this to save those 
+# #then add them manually in illustrator or inkscape
+# 
+# #Highly right skewed (like Poisson distribution)
+# Re_org%>%
+#         filter(variable %in% c("Betweenness","Resistance_2","Tortuosity","Volume"))%>%
+#         ggplot()+
+#         aes(value,fill=name)+
+#         geom_histogram(aes(y=..density..), position="identity", alpha=0.5)+
+#         geom_density(alpha=0.6)+
+#         facet_wrap(name ~ variable, scales = "free",nrow = 7,ncol = 4)+
+#         theme(legend.position = "none",
+#               strip.text.x = element_blank())#This is just to remove the title on each plot. I do this to save those 
+# #then add them manually in illustrator or inkscape
