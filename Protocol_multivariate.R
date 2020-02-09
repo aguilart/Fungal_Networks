@@ -74,6 +74,11 @@ MyceliaNetw_Traits[,c("cords_mean_Width","cords_mean_Length","cords_mean_Area","
                       "cords_mean_Or_ij" 
                       )];trial<-round(trial,digits = 3)
 
+trial2[,-1]<-round(trial2[,-1],digits = 3)
+
+trial1==trial2[,-1]#For some reason Resistance_2 is not the mean but instead a constant value, othe than that all o the values
+#in the summary table are a simple mean of the the edge values.
+
 
 
 #2. Getting to know the data.
@@ -92,23 +97,18 @@ str(Edge_Traits)
 #2.2. Looking at the distribution of the data. More impotantly, what is the distribution of the data? 
 
 #To simply get means, min, max per fungal species:
-trial2<-
+
 aggregate(
-        Edge_Traits[which(Edge_Traits$Type=="E"),#Removing the edges in the feature
+        Edge_Traits[,
                          c("Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
                            "Accessibility","Betweenness","Route_factor","Or_ij")],
         by=list(Edge_Traits[which(Edge_Traits$Type=="E"),]$name),
         mean)#Here you  can write different functions: min, max, median. range and summmary is also good because it
                 #gets you more than one summary statistics, but it can be confusing with so much data.
-trial2[,-1]<-round(trial2[,-1],digits = 3)
-
-trial1==trial2[,-1]#For some reason Resistance_2 is not the mean but instead a constant value, othe than that all o the values
-#in the summary table are a simple mean of the the edge values.
 
 
 #I had some issues understanding what Resistance is. Playing with the following code allowed me to determine that 
 #Resistance_2ave is the 10*(Length)/width^2
-
 
 summary(Edge_Traits$Resistance_2ave)
 length(which(Edge_Traits$Width_intact==0))
@@ -143,7 +143,8 @@ Re_org<-
         
         
 
-#Visualizng simple histograms (because there are too many variables, zoom the graphic to better visualize)
+#Visualizng simple histograms
+# I am grouping the variables in different sets. Each set represent (to me) groups that make sense
 
 Hist_Width_Length_Distance_1<-
 Hist_Width_Length_Area_Vol_2<-
@@ -210,15 +211,12 @@ Edge_Traits%>%
 #       -Route Factor: A bit" normal, still data is concentrated to the left
 
 
-#So what about betweeness and Length (the ones that are clearly left-skewed) and Tortuosity
+#What kind of transformations are needed for betweeness, Length (the ones that are clearly left-skewed) and Tortuosity
 
 summary(Edge_Traits$Betweenness)
 tapply(Edge_Traits$Betweenness,Edge_Traits$name,summary)
-
 tapply(Edge_Traits$Betweenness,Edge_Traits$name,function(x){length(which(x>3*(quantile(x)[4])))})
 tapply(Edge_Traits$Betweenness,Edge_Traits$name,function(x){length(which(x>3*(quantile(x)[4])))/length(x)})
-
-
 Edge_Traits%>%
         ggplot()+
         aes(Species,log10(Betweenness+1),color=name)+
@@ -260,9 +258,17 @@ Edge_Traits%>%
         theme(legend.position = "none")
 
 
-#Before transforming it would be worth exploring the relationships among the variables
+#Interesting relationships
+Edge_Traits_c<-Edge_Traits
 
-#Interesting relationships:
+Edge_Traits<-do.call(rbind,
+lapply(
+split(Edge_Traits,Edge_Traits$name),head))
+
+#Before doing a correlogram of everything with everythin. Here I want to test specific relationships that I think 
+#might be interesting biologically
+
+#LENGTH AND WIDTH
 
 # Log10(Width)~Log10(Length)
 Log_Length_Width<-#The only think I can tell from this one is that the thinnest hyphae have medium size length. Really long hyphae cannot be thin. There seems to be a lower boundary: the thinnest hypahe get longer up to a point
@@ -278,6 +284,7 @@ Log_Length_Width<-#The only think I can tell from this one is that the thinnest 
   theme(legend.position = "none")
 
 
+#LENGTH; WIDTH AND DISTANCE
 
 # Log10(Length)~Distance and Length~Distance
 Log_Length_Distance<-#Out of this one is clear that there is no relationship between length and sitance
@@ -288,8 +295,19 @@ Log_Length_Distance<-#Out of this one is clear that there is no relationship bet
         facet_wrap(. ~ Species, scales = "free",nrow = 6,ncol = 3)+
         theme(legend.position = "none")
 
-
-
+Distance_Lengt_Width<-
+  Edge_Traits%>%
+  filter(Area!=0)%>%
+  ggplot()+
+  aes(x=Distance,y=Length,color=Width)+
+  #aes(Distance,Volume,color=Volume)+
+  geom_point()+
+  #geom_hex() +
+  #geom_bin2d()+
+  scale_color_continuous(type = "viridis")+
+  #scale_fill_continuous(type = "viridis")+
+  theme_bw()+
+  facet_wrap(.~Species, scales = "free",nrow = 6,ncol = 3)
 
 library(hexbin)
 
@@ -307,6 +325,8 @@ Distance_Volume<-
         theme_bw()+
         facet_wrap(.~Species, scales = "free",nrow = 6,ncol = 3)
 
+#RESISTANCE WIDTH AND LENGTH (THIS IS MAINLY TO TEST THE MATHEMATICAL RELATIONSHIP AMONG THEM)
+
 Resistance_Width_Length<-
 Log_Resistance_Width_Length<-
         Edge_Traits%>%
@@ -320,22 +340,8 @@ Log_Resistance_Width_Length<-
         #scale_fill_continuous(type = "viridis")+
         theme_bw()+
         facet_wrap(.~Species, scales = "free",nrow = 6,ncol = 3)
-#
 
-Distance_Lengt_Width<-
-        Edge_Traits%>%
-        filter(Area!=0)%>%
-        ggplot()+
-        aes(x=Distance,y=Length,color=Width)+
-        #aes(Distance,Volume,color=Volume)+
-        geom_point()+
-        #geom_hex() +
-        #geom_bin2d()+
-        scale_color_continuous(type = "viridis")+
-        #scale_fill_continuous(type = "viridis")+
-        theme_bw()+
-        facet_wrap(.~Species, scales = "free",nrow = 6,ncol = 3)
-
+#BETWEENNESS AND DISTANCE
 
 Log_Betweenness_Distance<-
         Edge_Traits%>%
@@ -351,6 +357,22 @@ Log_Betweenness_Distance<-
         facet_wrap(.~Species, scales = "free",nrow = 2,ncol = 3)
 
 
+#ROUTE FACTOR AND WIDTH
+
+RouteFactor_Width<-
+  Edge_Traits%>%
+  ggplot()+
+  aes(y=Width,x=Route_factor,color=name)+
+    geom_point()+
+  #geom_hex() +
+  #geom_bin2d()+
+  geom_point(alpha=0.8,size=2)+
+  facet_wrap(. ~ Species, scales = "free",nrow = 6,ncol = 3)+
+  theme(legend.position = "none")+
+  theme_light()
+
+
+#Testing some 3D plots
 library(rayshader)
 plot_gg(Distance_Volume)
 render_camera(fov = 70, zoom = 0.5, theta = 130, phi = 35)
@@ -362,7 +384,6 @@ plot_gg(Log_Resistance_Width_Length)
 render_camera(fov = 70, zoom = 0.5, theta = 130, phi = 35)
 Sys.sleep(0.2)
 render_snapshot(clear = TRUE)
-
 
 cloud(Resistance_2ave~Length,data=Edge_Traits%>%
               filter(Area!=0)%>%
@@ -379,63 +400,13 @@ library(GGally)
 
 Edge_Traits%>%
         
-        # select(c("name","Species","Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
-        #          "Accessibility","Betweenness","Route_factor","Or_ij"))%>%
         select(c("Width","Length","Tortuosity","Distance",
-                 "Accessibility","Betweenness","Route_factor"))%>%
-        ggpairs(title="correlogram with ggpairs()",columns = 1:7)+
-        ggplot()+
-        aes(color=Species)
-
-
-
-#Visualizng density plots
-Re_org%>%
-        ggplot()+
-        aes(value,fill=name)+
-        geom_density(alpha=0.6)+
-        facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 11)+
-        theme(legend.position = "none")
-
-#Combining histograms and density plots
-Re_org%>%
-        ggplot()+
-        aes(value,fill=name)+
-        geom_histogram(aes(y=..density..), position="identity", alpha=0.5)+
-        geom_density(alpha=0.6)+
-        facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 11)+
-        theme(legend.position = "none",
-              strip.text.x = element_blank())#because I want to save it I am removing the labels in eachpanel,
-                                            #then I can use illustrator or inkscape to add better lables
+                 "Accessibility","Betweenness","Route_factor","Species"))%>%
+        ggpairs(title="correlogram with ggpairs()",columns = 1:7,ggplot2::aes(color=Species))
 
 
 
 
-
-
-
-
-#So, I tried the log10 (Betweenness,Length,Volume,Reistance,Tortuosity) and sqrt (Area) tranformation. 
-##It does not make it normal but it helps making them less skewed:
-
-
-Edge_Traits%>%
-        filter(Type=="E")%>%
-        select(c("name","Length","Width","Area","Volume","Resistance_2",
-                 "Tortuosity","Or_ij","Betweenness","Accessibility"))%>%
-        mutate(Betweenness=log10(Betweenness+0.325))%>%
-        mutate(Area=sqrt(Area+0.325))%>%
-        mutate(Volume=log10(Volume+0.325))%>%
-        mutate_at(c("Length","Resistance_2","Tortuosity"),log10)%>%
-        group_by(name)%>%
-        gather(key=variable,
-               value=value,Length:Accessibility)%>%
-        ggplot()+
-        aes(value,fill=name)+
-        #geom_histogram(aes(y=..density..), position="identity", alpha=0.5)+
-        geom_density(alpha=0.6)+
-        facet_wrap(name ~ variable, scales = "free",nrow = 7,ncol = 9)+
-        theme(legend.position = "none")
 
 
 
@@ -777,3 +748,52 @@ data(dune.env)
 #         theme(legend.position = "none",
 #               strip.text.x = element_blank())#This is just to remove the title on each plot. I do this to save those 
 # #then add them manually in illustrator or inkscape
+
+# 
+# #Visualizng density plots
+# Re_org%>%
+#   ggplot()+
+#   aes(value,fill=name)+
+#   geom_density(alpha=0.6)+
+#   facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 11)+
+#   theme(legend.position = "none")
+# 
+# #Combining histograms and density plots
+# Re_org%>%
+#   ggplot()+
+#   aes(value,fill=name)+
+#   geom_histogram(aes(y=..density..), position="identity", alpha=0.5)+
+#   geom_density(alpha=0.6)+
+#   facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 11)+
+#   theme(legend.position = "none",
+#         strip.text.x = element_blank())#because I want to save it I am removing the labels in eachpanel,
+# #then I can use illustrator or inkscape to add better lables
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# 
+# #So, I tried the log10 (Betweenness,Length,Volume,Reistance,Tortuosity) and sqrt (Area) tranformation. 
+# ##It does not make it normal but it helps making them less skewed:
+# 
+# 
+# Edge_Traits%>%
+#   filter(Type=="E")%>%
+#   select(c("name","Length","Width","Area","Volume","Resistance_2",
+#            "Tortuosity","Or_ij","Betweenness","Accessibility"))%>%
+#   mutate(Betweenness=log10(Betweenness+0.325))%>%
+#   mutate(Area=sqrt(Area+0.325))%>%
+#   mutate(Volume=log10(Volume+0.325))%>%
+#   mutate_at(c("Length","Resistance_2","Tortuosity"),log10)%>%
+#   group_by(name)%>%
+#   gather(key=variable,
+#          value=value,Length:Accessibility)%>%
+#   ggplot()+
+#   aes(value,fill=name)+
+#   #geom_histogram(aes(y=..density..), position="identity", alpha=0.5)+
+#   geom_density(alpha=0.6)+
+#   facet_wrap(name ~ variable, scales = "free",nrow = 7,ncol = 9)+
+#   theme(legend.position = "none")
