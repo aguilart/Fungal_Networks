@@ -104,6 +104,9 @@ aggregate(
 
 I had some issues understanding what Resistance is. Playing with the following code allowed me to determine that 
  Resistance_2ave is the 10*(Length)/width^2
+```{r,message=FALSE}
+library(tidyverse)
+```
 
 ```{r}
 summary(Edge_Traits$Resistance_2ave)
@@ -131,9 +134,6 @@ split(Edge_Traits,Edge_Traits$name),head))
 
 Visualinzing as simple historgrams helps. To make those, I use the suite of functions in the package tidyverse.
 
-```{r,message=FALSE}
-library(tidyverse)
-```
 
 First, reorganizing the dataframe helps so the figures are made easier
 
