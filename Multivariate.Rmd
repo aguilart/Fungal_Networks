@@ -351,7 +351,7 @@ Log_Length_Width
 ```
 The only think I can tell from this one is that the thinnest hyphae have medium size length. Really long hyphae cannot be thin. There seems to be a lower boundary: the thinnest hypahe get longer up to a point where it is impossible to go thinniest and long. Note! Assuming this follows the two are connected by a power law
 
-#LENGTH; WIDTH AND DISTANCE
+LENGTH; WIDTH AND DISTANCE
 ```{r,message=FALSE}
 Log_Length_Distance<-
   Edge_Traits%>%
