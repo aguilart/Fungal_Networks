@@ -94,10 +94,12 @@ To simply get means, min, max per fungal species per variable:
 
 ```{r}
 aggregate(
-        Fung_Netw_Traits[which(Fung_Netw_Traits$Type=="E"),#Removing the edges in the feature
-                         c("Length","Width","Area","Volume","Resistance_2","Tortuosity","Or_ij","Betweenness","Accessibility")],
-        by=list(Fung_Netw_Traits[which(Fung_Netw_Traits$Type=="E"),]$name),
-        range)#You can try functions other than "range". For example: "min", "max", "median" ; "summmary" is good because it gets you more than one summary statistics, but it can be confusing with so much data.
+        Edge_Traits[,
+                         c("Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
+                           "Accessibility","Betweenness","Route_factor","Or_ij")],
+        by=list(Edge_Traits[which(Edge_Traits$Type=="E"),]$name),
+        mean)#Here you  can write different functions: min, max, median. range and summmary is also good because it
+                #gets you more than one summary statistics, but it can be confusing with so much data.
 ```
 
 I had some issues understanding what Resistance is. Playing with the following code allowed me to determine that 
