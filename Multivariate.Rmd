@@ -102,12 +102,12 @@ aggregate(
                 #gets you more than one summary statistics, but it can be confusing with so much data.
 ```
 
-I had some issues understanding what Resistance is. Playing with the following code allowed me to determine that 
- Resistance_2ave is the 10*(Length)/width^2
 ```{r,message=FALSE}
 library(tidyverse)
 ```
 
+I had some issues understanding what Resistance is. Playing with the following code allowed me to determine that 
+ Resistance_2ave = 10*(Length)/width^2
 ```{r}
 summary(Edge_Traits$Resistance_2ave)
 length(which(Edge_Traits$Width_intact==0))
@@ -116,10 +116,13 @@ Edge_Traits%>%
         #filter(Resistance_2ave>500)%>%
         mutate(MyResistance=Length/(Width/2)^2)%>%
         mutate(Factor=Resistance_2ave/MyResistance)%>%
-        select(name,Length,Width,Resistance_2ave)%>%
+        select(Species,name,Length,Width,Resistance_2ave)%>%
         ggplot()+
-        aes(Species,Resistance_2ave)+
-        geom_boxplot()
+        aes(y=Resistance_2ave,x=name,fill=name)+
+        geom_boxplot()+
+        facet_grid(. ~ Species, scales = "free")+
+        theme(legend.position = "none")
+  
 
 length(which(Edge_Traits$Resistance_2ave>500))
 ```
