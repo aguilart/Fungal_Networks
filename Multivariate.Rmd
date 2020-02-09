@@ -127,14 +127,6 @@ Edge_Traits%>%
 length(which(Edge_Traits$Resistance_2ave>500))
 ```
 
-```{r}
-Edge_Traits_c<-Edge_Traits
-
-Edge_Traits<-do.call(rbind,
-lapply(
-split(Edge_Traits,Edge_Traits$name),head))
-```
-
 Visualinzing as simple historgrams helps. To make those, I use the suite of functions in the package tidyverse.
 
 
