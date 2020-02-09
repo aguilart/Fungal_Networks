@@ -218,7 +218,9 @@ Hist_Distance_Route_factor_6<-
 
 
 Looking at the plots
-```{r}
+
+Note: Here the display is to small to see anything. When you execute this code in your computer it looks much better
+```{r,fig.height = 15, fig.width = 10}
 Hist_Width_Length_Distance_1
 Hist_Width_Length_Area_Vol_2
 Hist_Width_Length_Resistance_3
