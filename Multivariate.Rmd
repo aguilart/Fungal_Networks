@@ -108,7 +108,7 @@ library(tidyverse)
 
 I had some issues understanding what Resistance is. Playing with the following code allowed me to determine that 
  Resistance_2ave = 10*(Length)/width^2
-```{r}
+```{r,eval=FALSE}
 summary(Edge_Traits$Resistance_2ave)
 length(which(Edge_Traits$Width_intact==0))
 Edge_Traits%>%
@@ -157,7 +157,7 @@ Now we can make simple histograms
 
 Note: I am grouping the variables in different sets. Each set represents (to me) an intuitively logical set of related variables
 
-```{r,echo = FALSE,message=FALSE}
+```{r,echo = TRUE,message=FALSE}
 Hist_Width_Length_Distance_1<-
         Re_org%>%
         filter(variable %in% c("Width","Length","Distance"))%>%#1_The completely indepedent variables
@@ -216,15 +216,249 @@ Hist_Distance_Route_factor_6<-
         theme(legend.position = "none")
 ```
 
+About tortuosity
 
+```{r,echo = TRUE,message=FALSE,eval=FALSE}
+tapply(Edge_Traits$Tortuosity,Edge_Traits$name,summary)
+tapply(Edge_Traits$Tortuosity,Edge_Traits$name,function(x){length(which(x>1.5))})
+tapply(Edge_Traits$Tortuosity,Edge_Traits$name,function(x){length(which(x>1.5))/length(x)})
+tapply(Edge_Traits$Tortuosity,Edge_Traits$name,function(x){length(which(x>1.5))})
+tapply(Edge_Traits$Tortuosity,Edge_Traits$name,length)
+```
+
+```{r,echo = TRUE,message=FALSE,fig.height = 15, fig.width = 10}
+Hist_Length_Tortuosity_4<-
+Edge_Traits%>%
+        filter(Tortuosity<1.5)%>%
+        select(c("name","Species","Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
+                 "Accessibility","Betweenness","Route_factor","Or_ij"))%>%
+        group_by(name)%>%
+        gather(key=variable,
+               value=value,Width:Or_ij)%>%
+        
+        filter(variable %in% c("Length","Tortuosity"))%>%#4_Tortuosity has little variation and depends on Length
+        ggplot()+
+        aes(value,fill=name)+
+        geom_histogram()+
+        facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 2)+
+        theme(legend.position = "none")
+```
 Looking at the plots
 
-Note: Here the display is to small to see anything. When you execute this code in your computer it looks much better
+Note: Here the display is not optimal. When you execute this code in your computer it looks much better
 ```{r,fig.height = 15, fig.width = 10}
 Hist_Width_Length_Distance_1
 Hist_Width_Length_Area_Vol_2
 Hist_Width_Length_Resistance_3
+Hist_Length_Tortuosity_4
 Hist_Resistance_Accessibility_Betweenness_5
 Hist_Distance_Route_factor_6
 ```
+
+Form these plots one learns that:
+
+  1. Some variables are mathematically correlated:
+  * Area= (pi/4)*Width^2
+  * Volume= (pi/4)*(Width^2)*Length
+  * Resitance= 10*Length/Width^2
+
+  * Thus for subsequent analysis I will only use variables that are not (at least so easily) related to each other:
+    * Width, Lenght, Tortuosity, Distance, Accessibility, Betweenness, Route Factor
+
+  2. The distribution of the data for a  variable is similar across ose species. In summary:
+
+  * Width: Varies from almost uniform to normal to bimodal to right skewed, and this depends on the species
+  * Length: left skewed
+  * Torturosity: "A bit" normal, still data is concentrated to the left. It is completely left skewed with tortuosity values higher than 1.5 are included which only represent less than 1% of the data
+  * Distance: Normally distributed
+  * Accessibility: A bit" normal, still data is concentrated to the left
+  * Betwenness: Highly right skewed
+  * Route Factor: A bit" normal, still data is concentrated to the left
+
+What kind of transformations are needed for betweeness, Length (the ones that are clearly left-skewed) and Tortuosity
+
+
+Betweenness can be log transformed (adding 1)
+```{r,message=FALSE,fig.height = 15, fig.width = 10}
+Edge_Traits%>%
+        #filter(Tortuosity<1.5)%>%
+        select(c("name","Species","Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
+                 "Accessibility","Betweenness","Route_factor","Or_ij"))%>%
+        mutate(Log_Betweenness=log10(Betweenness+1))%>%
+        group_by(name)%>%
+        gather(key=variable,
+               value=value,Width:Log_Betweenness)%>%
+        
+        filter(variable %in% c("Log_Betweenness","Distance"))%>%#4_Tortuosity has little variation and depends on Length
+        ggplot()+
+        aes(value,fill=name)+
+        geom_histogram()+
+        facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 2)+
+        theme(legend.position = "none")
+```
+
+Length can be log transformed and that makes it very normally ditributed
+```{r,message=FALSE,fig.height = 15, fig.width = 10}
+Edge_Traits%>%
+        #filter(Tortuosity<1.5)%>%
+        select(c("name","Species","Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
+                 "Accessibility","Betweenness","Route_factor","Or_ij"))%>%
+        mutate(Log_Length=log10(Length))%>%
+        group_by(name)%>%
+        gather(key=variable,
+               value=value,Width:Log_Length)%>%
+        
+        filter(variable %in% c("Log_Length","Distance"))%>%#4_Tortuosity has little variation and depends on Length
+        ggplot()+
+        aes(value,fill=name)+
+        geom_histogram()+
+        facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 2)+
+        theme(legend.position = "none")
+```
+
+
+### 2.3. Understanding relationships among variables. 
+
+Before doing a correlogram of everything with everythin. Here I want to test specific relationships that I think 
+might be interesting biologically
+
+LENGTH AND WIDTH 
+```{r,message=FALSE}
+Log_Length_Width<-
+
+#Length_Width<-
+  Edge_Traits%>%
+  ggplot()+
+  aes(x=log10(Width),y=log10(Length),color=name)+
+  #aes(x=Width,y=Length,color=name)+
+  geom_point(alpha=0.8)+
+  facet_wrap(. ~ Species, scales = "free",nrow = 6,ncol = 3)+
+  theme(legend.position = "none")
+
+Length_Width<-
+  Edge_Traits%>%
+  ggplot()+
+  #aes(x=log10(Width),y=log10(Length),color=name)+
+  aes(x=Width,y=Length,color=name)+
+  geom_point(alpha=0.8)+
+  facet_wrap(. ~ Species, scales = "free",nrow = 6,ncol = 3)+
+  theme(legend.position = "none")
+```
+
+```{r,echo = TRUE,message=FALSE,fig.height = 15, fig.width = 10}
+Length_Width
+Log_Length_Width
+```
+The only think I can tell from this one is that the thinnest hyphae have medium size length. Really long hyphae cannot be thin. There seems to be a lower boundary: the thinnest hypahe get longer up to a point where it is impossible to go thinniest and long. Note! Assuming this follows the two are connected by a power law
+
+#LENGTH; WIDTH AND DISTANCE
+```{r,message=FALSE}
+Log_Length_Distance<-
+  Edge_Traits%>%
+        ggplot()+
+        aes(x=Distance,y=log10(Length),color=name)+
+        geom_point(alpha=0.8)+
+        facet_wrap(. ~ Species, scales = "free",nrow = 6,ncol = 3)+
+        theme(legend.position = "none")
+
+Distance_Lengt_Width<-
+  Edge_Traits%>%
+  filter(Area!=0)%>%
+  ggplot()+
+  aes(x=Distance,y=Length,color=Width)+
+  #aes(Distance,Volume,color=Volume)+
+  geom_point()+
+  #geom_hex() +
+  #geom_bin2d()+
+  scale_color_continuous(type = "viridis")+
+  #scale_fill_continuous(type = "viridis")+
+  theme_bw()+
+  facet_wrap(.~Species, scales = "free",nrow = 6,ncol = 3)
+
+library(hexbin)
+
+Distance_Volume<-
+        Edge_Traits%>%
+        filter(Area!=0)%>%
+        ggplot()+
+        aes(x=Distance,y=Volume)+
+        #aes(Distance,Volume,color=Volume)+
+        #geom_point()+
+        geom_hex() +
+        #geom_bin2d()+
+        #scale_color_continuous(type = "viridis")+
+        scale_fill_continuous(type = "viridis")+
+        theme_bw()+
+        facet_wrap(.~Species, scales = "free",nrow = 6,ncol = 3)
+```
+
+```{r,fig.height = 15, fig.width = 10}
+Log_Length_Distance
+```
+Out of this one is clear that there is no relationship between length and distance
+
+RESISTANCE WIDTH AND LENGTH (THIS IS MAINLY TO TEST THE MATHEMATICAL RELATIONSHIP AMONG THEM)
+```{r}
+#Resistance_Width_Length<-
+Log_Resistance_Width_Length<-
+        Edge_Traits%>%
+        ggplot()+
+        #aes(x=Distance,y=Volume)+
+        aes(x=log10(Length),y=log10(Resistance_2ave),color=log10(Width))+
+        geom_point()+
+        #geom_hex() +
+        #geom_bin2d()+
+        scale_color_continuous(type = "viridis")+
+        #scale_fill_continuous(type = "viridis")+
+        theme_bw()+
+        facet_wrap(.~Species, scales = "free",nrow = 6,ncol = 3)
+
+```
+
+```{r,fig.height = 15, fig.width = 10}
+Log_Resistance_Width_Length
+```
+This plot confirms the relationship between resistance and lenght and width
+
+BETWEENNESS AND DISTANCE
+```{r}
+Log_Betweenness_Distance<-
+        Edge_Traits%>%
+        ggplot()+
+        aes(y=log10(Betweenness+1),x=Distance)+
+        #aes(Distance,Volume,color=Volume)+
+        #geom_point()+
+        geom_hex() +
+        #geom_bin2d()+
+        #scale_color_continuous(type = "viridis")+
+        scale_fill_continuous(type = "viridis")+
+        theme_bw()+
+        facet_wrap(.~Species, scales = "free",nrow = 2,ncol = 3)
+```
+
+```{r,fig.height = 15, fig.width = 10}
+Log_Betweenness_Distance
+```
+
+
+ROUTE FACTOR AND WIDTH
+```{r}
+RouteFactor_Width<-
+  Edge_Traits%>%
+  ggplot()+
+  aes(y=Width,x=Route_factor,color=name)+
+    geom_point()+
+  #geom_hex() +
+  #geom_bin2d()+
+  geom_point(alpha=0.8,size=2)+
+  facet_wrap(. ~ Species, scales = "free",nrow = 6,ncol = 3)+
+  theme(legend.position = "none")
+```
+
+```{r,fig.height = 15, fig.width = 10}
+RouteFactor_Width
+```
+
+
+
 
