@@ -102,7 +102,7 @@ aggregate(
                 #gets you more than one summary statistics, but it can be confusing with so much data.
 ```
 
-```{r,message=FALSE}
+```{r,message=FALSE,warning=FALSE}
 library(tidyverse)
 ```
 
@@ -352,7 +352,7 @@ Log_Length_Width
 The only think I can tell from this one is that the thinnest hyphae have medium size length. Really long hyphae cannot be thin. There seems to be a lower boundary: the thinnest hypahe get longer up to a point where it is impossible to go thinniest and long. Note! Assuming this follows the two are connected by a power law
 
 LENGTH; WIDTH AND DISTANCE
-```{r,message=FALSE}
+```{r,message=FALSE,warning=FALSE}
 Log_Length_Distance<-
   Edge_Traits%>%
         ggplot()+
@@ -459,6 +459,106 @@ RouteFactor_Width<-
 RouteFactor_Width
 ```
 
+Correlograms
+```{r, message=FALSE,warning=FALSE}
+library(GGally)
 
+```
+
+```{r,fig.height = 15, fig.width = 10}
+Edge_Traits%>%
+  filter(Species=="Mortierella elongata")%>%
+  filter(Tortuosity<1.5)%>%
+        
+  mutate(Log_Betweenness=log10(Betweenness+1))%>%
+  mutate(Log_Length=log10(Length))%>%
+  mutate(Species=as.factor(Species))%>%
+  select(c("Width","Log_Length","Tortuosity","Distance",
+                 "Accessibility","Log_Betweenness","Route_factor","Species"))%>%
+  ggpairs(title="Mortierella elongata",columns = 1:7,ggplot2::aes(color=Species))
+
+Edge_Traits%>%
+  filter(Species=="Umbelopsis isabellina")%>%
+  filter(Tortuosity<1.5)%>%
+        
+  mutate(Log_Betweenness=log10(Betweenness+1))%>%
+  mutate(Log_Length=log10(Length))%>%
+  mutate(Species=as.factor(Species))%>%
+  select(c("Width","Log_Length","Tortuosity","Distance",
+                 "Accessibility","Log_Betweenness","Route_factor","Species"))%>%
+  ggpairs(title="Umbelopsis isabellina",columns = 1:7,ggplot2::aes(color=Species))
+
+
+Edge_Traits%>%
+  filter(Species=="Mortierella alpina")%>%
+  filter(Tortuosity<1.5)%>%
+        
+  mutate(Log_Betweenness=log10(Betweenness+1))%>%
+  mutate(Log_Length=log10(Length))%>%
+  mutate(Species=as.factor(Species))%>%
+  select(c("Width","Log_Length","Tortuosity","Distance",
+                 "Accessibility","Log_Betweenness","Route_factor","Species"))%>%
+  ggpairs(title="Mortierella alpina",columns = 1:7,ggplot2::aes(color=Species))
+
+Edge_Traits%>%
+  filter(Species=="Mortierella elongata2")%>%
+  filter(Tortuosity<1.5)%>%
+        
+  mutate(Log_Betweenness=log10(Betweenness+1))%>%
+  mutate(Log_Length=log10(Length))%>%
+  mutate(Species=as.factor(Species))%>%
+  select(c("Width","Log_Length","Tortuosity","Distance",
+                 "Accessibility","Log_Betweenness","Route_factor","Species"))%>%
+  ggpairs(title="Mortierella elongata2",columns = 1:7,ggplot2::aes(color=Species))
+
+Edge_Traits%>%
+  filter(Species=="Mucor fragilis")%>%
+  filter(Tortuosity<1.5)%>%
+        
+  mutate(Log_Betweenness=log10(Betweenness+1))%>%
+  mutate(Log_Length=log10(Length))%>%
+  mutate(Species=as.factor(Species))%>%
+  select(c("Width","Log_Length","Tortuosity","Distance",
+                 "Accessibility","Log_Betweenness","Route_factor","Species"))%>%
+  ggpairs(title="Mucor fragilis",columns = 1:7,ggplot2::aes(color=Species))
+
+Edge_Traits%>%
+  filter(Species=="Mortierella alpina2")%>%
+  filter(Tortuosity<1.5)%>%
+        
+  mutate(Log_Betweenness=log10(Betweenness+1))%>%
+  mutate(Log_Length=log10(Length))%>%
+  mutate(Species=as.factor(Species))%>%
+  select(c("Width","Log_Length","Tortuosity","Distance",
+                 "Accessibility","Log_Betweenness","Route_factor","Species"))%>%
+  ggpairs(title="Mortierella alpina2",columns = 1:7,ggplot2::aes(color=Species))
+```
+
+```{r,fig.height = 15, fig.width = 10}
+Edge_Traits%>%
+  #filter(Species=="Mortierella elongata")%>%
+  filter(Tortuosity<1.5)%>%
+        
+  mutate(Log_Betweenness=log10(Betweenness+1))%>%
+  mutate(Log_Length=log10(Length))%>%
+  mutate(Species=as.factor(Species))%>%
+  select(c("Width","Log_Length","Tortuosity","Distance",
+                 "Accessibility","Log_Betweenness","Route_factor","Species"))%>%
+  ggpairs(title="All",columns = 1:7)
+```
+
+```{r,fig.height = 15, fig.width = 10}
+Edge_Traits%>%
+  #filter(Species=="Mortierella elongata")%>%
+  filter(Tortuosity<1.5)%>%
+        
+  mutate(Log_Betweenness=log10(Betweenness+1))%>%
+  mutate(Log_Length=log10(Length))%>%
+  mutate(Species=as.factor(Species))%>%
+  select(c("Width","Log_Length","Tortuosity","Distance",
+                 "Accessibility","Log_Betweenness","Route_factor","Species"))%>%
+  ggpairs(title="All",columns = 1:7,ggplot2::aes(color=Species))
+
+```
 
 
