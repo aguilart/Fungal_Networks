@@ -153,18 +153,36 @@ Hist_Width_Length_Resistance_3<-
 Hist_Resistance_Accessibility_Betweenness_5<-
 Hist_Distance_Route_factor_6<-
         
-        Re_org%>%
+        #Re_org%>%
+  
+  Edge_Traits%>%
+  #filter(Tortuosity<1.5)%>%
+  select(c("name","Species","Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
+           "Accessibility","Betweenness","Route_factor","Or_ij"))%>%
+  mutate(Log_Resistance_2ave=log10(Resistance_2ave))%>%
+  mutate(Log_Betweenness=log10(Betweenness+1))%>%
+  group_by(name)%>%
+  gather(key=variable,
+         value=value,Width:Log_Betweenness)%>%
+  filter(Species%in%c("Mortierella elongata","Mucor fragilis"))%>%
         #filter(variable %in% c("Width","Length","Distance"))%>%#1_The completely indepedent variables
         #filter(variable %in% c("Width","Length","Area","Volume"))%>%#2_The geometric ones depending on width and length
         #filter(variable %in% c("Width","Length","Resistance_2ave"))%>%#3_The "transport" one depending on width and length
-        #filter(variable %in% c("Resistance_2ave","Accessibility","Betweenness"))%>%#5_The "transport" ones depending all on Resistance to some extent
-        filter(variable %in% c("Route_factor","Distance"))%>%#6_The only that depends on distance
+        filter(variable %in% c("Log_Resistance_2ave","Accessibility","Log_Betweenness"))%>%#5_The "transport" ones depending all on Resistance to some extent
+        #filter(variable %in% c("Route_factor","Distance"))%>%#6_The only that depends on distance
         
         ggplot()+
         aes(value,fill=name)+
         geom_histogram()+
-        facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 2)+
-        theme(legend.position = "none")
+        facet_wrap(Species ~ variable, scales = "free",nrow = 2,ncol = 3)+
+        #theme(legend.position = "none")+
+  ggtitle(label = "Transport variables")+
+  theme(title = element_text(size = 28),
+        axis.title.x=element_blank(),
+        axis.text.x = element_text(size = 20,angle = 45,hjust = 1),
+        axis.text.y = element_text(size = 20),
+        strip.text.x = element_text(size = 20),
+        legend.position = "none")
 
 #About tortuosity
 
