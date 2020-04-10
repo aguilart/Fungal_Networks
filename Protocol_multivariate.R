@@ -741,77 +741,24 @@ data(dune.env)
 ###############################################
 
 
-#OLD
 
-# #Right skewed (but not so much)
-# Re_org%>%
-#         filter(variable %in% c("Accessibility","Area","Length","Or_ij","Width"))%>%
-#         ggplot()+
-#         aes(value,fill=name)+
-#         geom_histogram(aes(y=..density..), position="identity", alpha=0.5)+
-#         geom_density(alpha=0.6)+
-#         facet_wrap(name ~ variable, scales = "free",nrow = 7,ncol = 5)+
-#         theme(legend.position = "none",
-#               strip.text.x = element_blank())#This is just to remove the title on each plot. I do this to save those 
-# #then add them manually in illustrator or inkscape
-# 
-# #Highly right skewed (like Poisson distribution)
-# Re_org%>%
-#         filter(variable %in% c("Betweenness","Resistance_2","Tortuosity","Volume"))%>%
-#         ggplot()+
-#         aes(value,fill=name)+
-#         geom_histogram(aes(y=..density..), position="identity", alpha=0.5)+
-#         geom_density(alpha=0.6)+
-#         facet_wrap(name ~ variable, scales = "free",nrow = 7,ncol = 4)+
-#         theme(legend.position = "none",
-#               strip.text.x = element_blank())#This is just to remove the title on each plot. I do this to save those 
-# #then add them manually in illustrator or inkscape
 
-# 
-# #Visualizng density plots
-# Re_org%>%
-#   ggplot()+
-#   aes(value,fill=name)+
-#   geom_density(alpha=0.6)+
-#   facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 11)+
-#   theme(legend.position = "none")
-# 
-# #Combining histograms and density plots
-# Re_org%>%
-#   ggplot()+
-#   aes(value,fill=name)+
-#   geom_histogram(aes(y=..density..), position="identity", alpha=0.5)+
-#   geom_density(alpha=0.6)+
-#   facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 11)+
-#   theme(legend.position = "none",
-#         strip.text.x = element_blank())#because I want to save it I am removing the labels in eachpanel,
-# #then I can use illustrator or inkscape to add better lables
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# #So, I tried the log10 (Betweenness,Length,Volume,Reistance,Tortuosity) and sqrt (Area) tranformation. 
-# ##It does not make it normal but it helps making them less skewed:
-# 
-# 
-# Edge_Traits%>%
-#   filter(Type=="E")%>%
-#   select(c("name","Length","Width","Area","Volume","Resistance_2",
-#            "Tortuosity","Or_ij","Betweenness","Accessibility"))%>%
-#   mutate(Betweenness=log10(Betweenness+0.325))%>%
-#   mutate(Area=sqrt(Area+0.325))%>%
-#   mutate(Volume=log10(Volume+0.325))%>%
-#   mutate_at(c("Length","Resistance_2","Tortuosity"),log10)%>%
-#   group_by(name)%>%
-#   gather(key=variable,
-#          value=value,Length:Accessibility)%>%
-#   ggplot()+
-#   aes(value,fill=name)+
-#   #geom_histogram(aes(y=..density..), position="identity", alpha=0.5)+
-#   geom_density(alpha=0.6)+
-#   facet_wrap(name ~ variable, scales = "free",nrow = 7,ncol = 9)+
-#   theme(legend.position = "none")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -74,6 +74,51 @@ Edge_Traits<-Edge_Traits[-which(Edge_Traits$Width==0),]
 
 ```
 
+# Adding nodes
+```{r}
+temp = list.files(path="processedData\\",pattern="*-Node.csv")
+temp<-paste("processedData\\",temp,sep = "")
+myfiles = lapply(temp,function(x){read.csv(x,header = TRUE,stringsAsFactors = FALSE,sep = ";")} )
+#myfiles[[4]]<-myfiles[[4]][,c(1:42)]
+Node_Traits<-do.call(rbind,myfiles)
+
+Node_Traits$node_name_ID<-paste(Node_Traits$name,Node_Traits$node_ID,sep = "_")
+
+Edge_Traits<-Edge_Traits_o
+```
+
+#Merging them
+```{r}
+
+library(tidyverse)
+
+#For the first node
+trial<-
+left_join(Edge_Traits%>%
+            mutate(node_name_ID=paste(name,EndNodes_1,sep = "_")),
+          Node_Traits[,c("node_name_ID","node_Type","node_Degree")])
+
+trial<-trial%>%
+  rename(node_1_name_ID=node_name_ID)%>%
+  rename(EndNodes_1_Type=node_Type)%>%
+  rename(EndNodes_1_Degree=node_Degree)
+
+
+#For the second node
+trial<-
+left_join(trial%>%
+            mutate(node_name_ID=paste(name,EndNodes_2,sep = "_")),
+          Node_Traits[,c("node_name_ID","node_Type","node_Degree")])
+
+trial<-trial%>%
+  rename(node_2_name_ID=node_name_ID)%>%
+  rename(EndNodes_2_Type=node_Type)%>%
+  rename(EndNodes_2_Degree=node_Degree)
+
+Edge_Traits_o<-Edge_Traits
+Edge_Traits<-trial;rm(trial)
+```
+
 
 ## 2. Getting to know the data.
 
@@ -137,11 +182,13 @@ Re_org<-
         Edge_Traits%>%
         #filter(Area!=0)%>%
         #mutate(MyResistance=Length/(Width/2)^2)%>%
-        select(c("name","Species","Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
+        select(c("name","Species",
+                 "Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
                  "Accessibility","Betweenness","Route_factor","Or_ij"))%>%
         group_by(name)%>%
         gather(key=variable,
                value=value,Width:Or_ij)
+names(Edge_Traits)
 ```        
         
 
@@ -554,3 +601,20 @@ Edge_Traits%>%
 ```
 
 
+# Filtering by node degree
+
+All relationships above consider each hyphal segment as separate replicate. This information is meaningful particularly for what I call the descriptive traits (width, lenght) but for the transport ones (accessibility)
+this is a bit misleading as the transport from on hyphal segment to the next one is not going to change that much (or at all). Thus I am going to make a new analysis, this time only based on "Routes". That is the wholde
+path from the center of the inoculum to an endpoint.
+```{r}
+Re_org_2<-
+        Edge_Traits%>%
+        #filter(Area!=0)%>%
+        #mutate(MyResistance=Length/(Width/2)^2)%>%
+        select(c("name","Species","node_1_name_ID","EndNodes_1_Type","EndNodes_1_Degree","node_2_name_ID","EndNodes_2_Type","EndNodes_2_Degree",
+                 "Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
+                 "Accessibility","Betweenness","Route_factor"))%>%
+        group_by(name)%>%
+        gather(key=variable,
+               value=value,Width:Route_Factor)
+names(Edge_Traits)
