@@ -504,6 +504,7 @@ library(GGally)
 
 ```
 
+### Correlograms for each species
 ```{r,fig.height = 15, fig.width = 10}
 Edge_Traits%>%
   filter(Species=="Mortierella elongata")%>%
@@ -573,6 +574,7 @@ Edge_Traits%>%
   ggpairs(title="Mortierella alpina2",columns = 1:7,ggplot2::aes(color=Species))
 ```
 
+#### Correlograms for all species together
 ```{r,fig.height = 15, fig.width = 10}
 Edge_Traits%>%
   #filter(Species=="Mortierella elongata")%>%
@@ -601,20 +603,175 @@ Edge_Traits%>%
 ```
 
 
-# Filtering by node degree
+# Visualizing and testing the clustering of species in trait space
+
+```{r}
+#3. Performing a PCA on raw data and transformed data
+
+Descriptive_traits<-
+Edge_Traits%>%
+  #filter(Species=="Mortierella elongata")%>%
+  filter(Tortuosity<1.5)%>%
+        
+  mutate(Log_Betweenness=log10(Betweenness+1))%>%
+  mutate(Log_Length=log10(Length))%>%
+  mutate(Species=as.factor(Species))%>%
+  select(c("Width","Log_Length","Tortuosity","Distance",
+                 "Accessibility","Log_Betweenness","Route_factor","name","Species"))
+library(vegan)
+Model_descriptive_traits<-rda(Descriptive_traits[,c("Width","Log_Length","Tortuosity","Log_Betweenness")]~name+Condition(Species +Distance),scale = TRUE,data = Descriptive_traits)
+
+Model_descriptive_traits
+
+summary(Model_descriptive_traits)[["cont"]][["importance"]][,c(1:2)]
+#                              RDA1         RDA2
+# Eigenvalue            0.014666590 0.0029930041
+# Proportion Explained  0.003739927 0.0007632051
+# Cumulative Proportion 0.003739927 0.0045031321
+
+anova.cca(Model_descriptive_traits,by="term")
+# Permutation test for rda under reduced model
+# Terms added sequentially (first to last)
+# Permutation: free
+# Number of permutations: 999
+# 
+# Model: rda(formula = Descriptive_traits[, c("Width", "Log_Length", "Tortuosity", "Log_Betweenness")] ~ name + Condition(Species + Distance), data = Descriptive_traits, scale = TRUE)
+#              Df Variance      F Pr(>F)    
+# name         10   0.0189 290.83  0.001 ***
+# Residual 600416   3.9027                  
+
+```
+This model explains very little the variation, thus it is not worth using it. Thus a better option is to use mean values
+
+```{r}
+Descriptive_traits<-
+Edge_Traits%>%
+  #filter(Species=="Mortierella elongata")%>%
+  filter(Tortuosity<1.5)%>%
+        
+  mutate(Log_Betweenness=log10(Betweenness+1))%>%
+  mutate(Log_Length=log10(Length))%>%
+  mutate(Species=as.factor(Species))%>%
+  select(c("Width","Log_Length","Tortuosity","Distance",
+                 "Accessibility","Log_Betweenness","Route_factor","name","Species")) %>% 
+  group_by(Species,name) %>% 
+  summarise_at(c("Width","Log_Length","Tortuosity","Distance",
+                 "Accessibility","Log_Betweenness","Route_factor"),mean) %>% ungroup()
+
+Model_descriptive_traits<-rda(Descriptive_traits[,c("Width","Log_Length","Tortuosity","Log_Betweenness")]~Species+Condition(Distance),scale = TRUE,data = Descriptive_traits)
+
+Model_descriptive_traits
+#              Inertia Proportion Rank
+# Total         4.00000    1.00000     
+# Conditional   0.71843    0.17961    1
+# Constrained   2.92904    0.73226    4
+# Unconstrained 0.35253    0.08813    4
+# Inertia is correlations 
+
+summary(Model_descriptive_traits)[["cont"]][["importance"]][,c(1:2)]
+#                            RDA1       RDA2
+# Eigenvalue            2.6394842 0.27196022
+# Proportion Explained  0.8043352 0.08287497
+# Cumulative Proportion 0.8043352 0.88721012
+
+anova.cca(Model_descriptive_traits,by="term")
+#   Df Variance      F Pr(>F)    
+# Species   5  2.92904 14.956  0.001 ***
+# Residual  9  0.35253                  
+plot(Model_descriptive_traits$Ybar[,1],Descriptive_traits$Width)
+temporal<-as.data.frame(scores(Model_descriptive_traits,display = "sites",scaling = "sites",choices=c(1,2)))
+
+Descriptive_traits<-cbind(Descriptive_traits,temporal);rm(temporal)
+
+my_theme<-theme(
+  title = element_text(size=25),
+  axis.text.x = element_text(size=20),
+  axis.text.y=element_text(size=20),
+  strip.text.x=element_text(size=25),
+  legend.position = "none")
+
+Descriptive_traits %>% 
+  ggplot()+
+  aes(x=RDA1,y=RDA2,color=Species,label=Species) +
+  geom_text() +
+  scale_color_viridis_d()+
+  labs(y="RDA2 8%",x="RDA1 80%")+
+  my_theme
+
+```
+
+
+# Transport to tips traits
 
 All relationships above consider each hyphal segment as separate replicate. This information is meaningful particularly for what I call the descriptive traits (width, lenght) but for the transport ones (accessibility)
 this is a bit misleading as the transport from on hyphal segment to the next one is not going to change that much (or at all). Thus I am going to make a new analysis, this time only based on "Routes". That is the wholde
 path from the center of the inoculum to an endpoint.
+
+To do this one need to filter the hyphae of degree 1
 ```{r}
+
 Re_org_2<-
         Edge_Traits%>%
         #filter(Area!=0)%>%
-        #mutate(MyResistance=Length/(Width/2)^2)%>%
+        mutate(Route_Length=Distance*Route_factor)%>%
         select(c("name","Species","node_1_name_ID","EndNodes_1_Type","EndNodes_1_Degree","node_2_name_ID","EndNodes_2_Type","EndNodes_2_Degree",
-                 "Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
-                 "Accessibility","Betweenness","Route_factor"))%>%
+                 "Distance","Accessibility","Betweenness","Route_factor","Route_Length"))%>%
         group_by(name)%>%
         gather(key=variable,
-               value=value,Width:Route_Factor)
+               value=value,Distance:Route_Length)
 names(Edge_Traits)
+```
+
+```{r,fig.height = 15, fig.width = 10}
+
+        Re_org_2%>%
+  filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>%
+        filter(variable %in% c("Distance","Accessibility","Route_factor","Route_Length"))%>%#1_The completely indepedent variables
+        
+        ggplot()+
+        aes(value,fill=name)+
+        geom_histogram()+
+        facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 4)+
+        theme(legend.position = "none")
+
+Edge_Traits%>%
+  mutate(Route_Length=Distance*Route_factor)%>%
+  filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>%
+  ggplot()+
+  aes(y=Route_Length,x=Distance,color=name)+
+    geom_point()+
+  #geom_hex() +
+  #geom_bin2d()+
+  geom_point(alpha=0.8,size=2)+
+  facet_wrap(. ~ Species, scales = "free",nrow = 6,ncol = 3)+
+  theme(legend.position = "none")
+
+
+Edge_Traits%>%
+  mutate(Route_Length=Distance*Route_factor)%>%
+  filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>%
+  ggplot()+
+  aes(x=Route_Length,y=Accessibility,color=name)+
+    geom_point()+
+  #geom_hex() +
+  #geom_bin2d()+
+  geom_point(alpha=0.8,size=2)+
+  facet_wrap(. ~ Species, scales = "free",nrow = 6,ncol = 3)+
+  theme(legend.position = "none")
+        
+        
+```
+
+Making correlograms for this transport traits
+```{r,fig.height = 15, fig.width = 10}
+Edge_Traits%>%
+  mutate(Route_Length=Distance*Route_factor)%>%
+  filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>%
+  
+  mutate(Species=as.factor(Species))%>%
+  select(c("Distance","Accessibility","Route_factor","Route_Length","Species"))%>%
+  ggpairs(title="All",columns = 1:4,ggplot2::aes(color=Species))
+
+```
+
+Comment from Mark: Betweenness values less than one are a proxy of links that are not particularly useful because that route is never being used
