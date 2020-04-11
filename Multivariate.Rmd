@@ -31,13 +31,14 @@ For this we are using:
 To do that I use base R functions combined with functions from three other packages: vegan, tidyverse and RColorBrewer
 You might need to install those packages. You can do that via R studio or: 
 
-```{r, eval=FALSE}
+```{r, echo=FALSE}
 #install.packages("vegan")
 #install.packages("tidyverse")
 #install.packages("RColorBrewer")
 
 #Comment in if needed!
-
+library(vegan)
+library(tidyverse)
 ```
 
 ## 1. Loading files.
@@ -84,13 +85,11 @@ Node_Traits<-do.call(rbind,myfiles)
 
 Node_Traits$node_name_ID<-paste(Node_Traits$name,Node_Traits$node_ID,sep = "_")
 
-Edge_Traits<-Edge_Traits_o
+#Edge_Traits_o<-Edge_Traits
 ```
 
 #Merging them
 ```{r}
-
-library(tidyverse)
 
 #For the first node
 trial<-
@@ -134,9 +133,9 @@ str(Edge_Traits)
 ```
 
 ### 2.2. Understanding the variables and their distribution. 
+
 More impotantly, what is the distribution of the data? 
 To simply get means, min, max per fungal species per variable:
-
 ```{r}
 aggregate(
         Edge_Traits[,
@@ -147,9 +146,6 @@ aggregate(
                 #gets you more than one summary statistics, but it can be confusing with so much data.
 ```
 
-```{r,message=FALSE,warning=FALSE}
-library(tidyverse)
-```
 
 I had some issues understanding what Resistance is. Playing with the following code allowed me to determine that 
  Resistance_2ave = 10*(Length)/width^2
@@ -172,12 +168,10 @@ Edge_Traits%>%
 length(which(Edge_Traits$Resistance_2ave>500))
 ```
 
-Visualinzing as simple historgrams helps. To make those, I use the suite of functions in the package tidyverse.
 
+```{r,echo=FALSE}
+#First, reorganizing the dataframe helps so the figures are made easier
 
-First, reorganizing the dataframe helps so the figures are made easier
-
-```{r}
 Re_org<-
         Edge_Traits%>%
         #filter(Area!=0)%>%
@@ -192,11 +186,8 @@ names(Edge_Traits)
 ```        
         
 
-Now we can make simple histograms 
 
-Note: I am grouping the variables in different sets. Each set represents (to me) an intuitively logical set of related variables
-
-```{r,echo = TRUE,message=FALSE}
+```{r,echo = FALSE,message=FALSE}
 Hist_Width_Length_Distance_1<-
         Re_org%>%
         filter(variable %in% c("Width","Length","Distance"))%>%#1_The completely indepedent variables
@@ -282,9 +273,11 @@ Edge_Traits%>%
         facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 2)+
         theme(legend.position = "none")
 ```
-Looking at the plots
 
-Note: Here the display is not optimal. When you execute this code in your computer it looks much better
+#### Visualizing the distribution of the data
+
+Note: I am grouping the variables in different sets. Each set represents (to me) an intuitively logical set of related variables
+
 ```{r,fig.height = 15, fig.width = 10}
 Hist_Width_Length_Distance_1
 Hist_Width_Length_Area_Vol_2
@@ -362,7 +355,7 @@ Before doing a correlogram of everything with everythin. Here I want to test spe
 might be interesting biologically
 
 LENGTH AND WIDTH 
-```{r,message=FALSE}
+```{r,message=FALSE,echo=FALSE}
 Log_Length_Width<-
 
 #Length_Width<-
@@ -388,10 +381,10 @@ Length_Width<-
 Length_Width
 Log_Length_Width
 ```
-The only think I can tell from this one is that the thinnest hyphae have medium size length. Really long hyphae cannot be thin. There seems to be a lower boundary: the thinnest hypahe get longer up to a point where it is impossible to go thinniest and long. Note! Assuming this follows the two are connected by a power law
+The only thing I can tell from this one is that the thinnest hyphae have medium size length. Really long hyphae cannot be thin. There seems to be a lower boundary: the thinnest hypahe get longer up to a point where it is impossible to go thinniest and long. Note! Assuming this follows the two are connected by a power law
 
 LENGTH; WIDTH AND DISTANCE
-```{r,message=FALSE,warning=FALSE}
+```{r,message=FALSE,warning=FALSE,echo=FALSE}
 Log_Length_Distance<-
   Edge_Traits%>%
         ggplot()+
@@ -437,7 +430,7 @@ Log_Length_Distance
 Out of this one is clear that there is no relationship between length and distance
 
 RESISTANCE WIDTH AND LENGTH (THIS IS MAINLY TO TEST THE MATHEMATICAL RELATIONSHIP AMONG THEM)
-```{r}
+```{r echo=FALSE}
 #Resistance_Width_Length<-
 Log_Resistance_Width_Length<-
         Edge_Traits%>%
@@ -460,7 +453,7 @@ Log_Resistance_Width_Length
 This plot confirms the relationship between resistance and lenght and width
 
 BETWEENNESS AND DISTANCE
-```{r}
+```{r, echo=FALSE}
 Log_Betweenness_Distance<-
         Edge_Traits%>%
         ggplot()+
@@ -481,7 +474,7 @@ Log_Betweenness_Distance
 
 
 ROUTE FACTOR AND WIDTH
-```{r}
+```{r, echo=FALSE}
 RouteFactor_Width<-
   Edge_Traits%>%
   ggplot()+
@@ -588,7 +581,7 @@ Edge_Traits%>%
   ggpairs(title="All",columns = 1:7)
 ```
 
-```{r,fig.height = 15, fig.width = 10}
+```{r,fig.height = 15, fig.width = 10, eval=FALSE, echo=FALSE}
 Edge_Traits%>%
   #filter(Species=="Mortierella elongata")%>%
   filter(Tortuosity<1.5)%>%
@@ -605,7 +598,7 @@ Edge_Traits%>%
 
 # Visualizing and testing the clustering of species in trait space
 
-```{r}
+```{r echo=FALSE, eval=FALSE}
 #3. Performing a PCA on raw data and transformed data
 
 Descriptive_traits<-
@@ -618,11 +611,11 @@ Edge_Traits%>%
   mutate(Species=as.factor(Species))%>%
   select(c("Width","Log_Length","Tortuosity","Distance",
                  "Accessibility","Log_Betweenness","Route_factor","name","Species"))
-library(vegan)
+
 Model_descriptive_traits<-rda(Descriptive_traits[,c("Width","Log_Length","Tortuosity","Log_Betweenness")]~name+Condition(Species +Distance),scale = TRUE,data = Descriptive_traits)
 
-Model_descriptive_traits
 
+Model_descriptive_traits
 summary(Model_descriptive_traits)[["cont"]][["importance"]][,c(1:2)]
 #                              RDA1         RDA2
 # Eigenvalue            0.014666590 0.0029930041
@@ -639,11 +632,12 @@ anova.cca(Model_descriptive_traits,by="term")
 #              Df Variance      F Pr(>F)    
 # name         10   0.0189 290.83  0.001 ***
 # Residual 600416   3.9027                  
-
 ```
-This model explains very little the variation, thus it is not worth using it. Thus a better option is to use mean values
 
-```{r}
+
+##### A model with information at the hyphal level showed to explain very little the variation, thus it is not worth using it. Thus a better option is to use mean values
+
+```{r, echo=FALSE}
 Descriptive_traits<-
 Edge_Traits%>%
   #filter(Species=="Mortierella elongata")%>%
@@ -689,7 +683,30 @@ my_theme<-theme(
   axis.text.y=element_text(size=20),
   strip.text.x=element_text(size=25),
   legend.position = "none")
+```
+#### Results from RDA
 
+##### Proportion of data explained by constrained axes
+```{r}
+Model_descriptive_traits
+```
+
+#### Proportion of data explained by the first and second RDA axes
+```{r, echo=FALSE}
+summary(Model_descriptive_traits)[["cont"]][["importance"]][,c(1:2)]
+
+```
+
+
+#### Significance testing of the RDA (permutation based test of vegan package)
+```{r, echo=FALSE}
+anova.cca(Model_descriptive_traits,by="term")
+
+```
+
+
+### Clustering based on descriptive traits: "Width","Log_Length","Tortuosity","Log_Betweenness"
+```{r}
 Descriptive_traits %>% 
   ggplot()+
   aes(x=RDA1,y=RDA2,color=Species,label=Species) +
@@ -697,7 +714,6 @@ Descriptive_traits %>%
   scale_color_viridis_d()+
   labs(y="RDA2 8%",x="RDA1 80%")+
   my_theme
-
 ```
 
 
@@ -707,8 +723,9 @@ All relationships above consider each hyphal segment as separate replicate. This
 this is a bit misleading as the transport from on hyphal segment to the next one is not going to change that much (or at all). Thus I am going to make a new analysis, this time only based on "Routes". That is the wholde
 path from the center of the inoculum to an endpoint.
 
-To do this one need to filter the hyphae of degree 1
-```{r}
+
+```{r, echo=FALSE}
+#To do this one need to filter the hyphae of degree 1
 
 Re_org_2<-
         Edge_Traits%>%
@@ -722,17 +739,22 @@ Re_org_2<-
 names(Edge_Traits)
 ```
 
+#### Histograms of the transport traits: "Distance","Accessibility","Route_factor","Route_Length"
 ```{r,fig.height = 15, fig.width = 10}
 
         Re_org_2%>%
   filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>%
         filter(variable %in% c("Distance","Accessibility","Route_factor","Route_Length"))%>%#1_The completely indepedent variables
-        
         ggplot()+
         aes(value,fill=name)+
         geom_histogram()+
         facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 4)+
         theme(legend.position = "none")
+```
+
+
+#### Relationship among the transport traits
+```{r}
 
 Edge_Traits%>%
   mutate(Route_Length=Distance*Route_factor)%>%
@@ -758,11 +780,11 @@ Edge_Traits%>%
   geom_point(alpha=0.8,size=2)+
   facet_wrap(. ~ Species, scales = "free",nrow = 6,ncol = 3)+
   theme(legend.position = "none")
-        
-        
+
 ```
 
-Making correlograms for this transport traits
+
+#### Making correlograms for these transport traits
 ```{r,fig.height = 15, fig.width = 10}
 Edge_Traits%>%
   mutate(Route_Length=Distance*Route_factor)%>%
@@ -775,3 +797,82 @@ Edge_Traits%>%
 ```
 
 Comment from Mark: Betweenness values less than one are a proxy of links that are not particularly useful because that route is never being used
+
+
+#### Clustering and testing the signficance of the clustering for these transport traits
+
+```{r, echo=FALSE}
+
+Transport_traits<-Edge_Traits%>%
+  mutate(Route_Length=Distance*Route_factor)%>%
+  filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1) %>% 
+  group_by(Species,name) %>% 
+  summarise_at(c("Distance","Accessibility","Route_factor","Route_Length"),mean) %>% ungroup()
+
+
+Model_transport_traits<-rda(Transport_traits[,c("Distance","Accessibility","Route_factor","Route_Length")]~Species,scale = TRUE,data = Transport_traits)
+```
+
+```{r}
+Model_transport_traits
+#               Inertia Proportion Rank
+# Total            4.00       1.00     
+# Constrained      2.76       0.69    4
+# Unconstrained    1.24       0.31    4
+# Inertia is correlations 
+```
+
+
+```{r}
+summary(Model_transport_traits)[["cont"]][["importance"]][,c(1:2)]
+#                       RDA1      RDA2
+# Eigenvalue            1.6709939 0.8693697
+# Proportion Explained  0.4177485 0.2173424
+# Cumulative Proportion 0.4177485 0.6350909
+```
+
+
+```{r}
+
+anova.cca(Model_transport_traits,by="term")
+#          Df   Variance  F       Pr(>F)    
+# Species   5   2.7598    4.4506  0.001 ***
+# Residual 10   1.2402                  
+#plot(Model_transport_traits$Ybar[,1],Transport_traits$Distance)
+
+```
+
+
+### Clustering based on transport traits (mean values per replicate)
+```{r}
+
+temporal<-as.data.frame(scores(Model_transport_traits,display = "sites",scaling = "sites",choices=c(1,2)))
+
+Transport_traits<-cbind(Transport_traits,temporal);rm(temporal)
+
+Transport_traits %>% 
+  ggplot()+
+  aes(x=RDA1,y=RDA2,color=Species,label=Species) +
+  geom_text() +
+  scale_color_viridis_d()+
+  labs(y="RDA2 21%",x="RDA1 41%")+
+  my_theme
+```
+
+# To do list:
+
+Check how to deal with not anastomosis from the images... maybe removing the node degree higher or equal than 3... also check whether i can measure route factor in R
+
+Other traits to include is the total length of the mycelium, and the total lenght divided by the number of hyphal segments
+
+Revise again how do I know that the traits are not not adjusted to micrometers but pixels
+
+Is mean length the same as the total length of the mycelium divided by the number of hyphae
+
+Check again what is Ybar from the output of vegan
+
+Check whether I got new data on the problmatic species including umpellopsis
+
+Maybe the twist here is how to tell appart phenotypically species that are closely related to each other. I should ask Anika what is the evidence for the mucoromycota species to behave differently.
+
+Think how to treat betweenness
