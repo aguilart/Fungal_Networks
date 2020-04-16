@@ -876,3 +876,199 @@ Check whether I got new data on the problmatic species including umpellopsis
 Maybe the twist here is how to tell appart phenotypically species that are closely related to each other. I should ask Anika what is the evidence for the mucoromycota species to behave differently.
 
 Think how to treat betweenness
+
+Check in igraph how to identify particular routes in a network
+
+Think how to deal with the relationship between accessibility and resistance and route factor
+
+```{r}
+#To calcuate the second peak of the bimodal distribution
+find_modes<- function(x) {
+  modes <- NULL
+  for ( i in 2:(length(x)-1) ){
+    if ( (x[i] > x[i-1]) & (x[i] > x[i+1]) ) {
+      modes <- c(modes,i)
+    }
+  }
+  if ( length(modes) == 0 ) {
+    modes = 'This is a monotonic distribution'
+  }
+  return(modes)
+}
+
+trial<-Edge_Traits$Width[Edge_Traits$name=="C35(4)_t30"]
+
+
+
+my_mode_indices<-
+find_modes(density(trial)$y)
+
+
+density(trial)$y[my_mode_indices]
+density(trial)$x[my_mode_indices]
+#0.9040683 5.5380611
+density(trial)$x[which(density(trial)$y==max(density(trial)$y))]
+
+
+#For all of them:
+modes<-function(x){
+names(table(x))[table(x)==max(table(x))]}
+
+
+tapply(Edge_Traits$Width, Edge_Traits$name, function(f) {density(f)$x[find_modes(density(f)$y)]})
+tapply(Edge_Traits$Width, Edge_Traits$name,)
+
+
+
+library(diptest)
+plot(density(Edge_Traits$Width[Edge_Traits$name=="C35(4)_t30"]))
+dip(Edge_Traits$Width[Edge_Traits$name=="C35(4)_t30"], full.result = T)
+dip.test(Edge_Traits$Width[Edge_Traits$name=="C35(4)_t30"])
+
+
+
+dip(trial,full.result = "all")
+plot(dip(trial,full.result = "all"))
+
+
+
+data("statfaculty")
+plot(density(statfaculty))
+plot(dip(statfaculty,full.result = "all"))
+
+#this package provides a metric of distances between the two means. However I do not really like it.
+library(BimodalIndex)
+library(oompaData)
+data(lungData)
+bimodalIndex(lung.dataset,verbose = F)
+t(head(
+Edge_Traits[Edge_Traits$name=="C35(4)_t30",c("Width","Length")]))
+bimodalIndex(t(Edge_Traits[Edge_Traits$name=="C35(4)_t30",c("Width")]))
+
+#The package "multimode" might also be useful
+
+Re_org%>%
+        filter(variable %in% c("Width")) %>% #,"Length","Distance"))%>%#1_The completely indepedent variables
+        filter(name=="C35(4)_t30") %>% 
+        ggplot()+
+        aes(value,fill=name)+
+        #geom_histogram(binwidth = 0.5)+
+        geom_density()+
+        #facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 3)+
+        theme(legend.position = "none")
+```
+
+# As a conclussion I will use the Dip statistic to describe how "strong" is the bimodality for width, which would mean how distinct are the major roads from all other road types.
+
+For the multivariate analysis I should not use the mean for the width, but better the two modes, particularly the first peak which is the esiest to identify. For length I will use the log of the mean, for tortuosity as well, and for betweenness..
+
+# Understanding betweeness
+
+The betwenness of edges (k=1) is not the same as the total number of edges
+```{r}
+tapply(Edge_Traits$name,Edge_Traits$name,length)
+
+with(
+  Edge_Traits[which(Edge_Traits$EndNodes_1_Degree==1|Edge_Traits$EndNodes_2_Degree==1),],
+tapply(Betweenness,name,unique)
+)
+```
+
+But these two values are proportional to each other
+```{r}
+plot(
+tapply(Edge_Traits$name,Edge_Traits$name,length),
+with(
+  Edge_Traits[which(Edge_Traits$EndNodes_1_Degree==1|Edge_Traits$EndNodes_2_Degree==1),],
+tapply(Betweenness,name,unique)
+)
+)
+```
+
+```{r}
+tapply(Edge_Traits$Distance,Edge_Traits$name,min)
+```
+
+
+The edges maximum betweenness for each colony is located always closer to the center of the colony
+```{r}
+
+sapply(
+  split(Edge_Traits,Edge_Traits$name),function(x){
+    unique(x$Distance[x$Betweenness==max(x$Betweenness)])
+  }
+  
+)
+tapply(Edge_Traits$Betweenness,Edge_Traits$name,max)
+
+```
+
+```{r}
+sapply(
+  split(Edge_Traits,Edge_Traits$name),function(x){
+    summary(x$Betweenness[x$Distance<=1.5*min(x$Distance)])
+  }
+  
+)
+```
+
+
+The minimum betweenness value is 0 and it occurs in all colonies. Thus the question is, what do edges with betwenness 0 have in common?
+
+a) They are not tips. All of them have a degree larger or equal to two
+```{r}
+with(
+  Edge_Traits[which(Edge_Traits$Betweenness==0),],
+tapply(EndNodes_2_Degree,name,summary)
+)
+```
+
+b) They represent they represent the 6% to 14% of all edges
+```{r}
+with(
+  Edge_Traits[which(Edge_Traits$Betweenness==0),],
+tapply(name,name,length)
+)/tapply(Edge_Traits$name,Edge_Traits$name,length)
+
+```
+
+
+
+```{r}
+
+temporal<-Edge_Traits[which(Edge_Traits$Betweenness==
+min(Edge_Traits$Betweenness)),]
+
+Edge_Traits %>% 
+filter(Species=="Mortierella elongata") %>% 
+  filter(Betweenness<21729)%>%
+  ggplot()+
+  aes(Betweenness)+
+  geom_histogram()+
+  facet_wrap(.~name)
+
+
+Edge_Traits%>%
+#        filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>%
+  filter(Species=="Mortierella elongata") %>% 
+  filter(Betweenness>21729)%>%
+  
+        select(c("name","Species","Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
+                 "Accessibility","Betweenness","Route_factor","Or_ij"))%>%
+        mutate(Log_Betweenness=log10(Betweenness+1))%>%
+        group_by(name)%>%
+        gather(key=variable,
+            value=value,Width:Log_Betweenness)%>%
+        
+        filter(variable %in% c("Betweenness"))%>%#4_Tortuosity has little variation and depends on Length
+        ggplot()+
+        aes(value,fill=name)+
+        geom_histogram()+
+  facet_wrap(name ~ variable, scales = "free",nrow = 3,ncol = 3)#+
+        #facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 2)#+
+        #theme(legend.position = "none")
+
+
+```
+
+
