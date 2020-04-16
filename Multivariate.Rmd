@@ -985,12 +985,12 @@ tapply(Betweenness,name,unique)
 )
 ```
 
+The edges maximum betweenness for each colony are located always close to the center of the colony
 ```{r}
 tapply(Edge_Traits$Distance,Edge_Traits$name,min)
 ```
 
 
-The edges maximum betweenness for each colony is located always closer to the center of the colony
 ```{r}
 
 sapply(
@@ -999,18 +999,23 @@ sapply(
   }
   
 )
-tapply(Edge_Traits$Betweenness,Edge_Traits$name,max)
 
+tapply(Edge_Traits$Betweenness,Edge_Traits$name,max)
 ```
 
+But they are not the minimal values, they lay though within 2 times the minimum distance
 ```{r}
 sapply(
   split(Edge_Traits,Edge_Traits$name),function(x){
-    summary(x$Betweenness[x$Distance<=1.5*min(x$Distance)])
+    summary(x$Betweenness[x$Distance<=2*min(x$Distance)])
   }
   
 )
 ```
+
+It makes sense for the maximum betweenness to lay close to the center of the colony as it is where most of the "root" edges are
+
+
 
 
 The minimum betweenness value is 0 and it occurs in all colonies. Thus the question is, what do edges with betwenness 0 have in common?
@@ -1023,13 +1028,28 @@ tapply(EndNodes_2_Degree,name,summary)
 )
 ```
 
-b) They represent they represent the 6% to 14% of all edges
+b) They represent between the 6% to 14% of all edges
 ```{r}
 with(
   Edge_Traits[which(Edge_Traits$Betweenness==0),],
 tapply(name,name,length)
 )/tapply(Edge_Traits$name,Edge_Traits$name,length)
 
+```
+
+```{r}
+tapply(Edge_Traits$Distance,Edge_Traits$name,min)
+```
+
+
+
+```{r}
+sapply(
+  split(Edge_Traits,Edge_Traits$name),function(x){
+    summary(x$Distance[x$Betweenness<=min(x$Betweenness)+10])
+  }
+  
+)
 ```
 
 
