@@ -4,7 +4,7 @@ navbar:
   title: "Fungal Networks"
   left:
   - text: "Home"
-   href: index.html
+   href: Multivariate.html
   - text: "Analysis with Igraph"
    href: analysis_igraph.html
 output:

@@ -1,19 +1,11 @@
 ---
 title: "Multivariate analysis"
-knit: (function(input_file, encoding) {
-  out_dir <- 'docs';
-  rmarkdown::render(input_file,
- encoding=encoding,
- output_file=file.path(dirname(input_file), out_dir, 'index.html'))})
-
-author: "Carlos"
-date: "02/11/2019"
-output: html_document
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(eval = FALSE)
 ```
+
 
 # Multivariate Analysis of Network data
 
