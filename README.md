@@ -8,4 +8,4 @@ Thus, this analysis right now is based on the "edge" data obtained from the Netw
 
 If it is too confusing, I also created this tutorial:
 
-https://aguilart.github.io/Fungal_Networks/
+
