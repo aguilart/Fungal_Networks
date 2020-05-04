@@ -11,4 +11,4 @@ navbar:
       href: analysis_igraph.html
 output:
   html_document:
-theme: cosmo
+theme: cayman
