@@ -1,3 +1,4 @@
+name: "Fungal_Networks"
 output_dir: "docs"
 navbar:
 title: "Multivariate analysis"
