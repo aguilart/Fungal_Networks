@@ -1,0 +1,610 @@
+---
+title: "analysis with igraph"
+output: html_document
+---
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(eval = FALSE)
+```
+
+Check in igraph how to identify particular routes in a network
+
+Think how to deal with the relationship between accessibility and resistance and route factor
+
+```{r}
+#To calcuate the second peak of the bimodal distribution
+find_modes<- function(x) {
+  modes <- NULL
+  for ( i in 2:(length(x)-1) ){
+    if ( (x[i] > x[i-1]) & (x[i] > x[i+1]) ) {
+      modes <- c(modes,i)
+    }
+  }
+  if ( length(modes) == 0 ) {
+    modes = 'This is a monotonic distribution'
+  }
+  return(modes)
+}
+
+trial<-Edge_Traits$Width[Edge_Traits$name=="C35(4)_t30"]
+
+
+
+my_mode_indices<-
+find_modes(density(trial)$y)
+
+
+density(trial)$y[my_mode_indices]
+density(trial)$x[my_mode_indices]
+#0.9040683 5.5380611
+density(trial)$x[which(density(trial)$y==max(density(trial)$y))]
+
+
+#For all of them:
+modes<-function(x){
+names(table(x))[table(x)==max(table(x))]}
+
+
+tapply(Edge_Traits$Width, Edge_Traits$name, function(f) {density(f)$x[find_modes(density(f)$y)]})
+tapply(Edge_Traits$Width, Edge_Traits$name,)
+
+
+
+library(diptest)
+plot(density(Edge_Traits$Width[Edge_Traits$name=="C35(4)_t30"]))
+dip(Edge_Traits$Width[Edge_Traits$name=="C35(4)_t30"], full.result = T)
+dip.test(Edge_Traits$Width[Edge_Traits$name=="C35(4)_t30"])
+
+
+
+dip(trial,full.result = "all")
+plot(dip(trial,full.result = "all"))
+
+
+
+data("statfaculty")
+plot(density(statfaculty))
+plot(dip(statfaculty,full.result = "all"))
+
+#this package provides a metric of distances between the two means. However I do not really like it.
+library(BimodalIndex)
+library(oompaData)
+data(lungData)
+bimodalIndex(lung.dataset,verbose = F)
+t(head(
+Edge_Traits[Edge_Traits$name=="C35(4)_t30",c("Width","Length")]))
+bimodalIndex(t(Edge_Traits[Edge_Traits$name=="C35(4)_t30",c("Width")]))
+
+#The package "multimode" might also be useful
+
+Re_org%>%
+        filter(variable %in% c("Width")) %>% #,"Length","Distance"))%>%#1_The completely indepedent variables
+        filter(name=="C35(4)_t30") %>% 
+        ggplot()+
+        aes(value,fill=name)+
+        #geom_histogram(binwidth = 0.5)+
+        geom_density()+
+        #facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 3)+
+        theme(legend.position = "none")
+```
+
+# As a conclussion I will use the Dip statistic to describe how "strong" is the bimodality for width, which would mean how distinct are the major roads from all other road types.
+
+For the multivariate analysis I should not use the mean for the width, but better the two modes, particularly the first peak which is the esiest to identify. For length I will use the log of the mean, for tortuosity as well, and for betweenness..
+
+# Understanding betweeness
+
+The betwenness of edges (k=1) is not the same as the total number of edges
+```{r}
+tapply(Edge_Traits$name,Edge_Traits$name,length)
+
+with(
+  Edge_Traits[which(Edge_Traits$EndNodes_1_Degree==1|Edge_Traits$EndNodes_2_Degree==1),],
+tapply(Betweenness,name,unique)
+)
+```
+
+But these two values are proportional to each other
+```{r}
+plot(
+tapply(Edge_Traits$name,Edge_Traits$name,length),
+with(
+  Edge_Traits[which(Edge_Traits$EndNodes_1_Degree==1|Edge_Traits$EndNodes_2_Degree==1),],
+tapply(Betweenness,name,unique)
+)
+)
+```
+
+The edges maximum betweenness for each colony are located always close to the center of the colony
+```{r}
+tapply(Edge_Traits$Distance,Edge_Traits$name,min)
+```
+
+
+```{r}
+
+sapply(
+  split(Edge_Traits,Edge_Traits$name),function(x){
+    unique(x$Distance[x$Betweenness==max(x$Betweenness)])
+  }
+  
+)
+
+tapply(Edge_Traits$Betweenness,Edge_Traits$name,max)
+```
+
+But they are not the minimal values, they lay though within 2 times the minimum distance
+```{r}
+sapply(
+  split(Edge_Traits,Edge_Traits$name),function(x){
+    summary(x$Betweenness[x$Distance<=2*min(x$Distance)])
+  }
+  
+)
+```
+
+It makes sense for the maximum betweenness to lay close to the center of the colony as it is where most of the "root" edges are
+
+
+
+
+The minimum betweenness value is 0 and it occurs in all colonies. Thus the question is, what do edges with betwenness 0 have in common?
+
+a) They are not tips. All of them have a degree larger or equal to two
+```{r}
+with(
+  Edge_Traits[which(Edge_Traits$Betweenness==0),],
+tapply(EndNodes_2_Degree,name,summary)
+)
+```
+
+b) They represent between the 6% to 14% of all edges
+```{r}
+with(
+  Edge_Traits[which(Edge_Traits$Betweenness==0),],
+tapply(name,name,length)
+)/tapply(Edge_Traits$name,Edge_Traits$name,length)
+
+```
+
+```{r}
+tapply(Edge_Traits$Distance,Edge_Traits$name,min)
+```
+
+
+
+```{r}
+sapply(
+  split(Edge_Traits,Edge_Traits$name),function(x){
+    summary(x$Distance[x$Betweenness<=min(x$Betweenness)+10])
+  }
+  
+)
+```
+
+
+
+```{r}
+
+temporal<-Edge_Traits[which(Edge_Traits$Betweenness==
+min(Edge_Traits$Betweenness)),]
+
+Edge_Traits %>% 
+filter(Species=="Mortierella elongata") %>% 
+  filter(Betweenness<21729)%>%
+  ggplot()+
+  aes(Betweenness)+
+  geom_histogram()+
+  facet_wrap(.~name)
+
+
+Edge_Traits%>%
+#        filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>%
+  filter(Species=="Mortierella elongata") %>% 
+  filter(Betweenness>21729)%>%
+  
+        select(c("name","Species","Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
+                 "Accessibility","Betweenness","Route_factor","Or_ij"))%>%
+        mutate(Log_Betweenness=log10(Betweenness+1))%>%
+        group_by(name)%>%
+        gather(key=variable,
+            value=value,Width:Log_Betweenness)%>%
+        
+        filter(variable %in% c("Betweenness"))%>%#4_Tortuosity has little variation and depends on Length
+        ggplot()+
+        aes(value,fill=name)+
+        geom_histogram()+
+  facet_wrap(name ~ variable, scales = "free",nrow = 3,ncol = 3)#+
+        #facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 2)#+
+        #theme(legend.position = "none")
+
+
+```
+
+# Analyzing the graph using igraph
+
+
+
+
+```{r}
+library(igraph)
+library(tidyverse)
+```
+
+igraph is versatile to analyze network properties. The first step is to create an igraph object from the edge list and node list tha comes out of Mark´s app
+
+```{r}
+
+Mucor_edge<-read.csv("processedData\\DF56(6)_t09-Edge.csv",header = T, stringsAsFactors = F)#Node_Traits[which(Node_Traits$name=="DF56(6)_t09"),]
+Mucor_node<-read.csv("processedData\\DF56(6)_t09-Node.csv",header = T, stringsAsFactors = F,sep = ";",dec = ",")#Node_Traits[which(Node_Traits$name=="DF56(6)_t09"),]
+
+edges_1<-Mucor_edge[,c("EndNodes_1","EndNodes_2")]#Edge_Traits[which(Edge_Traits$name=="DF56(6)_t09"),c("EndNodes_1","EndNodes_2")]
+edges_1<-graph_from_edgelist(as.matrix(edges_1),directed = F)
+
+spatial.data<-Mucor_node[,#Node_Traits[which(Node_Traits$name=="DF56(6)_t09"),
+                          c("node_ID","node_X_pix","node_Y_pix")]
+
+l <- as.matrix(spatial.data[,c(2,3)])
+l <- norm_coords(l, ymin=-1, ymax=1, xmin=-1, xmax=1)
+
+```
+
+Visualizing the network via the igraph object
+```{r}
+
+plot(edges_1,
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     edge.color="black", vertex.label=NA,vertex.shape="none",
+     edge.size=150,vertex.size=0,layout=l*1,main="Real Network")
+```
+
+
+# Assigning attributes to the igraph object
+
+Attributes can be anything and can be name however I want to. Except for "weight" which will be used as the link weight
+
+According to Mark´s manual these weights for hypha should be resistance
+```{r}
+E(edges_1)$weight<-Mucor_edge$Resistance_2ave
+#E(edges_1)$weight<-Mucor_edge$Resistance_2
+E(edges_1)$lenght<-Mucor_edge$Length
+E(edges_1)$width<-Mucor_edge$Width
+
+```
+
+# Calculating the shortests paths
+Now I calculate the shortests paths from the inoculum and to every other vertex. As specifed in Mark´s manual, the shortest path is the one that sums the lowest resistance (using Resistance_2ave). To do this, igrap has the function get.shortest.paths, which according to its documentation uses the same algorithm as reported in Mark´s manual, quoting: "By default igraph tries to select the fastest suitable algorithm. If there are no weights, then an unweighted breadth-first search is used, otherwise if all weights are positive, then Dijkstra's algorithm is used."
+
+```{r}
+#With this line one can check which number corresponds to the inoculum
+Mucor_edge[which(Mucor_edge$Type=="F"),c("EndNodes_1","EndNodes_2")]
+
+trial<-get.shortest.paths(edges_1,from = 5279)
+
+```
+
+Now I am trying to get the total length of those shortests paths. In principle these lenghts should be identical to the ones obtained by multiplying the node route factor with the node distance
+
+```{r}
+(Mucor_node$node_RF*Mucor_node$node_Distance)[1]
+```
+
+I found two methods to do this:
+
+Method 1
+```{r}
+
+sum(E(edges_1,path = trial$vpath[[1]])$lenght
+    )
+```
+
+Method 2
+```{r}
+sum(
+E(induced.subgraph(edges_1,as_ids(trial$vpath[[1]])))$lenght
+)
+```
+
+
+Now calculating these lengths for all the network using method 1 and comparing with node_rf * node_distance
+```{r}
+route_lengths<-rep(0,length(Mucor_node$node_RF))
+for (i in 1:length(trial$vpath)) {
+  route_lengths[i]<-sum(E(edges_1,path = trial$vpath[[i]])$lenght
+    
+  )
+}
+
+plot(
+  (Mucor_node$node_RF*Mucor_node$node_Distance),
+  route_lengths
+)
+```
+
+
+Now calculating these lengths for all the network using method 2 and comparing with node_rf * node_distance
+```{r}
+
+route_lengths<-rep(0,length(Mucor_node$node_RF))
+for (i in 1:length(trial$vpath)) {
+  route_lengths[i]<-sum(E(induced.subgraph(edges_1,as_ids(trial$vpath[[i]])))$lenght
+    
+  )
+}
+
+plot(
+  (Mucor_node$node_RF*Mucor_node$node_Distance),
+  route_lengths
+)
+
+
+```
+
+
+I can also get node accessibility using igraph. For that I use the function distances and it does give me exactly the same values as in node_accessiblity coming from Mark´s app
+
+```{r}
+plot(
+distances(edges_1,v=5279),#here each distance is the lowest summation of edge resistances from node 5279 to each other node
+Mucor_node$node_Accessibility
+)
+
+temporal<-distances(edges_1,v=5279)
+summary(as.vector(temporal)/
+as.vector(Mucor_node$node_Accessibility))
+```
+
+
+These results confirm the following:
+
+* igraph calculate distances based on hyphal resistance using the Dijkestra algorithm exactly in the same way as in Mark´s app. This means that accessibility to a node is simply the lowest summation of resistances of edges (a path) from the inoculum to that node.
+*But for some reason there is small discrepancy between the lengths calulation. I think that the culprit might be in the values of length themselves, but his would need to be checked.
+
+
+Now trying to calculate new stuff
+
+Route width
+I had initially high hopes about measuring the average widths of the shortests paths
+
+```{r}
+E(edges_1)$width<-Mucor_edge$Width
+
+E(induced.subgraph(edges_1,as_ids(trial$vpath[[i]])))$width
+
+max(Mucor_edge$Width)
+min(Mucor_edge$Length)
+
+tapply(Edge_Traits$Width,Edge_Traits$name,max)#This is weird the maximum is fixed at 5.6 regardless of the colony, and when I also analyze my close up, I also get 5.6 as max value (which particularly makes no sense)
+tapply(Edge_Traits$Width,Edge_Traits$name,min)
+
+
+```
+
+
+Here, what I am doing is selecting a particular "shortest" path based on their width. This means that one can select distincts parts of the mycelia for analysis. 
+
+```{r}
+
+ecol<-rep("black",ecount(edges_1))
+ecol[
+   E(edges_1,path = trial$vpath[[1]])[
+      E(edges_1,path = trial$vpath[[1]])>=0.7*
+         E(edges_1,path = trial$vpath[[1]])$width]
+   ]<-"orange"
+
+neighbors(edges_1,5279)
+incident(edges_1,5279)
+
+E(edges_1)$type<-"E"
+E(edges_1)[incident(edges_1,5279)]$type<-"F"
+
+
+
+max(E(edges_1)$lenght)
+
+max(
+E(edges_1)[
+E(edges_1)$type=="E"]$lenght)
+
+E(edges_1)[
+E(edges_1)$lenght==max(
+E(edges_1)[
+E(edges_1)$type=="E"]$lenght)
+]
+
+ecol[
+  E(edges_1)$lenght==max(
+E(edges_1)[
+E(edges_1)$type=="E"]$lenght)
+   ]<-"red"
+
+ecol<-rep("black",ecount(edges_1))
+
+ecol[E(edges_1)[inc(V(edges_1)[degree==1])&lenght>200]
+  ]<-"green"
+
+ecol[E(edges_1)[inc(V(edges_1)[degree==2])]
+  ]<-"blue"
+
+ecol[E(edges_1)[inc(V(edges_1)[degree==3])]
+  ]<-"red"
+
+ecol[E(edges_1)$type=="F"]<-"gray80"
+
+plot(edges_1,
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=l*1,main="Real Network")
+
+plot(edges_1,
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label.cex=0.2,
+     #vertex.shape="none",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=l*1,main="Real Network")
+
+plot(edges_1,
+     vertex.label.color="black", vertex.label.cex=1,vertex.size=1,
+     edge.color=ecol,layout=l)
+
+```
+
+# Descriptive traits to have
+
+Mean tip hyphal length
+
+# Can I calculate these variables also for "toy" networks based on the mycelia network
+
+It seems that for minimum spanning trees is possible
+```{r}
+#Minimum spanning tree: 
+library(igraph)
+edges_1_no_weights<-edges_1
+
+
+edges_1_no_weights<-
+delete_edge_attr(edges_1_no_weights,"weight")
+
+
+
+edges_1mst<-mst(edges_1)
+edges_1_no_weights_mst<-mst(edges_1_no_weights)
+
+
+E(edges_1mst)$weight
+E(edges_1_no_weights_mst)$weight
+
+
+length(E(edges_1))
+length(E(edges_1mst))
+length(E(edges_1_no_weights_mst))
+
+plot(edges_1mst,
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     edge.color="black", vertex.label=NA,vertex.shape="none",
+     edge.size=150,vertex.size=0,layout=l*1,main="Minimum Spanning Tree")
+
+
+plot(edges_1_no_weights_mst,
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     edge.color="black", vertex.label=NA,vertex.shape="none",
+     edge.size=150,vertex.size=0,layout=l*1,main="Minimum Spanning Tree no weights")
+
+```
+
+
+
+```{r}
+
+min(Mucor_edge$Length)
+plot(Mucor_edge$Length,Mucor_edge$Width)
+
+
+```
+
+
+The other ones seems it is more complicated because they are based on vertex positions. Thus maybe what I could do is to get those distance based graphs and based on those ones subset the weights from the real network
+
+
+```{r}
+library(igraph)
+length(degree(edges_1))
+
+V(edges_1)$degree<-degree(edges_1)
+V(edges_1)$distance<-Mucor_node$node_Distance
+E(edges_1)$distance<-Mucor_edge$Distance
+
+no_feature<-
+subgraph.edges(edges_1,E(edges_1)[type=="E"])
+
+E(no_feature)$hyphae<-"main"
+E(no_feature)[inc(V(no_feature)[degree==1])]$hyphae<-"tip"
+#E(no_feature)[inc(V(no_feature)[degree==1])]$hyphae<-"tip"
+
+probando<-rbind(
+  
+data.frame(degree="tip",Lengths=
+E(no_feature)[hyphae=="tip"]$lenght,
+Widths=E(no_feature)[hyphae=="tip"]$width,
+Distance=E(no_feature)[hyphae=="tip"]$distance),
+
+data.frame(degree="main",Lengths=
+E(no_feature)[hyphae=="main"]$lenght,
+Widths=E(no_feature)[hyphae=="main"]$width,
+Distance=E(no_feature)[hyphae=="main"]$distance)#,
+
+#data.frame(degree="three",Lengths=
+#E(no_feature)[inc(V(no_feature)[degree==1])]$lenght),
+)
+
+table(probando$degree)
+
+library(tidyverse)
+library(igraph)
+
+probando %>% 
+  filter(degree=="main") %>% 
+  ggplot()+
+  aes(Distance,Widths)+#It does not seem to be a relationship between widht and distances, meaning that certain hyphae remian thick all the way from the inoculum to the the tip
+  geom_point()
+  #aes(degree,Widths)+
+  #geom_boxplot()
+
+
+hist(probando$Widths[probando$degree=="tip"])
+
+
+```
+
+From this plot it is clear that there is a difference in width between hyphae a the tips and main hyphae. But that is not the case for length, that keep constant along the mycelium. So as descriptive trait I will use each mean for width and a single mean for length
+
+
+
+
+
+```{r}
+hist(probando$Widths[probando$degree=="main"])
+```
+
+
+```{r}
+trial<-get.shortest.paths(edges_1,from = 5279)
+```
+
+
+Now I am trying to get the total length of those shortests paths. In principle these lenghts should be identical to the ones obtained by multiplying the node route factor with the node distance
+
+```{r}
+(Mucor_node$node_RF*Mucor_node$node_Distance)[1]
+```
+
+I found two methods to do this:
+
+Method 1
+```{r}
+
+sum(E(edges_1,path = trial$vpath[[1]])$lenght
+    )
+```
+
+
+Now calculating these lengths for all the network using method 1 and comparing with node_rf * node_distance
+```{r}
+route_lengths<-rep(0,length(Mucor_node$node_RF))
+for (i in 1:length(trial$vpath)) {
+  route_lengths[i]<-sum(E(edges_1,path = trial$vpath[[i]])$lenght
+    
+  )
+}
+
+plot(
+  (Mucor_node$node_RF*Mucor_node$node_Distance),
+  route_lengths
+)
+```
+
+
+
+
+
+
