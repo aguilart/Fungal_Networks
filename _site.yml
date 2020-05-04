@@ -6,7 +6,7 @@ navbar:
     - text: "Home"
       href: index.html
     - text: "Multivariate analysis"
-      href: about.html
+      href: Multivariate.html
     - text: "Analysis with Igraph"
       href: analysis_igraph.html
 output:
