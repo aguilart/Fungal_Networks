@@ -1,5 +1,6 @@
 ---
 title: "Multivariate analysis"
+output: html_document
 ---
 
 ```{r setup, include = FALSE}
