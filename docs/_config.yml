@@ -1,7 +1,7 @@
 name: "Fungal_Networks"
 output_dir: "docs"
 navbar:
-  title: "Multivariate analysis"
+title: "Multivariate analysis"
   left:
   - text: "Home"
    href: Multivariate.html
