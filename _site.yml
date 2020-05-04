@@ -1,0 +1,14 @@
+name: "Fungal-Networks"
+output_dir: "docs"
+navbar:
+  title: "Fungal Networks"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Multivariate analysis"
+      href: about.html
+    - text: "Analysis with Igraph"
+      href: analysis_igraph.html
+output:
+  html_document:
+theme: jekyll-theme-cayman
