@@ -309,6 +309,19 @@ $(document).ready(function () {
 <li>PERMANOVA: to test difference among groups</li>
 </ul>
 <p>To do that I use base R functions combined with functions from three other packages: vegan, tidyverse and RColorBrewer You might need to install those packages. You can do that via R studio or:</p>
+<pre><code>## Warning: package &#39;vegan&#39; was built under R version 3.6.3</code></pre>
+<pre><code>## Loading required package: permute</code></pre>
+<pre><code>## Warning: package &#39;permute&#39; was built under R version 3.6.3</code></pre>
+<pre><code>## Loading required package: lattice</code></pre>
+<pre><code>## This is vegan 2.5-6</code></pre>
+<pre><code>## -- Attaching packages ---------------------------------------------------------------------------- tidyverse 1.2.1 --</code></pre>
+<pre><code>## v ggplot2 3.2.1     v purrr   0.3.2
+## v tibble  2.1.3     v dplyr   0.8.3
+## v tidyr   1.0.0     v stringr 1.4.0
+## v readr   1.3.1     v forcats 0.4.0</code></pre>
+<pre><code>## -- Conflicts ------------------------------------------------------------------------------- tidyverse_conflicts() --
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()</code></pre>
 </div>
 <div id="loading-files." class="section level2">
 <h2>1. Loading files.</h2>
@@ -356,9 +369,9 @@ Node_Traits$node_name_ID&lt;-paste(Node_Traits$name,Node_Traits$node_ID,sep = &q
 trial&lt;-
 left_join(Edge_Traits%&gt;%
             mutate(node_name_ID=paste(name,EndNodes_1,sep = &quot;_&quot;)),
-          Node_Traits[,c(&quot;node_name_ID&quot;,&quot;node_Type&quot;,&quot;node_Degree&quot;)])
-
-trial&lt;-trial%&gt;%
+          Node_Traits[,c(&quot;node_name_ID&quot;,&quot;node_Type&quot;,&quot;node_Degree&quot;)])</code></pre>
+<pre><code>## Joining, by = &quot;node_name_ID&quot;</code></pre>
+<pre class="r"><code>trial&lt;-trial%&gt;%
   rename(node_1_name_ID=node_name_ID)%&gt;%
   rename(EndNodes_1_Type=node_Type)%&gt;%
   rename(EndNodes_1_Degree=node_Degree)
@@ -368,9 +381,9 @@ trial&lt;-trial%&gt;%
 trial&lt;-
 left_join(trial%&gt;%
             mutate(node_name_ID=paste(name,EndNodes_2,sep = &quot;_&quot;)),
-          Node_Traits[,c(&quot;node_name_ID&quot;,&quot;node_Type&quot;,&quot;node_Degree&quot;)])
-
-trial&lt;-trial%&gt;%
+          Node_Traits[,c(&quot;node_name_ID&quot;,&quot;node_Type&quot;,&quot;node_Degree&quot;)])</code></pre>
+<pre><code>## Joining, by = &quot;node_name_ID&quot;</code></pre>
+<pre class="r"><code>trial&lt;-trial%&gt;%
   rename(node_2_name_ID=node_name_ID)%&gt;%
   rename(EndNodes_2_Type=node_Type)%&gt;%
   rename(EndNodes_2_Degree=node_Degree)
@@ -383,6 +396,69 @@ Edge_Traits&lt;-trial;rm(trial)</code></pre>
 <h3>2.1 How R sees the data.</h3>
 <p>It is useful to have an idea on how R recognize the data. R is an “object oriented” program language. That is, every data is an object which has certain properties. R uses these properties to categorized the object. It is useful to know what kind of object is your data because some functions only work on one object type but not in others.</p>
 <pre class="r"><code>str(Edge_Traits)</code></pre>
+<pre><code>## &#39;data.frame&#39;:    605130 obs. of  62 variables:
+##  $ name                     : chr  &quot;C34(1)_t11&quot; &quot;C34(1)_t11&quot; &quot;C34(1)_t11&quot; &quot;C34(1)_t11&quot; ...
+##  $ channel                  : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ section                  : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ frame                    : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ EndNodes_1               : int  1 2 3 4 5 6 7 7 8 8 ...
+##  $ EndNodes_2               : int  13 4 4 13 7 8 10 12 9 51 ...
+##  $ node_Idx_1               : int  1237662 3257824 3296651 3348477 4526081 4680869 4720355 4720355 4823328 4771532 ...
+##  $ node_Idx_2               : int  5032232 3348477 3348477 5032232 4720355 4771532 4901665 5018246 4771532 7245376 ...
+##  $ Name                     : int  1 2 3 4902 4 5 4904 4903 6 4905 ...
+##  $ Type                     : chr  &quot;E&quot; &quot;E&quot; &quot;E&quot; &quot;E&quot; ...
+##  $ Weight                   : num  1122.73 5.64 833.53 21.16 186.58 ...
+##  $ Original                 : num  0.601 0.469 0.305 0.611 0.282 ...
+##  $ Original_cv              : num  0.233 0.125 0.372 0.175 0.219 ...
+##  $ Intensity                : num  0.891 0.458 0.201 0.942 0.148 ...
+##  $ Intensity_cv             : num  0.264 0.402 1.004 0.123 0.336 ...
+##  $ Gradient                 : num  90.7 43.9 21.4 94.3 16.9 ...
+##  $ Gradient_cv              : num  0.297 0.365 0.818 0.193 0.255 ...
+##  $ Width_initial            : num  4.688 2.402 1.042 4.929 0.706 ...
+##  $ Width_initial_cv         : num  0.277 0.342 1.002 0.136 0.505 ...
+##  $ Width_intact             : int  1 1 1 1 1 1 1 1 1 1 ...
+##  $ Length                   : num  326.17 9.24 27.07 190.56 18.73 ...
+##  $ Number                   : int  299 9 26 146 16 8 15 38 9 231 ...
+##  $ Midpoint                 : int  3128478 3296674 3374366 4281010 4616743 4719724 4811008 4772177 4797430 6053780 ...
+##  $ Tortuosity               : num  1.08 1.15 1.21 1.06 1.07 ...
+##  $ Distance                 : num  3748 3660 3650 3625 3247 ...
+##  $ Width                    : num  4.693 2.402 0.846 4.929 0.662 ...
+##  $ Width_cv                 : num  0.278 0.342 0.965 0.136 0.487 ...
+##  $ Area                     : num  17.299 4.532 0.562 19.079 0.345 ...
+##  $ Volume                   : num  5642.2 41.89 15.22 3635.74 6.46 ...
+##  $ Resistance_2             : num  1122.73 5.64 833.53 21.16 186.58 ...
+##  $ Resistance_4             : num  1.11e+05 1.89 2.96e+04 1.07 1.18e+03 ...
+##  $ Resistance_2ave          : num  150.8 16.3 385.2 79.9 434.6 ...
+##  $ Resistance_4ave          : num  27.4 11.3 2152.6 13.2 3961.4 ...
+##  $ Or_ij                    : num  191.6 225 56.3 40.3 35.5 ...
+##  $ Or_ji                    : num  165 166 -90 -132 -157 ...
+##  $ Region                   : num  9084 405 683 4911 492 ...
+##  $ Route_factor             : num  1.14 1.18 1.18 1.16 1.11 ...
+##  $ Accessibility            : num  0.000963 0.001997 0.001093 0.002051 0.001131 ...
+##  $ Accessibility_ratio      : num  3.61 7.31 3.99 7.44 3.67 ...
+##  $ Betweenness              : num  28340 28340 28340 85014 28340 ...
+##  $ Ai                       : int  2 1 3 3 4 5 6 6 5 5 ...
+##  $ Aj                       : int  1 1 1 1 4 5 4 4 5 5 ...
+##  $ cord_Rank                : int  20 2 2 18 19 15 3 17 6 16 ...
+##  $ length_Disconnected      : int  2 1 2 2 2 1 2 2 1 1 ...
+##  $ length_meanDisconnect    : int  3 2 3 3 3 2 3 3 2 2 ...
+##  $ width_Disconnected       : int  5 3 1 5 1 1 1 1 2 5 ...
+##  $ width_meanDisconnect     : int  6 4 2 6 2 2 2 2 3 6 ...
+##  $ volume_Disconnected      : int  2 1 1 2 1 1 1 1 1 2 ...
+##  $ volume_meanDisconnect    : int  4 2 2 4 2 2 2 2 2 4 ...
+##  $ resistance_Disconnected  : int  3 3 3 3 4 1 4 4 1 1 ...
+##  $ resistance_meanDisconnect: int  4 4 4 4 5 2 5 5 2 2 ...
+##  $ random_Disconnected      : int  5 2 2 5 5 6 3 5 6 6 ...
+##  $ random_meanDisconnect    : int  6 3 3 6 6 7 4 6 7 7 ...
+##  $ spatial_Disconnected     : int  14 14 14 14 14 14 14 14 14 14 ...
+##  $ spatial_meanDisconnect   : int  15 15 15 15 15 15 15 15 15 15 ...
+##  $ Species                  : chr  &quot;Mortierella elongata&quot; &quot;Mortierella elongata&quot; &quot;Mortierella elongata&quot; &quot;Mortierella elongata&quot; ...
+##  $ node_1_name_ID           : chr  &quot;C34(1)_t11_1&quot; &quot;C34(1)_t11_2&quot; &quot;C34(1)_t11_3&quot; &quot;C34(1)_t11_4&quot; ...
+##  $ EndNodes_1_Type          : chr  &quot;E&quot; &quot;E&quot; &quot;E&quot; &quot;E&quot; ...
+##  $ EndNodes_1_Degree        : int  1 1 1 3 1 1 3 3 3 3 ...
+##  $ node_2_name_ID           : chr  &quot;C34(1)_t11_13&quot; &quot;C34(1)_t11_4&quot; &quot;C34(1)_t11_4&quot; &quot;C34(1)_t11_13&quot; ...
+##  $ EndNodes_2_Type          : chr  &quot;E&quot; &quot;E&quot; &quot;E&quot; &quot;E&quot; ...
+##  $ EndNodes_2_Degree        : int  3 3 3 3 3 3 3 3 1 3 ...</code></pre>
 </div>
 <div id="understanding-the-variables-and-their-distribution." class="section level3">
 <h3>2.2. Understanding the variables and their distribution.</h3>
@@ -392,8 +468,42 @@ Edge_Traits&lt;-trial;rm(trial)</code></pre>
                          c(&quot;Width&quot;,&quot;Length&quot;,&quot;Area&quot;,&quot;Volume&quot;,&quot;Resistance_2ave&quot;,&quot;Tortuosity&quot;,&quot;Distance&quot;,
                            &quot;Accessibility&quot;,&quot;Betweenness&quot;,&quot;Route_factor&quot;,&quot;Or_ij&quot;)],
         by=list(Edge_Traits[which(Edge_Traits$Type==&quot;E&quot;),]$name),
-        mean)#Here you  can write different functions: min, max, median. range and summmary is also good because it
-                #gets you more than one summary statistics, but it can be confusing with so much data.</code></pre>
+        mean)#Here you  can write different functions: min, max, median. range and summmary is also good because it</code></pre>
+<pre><code>##        Group.1    Width   Length      Area    Volume Resistance_2ave
+## 1   C34(1)_t11 2.486416 35.62635  6.484219  261.0451       185.76146
+## 2   C34(2)_t23 2.842553 38.28422  7.800379  355.1597        95.65841
+## 3   C34(3)_t23 3.001343 42.16709  8.648350  423.5895       101.15995
+## 4   C35(4)_t30 2.586732 30.21901  7.302022  212.3975       218.03514
+## 5  DF19(1)_t11 2.495999 33.08385  6.423266  236.8064       236.37738
+## 6  DF19(2)_t11 2.116843 25.48389  5.584297  156.0670      1346.55560
+## 7  DF19(3)_t11 2.547124 27.84863  6.594102  198.2312       168.83730
+## 8  DF25(4)_t08 2.490902 35.03497  6.422615  252.6609       152.65753
+## 9  DF25(5)_t11 2.879607 36.55567  8.144890  321.9221       105.70673
+## 10 DF25(6)_t11 2.689017 35.93821  7.304261  287.6657       135.07033
+## 11 DF56(4)_t11 3.942069 79.73737 13.818083 1209.7395        74.84091
+## 12 DF56(5)_t09 3.972351 85.11932 13.941104 1343.8569        72.07603
+## 13 DF56(6)_t09 3.609932 70.31851 12.054374  984.2309        88.14096
+## 14    M(4)_t13 2.860984 31.40790  7.721019  272.7007       544.66314
+## 15  M(5)_t13_c 2.587538 34.63359  6.684309  251.3199       132.11649
+## 16    M(6)_t13 2.850257 36.04745  7.946164  304.1161       104.27262
+##    Tortuosity Distance Accessibility Betweenness Route_factor    Or_ij
+## 1    1.092237 2730.960   0.002287540  1081660.47     1.116972 121.8803
+## 2    1.085628 2870.466   0.002494275   784964.46     1.131151 121.6303
+## 3    1.085478 2837.314   0.002518414   760376.74     1.097317 123.7604
+## 4    1.087140 2485.268   0.003056472  2107936.15     1.085434 120.4299
+## 5    1.092123 2776.072   0.002542657  1610009.10     1.107132 121.0331
+## 6    1.126633 2575.005   0.002288031  2251847.21     1.121702 118.4352
+## 7    1.091932 2913.884   0.002331193  2707310.98     1.103961 120.2419
+## 8    1.088899 3378.191   0.002619193  1279655.41     1.072414 123.9226
+## 9    1.086190 3354.245   0.002940076  1097108.80     1.092419 124.2263
+## 10   1.086563 3140.293   0.003111686   894980.82     1.079164 123.5433
+## 11   1.101663 2732.423   0.003735935    61335.67     1.143124 131.3189
+## 12   1.106022 3401.546   0.002962687    45846.92     1.167376 131.3435
+## 13   1.109570 3489.348   0.002672755   132083.01     1.170059 128.0034
+## 14   1.085376 2552.801   0.002946290  1277518.99     1.129328 120.5754
+## 15   1.088701 2805.298   0.002676110  1243594.56     1.127154 123.4909
+## 16   1.091450 2637.110   0.003290793  1186738.63     1.114236 121.8883</code></pre>
+<pre class="r"><code>                #gets you more than one summary statistics, but it can be confusing with so much data.</code></pre>
 <p>I had some issues understanding what Resistance is. Playing with the following code allowed me to determine that Resistance_2ave = 10*(Length)/width^2</p>
 <pre class="r"><code>summary(Edge_Traits$Resistance_2ave)
 length(which(Edge_Traits$Width_intact==0))
@@ -411,6 +521,37 @@ Edge_Traits%&gt;%
   
 
 length(which(Edge_Traits$Resistance_2ave&gt;500))</code></pre>
+<pre><code>##  [1] &quot;name&quot;                      &quot;channel&quot;                  
+##  [3] &quot;section&quot;                   &quot;frame&quot;                    
+##  [5] &quot;EndNodes_1&quot;                &quot;EndNodes_2&quot;               
+##  [7] &quot;node_Idx_1&quot;                &quot;node_Idx_2&quot;               
+##  [9] &quot;Name&quot;                      &quot;Type&quot;                     
+## [11] &quot;Weight&quot;                    &quot;Original&quot;                 
+## [13] &quot;Original_cv&quot;               &quot;Intensity&quot;                
+## [15] &quot;Intensity_cv&quot;              &quot;Gradient&quot;                 
+## [17] &quot;Gradient_cv&quot;               &quot;Width_initial&quot;            
+## [19] &quot;Width_initial_cv&quot;          &quot;Width_intact&quot;             
+## [21] &quot;Length&quot;                    &quot;Number&quot;                   
+## [23] &quot;Midpoint&quot;                  &quot;Tortuosity&quot;               
+## [25] &quot;Distance&quot;                  &quot;Width&quot;                    
+## [27] &quot;Width_cv&quot;                  &quot;Area&quot;                     
+## [29] &quot;Volume&quot;                    &quot;Resistance_2&quot;             
+## [31] &quot;Resistance_4&quot;              &quot;Resistance_2ave&quot;          
+## [33] &quot;Resistance_4ave&quot;           &quot;Or_ij&quot;                    
+## [35] &quot;Or_ji&quot;                     &quot;Region&quot;                   
+## [37] &quot;Route_factor&quot;              &quot;Accessibility&quot;            
+## [39] &quot;Accessibility_ratio&quot;       &quot;Betweenness&quot;              
+## [41] &quot;Ai&quot;                        &quot;Aj&quot;                       
+## [43] &quot;cord_Rank&quot;                 &quot;length_Disconnected&quot;      
+## [45] &quot;length_meanDisconnect&quot;     &quot;width_Disconnected&quot;       
+## [47] &quot;width_meanDisconnect&quot;      &quot;volume_Disconnected&quot;      
+## [49] &quot;volume_meanDisconnect&quot;     &quot;resistance_Disconnected&quot;  
+## [51] &quot;resistance_meanDisconnect&quot; &quot;random_Disconnected&quot;      
+## [53] &quot;random_meanDisconnect&quot;     &quot;spatial_Disconnected&quot;     
+## [55] &quot;spatial_meanDisconnect&quot;    &quot;Species&quot;                  
+## [57] &quot;node_1_name_ID&quot;            &quot;EndNodes_1_Type&quot;          
+## [59] &quot;EndNodes_1_Degree&quot;         &quot;node_2_name_ID&quot;           
+## [61] &quot;EndNodes_2_Type&quot;           &quot;EndNodes_2_Degree&quot;</code></pre>
 <p>About tortuosity</p>
 <pre class="r"><code>tapply(Edge_Traits$Tortuosity,Edge_Traits$name,summary)
 tapply(Edge_Traits$Tortuosity,Edge_Traits$name,function(x){length(which(x&gt;1.5))})
@@ -435,12 +576,24 @@ Edge_Traits%&gt;%
 <div id="visualizing-the-distribution-of-the-data" class="section level4">
 <h4>Visualizing the distribution of the data</h4>
 <p>Note: I am grouping the variables in different sets. Each set represents (to me) an intuitively logical set of related variables</p>
-<pre class="r"><code>Hist_Width_Length_Distance_1
-Hist_Width_Length_Area_Vol_2
-Hist_Width_Length_Resistance_3
-Hist_Length_Tortuosity_4
-Hist_Resistance_Accessibility_Betweenness_5
-Hist_Distance_Route_factor_6</code></pre>
+<pre class="r"><code>Hist_Width_Length_Distance_1</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-12-1.png" width="960" /></p>
+<pre class="r"><code>Hist_Width_Length_Area_Vol_2</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-12-2.png" width="960" /></p>
+<pre class="r"><code>Hist_Width_Length_Resistance_3</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-12-3.png" width="960" /></p>
+<pre class="r"><code>Hist_Length_Tortuosity_4</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-12-4.png" width="960" /></p>
+<pre class="r"><code>Hist_Resistance_Accessibility_Betweenness_5</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-12-5.png" width="960" /></p>
+<pre class="r"><code>Hist_Distance_Route_factor_6</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-12-6.png" width="960" /></p>
 <p>Form these plots one learns that:</p>
 <ol style="list-style-type: decimal">
 <li>Some variables are mathematically correlated:</li>
@@ -483,6 +636,7 @@ Hist_Distance_Route_factor_6</code></pre>
         geom_histogram()+
         facet_wrap(Species ~ variable, scales = &quot;free&quot;,nrow = 6,ncol = 2)+
         theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-13-1.png" width="960" /></p>
 <p>Length can be log transformed and that makes it very normally ditributed</p>
 <pre class="r"><code>Edge_Traits%&gt;%
         #filter(Tortuosity&lt;1.5)%&gt;%
@@ -499,25 +653,29 @@ Hist_Distance_Route_factor_6</code></pre>
         geom_histogram()+
         facet_wrap(Species ~ variable, scales = &quot;free&quot;,nrow = 6,ncol = 2)+
         theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-14-1.png" width="960" /></p>
 </div>
 </div>
 <div id="understanding-relationships-among-variables." class="section level3">
 <h3>2.3. Understanding relationships among variables.</h3>
 <p>Before doing a correlogram of everything with everythin. Here I want to test specific relationships that I think might be interesting biologically</p>
 <p>LENGTH AND WIDTH</p>
-<pre class="r"><code>Length_Width
-Log_Length_Width</code></pre>
-<p>The only thing I can tell from this one is that the thinnest hyphae have medium size length. Really long hyphae cannot be thin. There seems to be a lower boundary: the thinnest hypahe get longer up to a point where it is impossible to go thinniest and long. Note! Assuming this follows the two are connected by a power law</p>
+<pre class="r"><code>Length_Width</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-16-1.png" width="960" /></p>
+<pre class="r"><code>Log_Length_Width</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-16-2.png" width="960" /> The only thing I can tell from this one is that the thinnest hyphae have medium size length. Really long hyphae cannot be thin. There seems to be a lower boundary: the thinnest hypahe get longer up to a point where it is impossible to go thinniest and long. Note! Assuming this follows the two are connected by a power law</p>
 <p>LENGTH; WIDTH AND DISTANCE</p>
 <pre class="r"><code>Log_Length_Distance</code></pre>
-<p>Out of this one is clear that there is no relationship between length and distance</p>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-18-1.png" width="960" /> Out of this one is clear that there is no relationship between length and distance</p>
 <p>RESISTANCE WIDTH AND LENGTH (THIS IS MAINLY TO TEST THE MATHEMATICAL RELATIONSHIP AMONG THEM)</p>
 <pre class="r"><code>Log_Resistance_Width_Length</code></pre>
-<p>This plot confirms the relationship between resistance and lenght and width</p>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-20-1.png" width="960" /> This plot confirms the relationship between resistance and lenght and width</p>
 <p>BETWEENNESS AND DISTANCE</p>
 <pre class="r"><code>Log_Betweenness_Distance</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-22-1.png" width="960" /></p>
 <p>ROUTE FACTOR AND WIDTH</p>
 <pre class="r"><code>RouteFactor_Width</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-24-1.png" width="960" /></p>
 <p>Correlograms</p>
 <pre class="r"><code>library(GGally)</code></pre>
 </div>
@@ -532,9 +690,9 @@ Log_Length_Width</code></pre>
   mutate(Species=as.factor(Species))%&gt;%
   select(c(&quot;Width&quot;,&quot;Log_Length&quot;,&quot;Tortuosity&quot;,&quot;Distance&quot;,
                  &quot;Accessibility&quot;,&quot;Log_Betweenness&quot;,&quot;Route_factor&quot;,&quot;Species&quot;))%&gt;%
-  ggpairs(title=&quot;Mortierella elongata&quot;,columns = 1:7,ggplot2::aes(color=Species))
-
-Edge_Traits%&gt;%
+  ggpairs(title=&quot;Mortierella elongata&quot;,columns = 1:7,ggplot2::aes(color=Species))</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-26-1.png" width="960" /></p>
+<pre class="r"><code>Edge_Traits%&gt;%
   filter(Species==&quot;Umbelopsis isabellina&quot;)%&gt;%
   filter(Tortuosity&lt;1.5)%&gt;%
         
@@ -543,10 +701,9 @@ Edge_Traits%&gt;%
   mutate(Species=as.factor(Species))%&gt;%
   select(c(&quot;Width&quot;,&quot;Log_Length&quot;,&quot;Tortuosity&quot;,&quot;Distance&quot;,
                  &quot;Accessibility&quot;,&quot;Log_Betweenness&quot;,&quot;Route_factor&quot;,&quot;Species&quot;))%&gt;%
-  ggpairs(title=&quot;Umbelopsis isabellina&quot;,columns = 1:7,ggplot2::aes(color=Species))
-
-
-Edge_Traits%&gt;%
+  ggpairs(title=&quot;Umbelopsis isabellina&quot;,columns = 1:7,ggplot2::aes(color=Species))</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-26-2.png" width="960" /></p>
+<pre class="r"><code>Edge_Traits%&gt;%
   filter(Species==&quot;Mortierella alpina&quot;)%&gt;%
   filter(Tortuosity&lt;1.5)%&gt;%
         
@@ -555,9 +712,9 @@ Edge_Traits%&gt;%
   mutate(Species=as.factor(Species))%&gt;%
   select(c(&quot;Width&quot;,&quot;Log_Length&quot;,&quot;Tortuosity&quot;,&quot;Distance&quot;,
                  &quot;Accessibility&quot;,&quot;Log_Betweenness&quot;,&quot;Route_factor&quot;,&quot;Species&quot;))%&gt;%
-  ggpairs(title=&quot;Mortierella alpina&quot;,columns = 1:7,ggplot2::aes(color=Species))
-
-Edge_Traits%&gt;%
+  ggpairs(title=&quot;Mortierella alpina&quot;,columns = 1:7,ggplot2::aes(color=Species))</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-26-3.png" width="960" /></p>
+<pre class="r"><code>Edge_Traits%&gt;%
   filter(Species==&quot;Mortierella elongata2&quot;)%&gt;%
   filter(Tortuosity&lt;1.5)%&gt;%
         
@@ -566,9 +723,9 @@ Edge_Traits%&gt;%
   mutate(Species=as.factor(Species))%&gt;%
   select(c(&quot;Width&quot;,&quot;Log_Length&quot;,&quot;Tortuosity&quot;,&quot;Distance&quot;,
                  &quot;Accessibility&quot;,&quot;Log_Betweenness&quot;,&quot;Route_factor&quot;,&quot;Species&quot;))%&gt;%
-  ggpairs(title=&quot;Mortierella elongata2&quot;,columns = 1:7,ggplot2::aes(color=Species))
-
-Edge_Traits%&gt;%
+  ggpairs(title=&quot;Mortierella elongata2&quot;,columns = 1:7,ggplot2::aes(color=Species))</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-26-4.png" width="960" /></p>
+<pre class="r"><code>Edge_Traits%&gt;%
   filter(Species==&quot;Mucor fragilis&quot;)%&gt;%
   filter(Tortuosity&lt;1.5)%&gt;%
         
@@ -577,9 +734,9 @@ Edge_Traits%&gt;%
   mutate(Species=as.factor(Species))%&gt;%
   select(c(&quot;Width&quot;,&quot;Log_Length&quot;,&quot;Tortuosity&quot;,&quot;Distance&quot;,
                  &quot;Accessibility&quot;,&quot;Log_Betweenness&quot;,&quot;Route_factor&quot;,&quot;Species&quot;))%&gt;%
-  ggpairs(title=&quot;Mucor fragilis&quot;,columns = 1:7,ggplot2::aes(color=Species))
-
-Edge_Traits%&gt;%
+  ggpairs(title=&quot;Mucor fragilis&quot;,columns = 1:7,ggplot2::aes(color=Species))</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-26-5.png" width="960" /></p>
+<pre class="r"><code>Edge_Traits%&gt;%
   filter(Species==&quot;Mortierella alpina2&quot;)%&gt;%
   filter(Tortuosity&lt;1.5)%&gt;%
         
@@ -589,6 +746,7 @@ Edge_Traits%&gt;%
   select(c(&quot;Width&quot;,&quot;Log_Length&quot;,&quot;Tortuosity&quot;,&quot;Distance&quot;,
                  &quot;Accessibility&quot;,&quot;Log_Betweenness&quot;,&quot;Route_factor&quot;,&quot;Species&quot;))%&gt;%
   ggpairs(title=&quot;Mortierella alpina2&quot;,columns = 1:7,ggplot2::aes(color=Species))</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-26-6.png" width="960" /></p>
 <div id="correlograms-for-all-species-together" class="section level4">
 <h4>Correlograms for all species together</h4>
 <pre class="r"><code>Edge_Traits%&gt;%
@@ -601,6 +759,7 @@ Edge_Traits%&gt;%
   select(c(&quot;Width&quot;,&quot;Log_Length&quot;,&quot;Tortuosity&quot;,&quot;Distance&quot;,
                  &quot;Accessibility&quot;,&quot;Log_Betweenness&quot;,&quot;Route_factor&quot;,&quot;Species&quot;))%&gt;%
   ggpairs(title=&quot;All&quot;,columns = 1:7)</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-27-1.png" width="960" /></p>
 </div>
 </div>
 </div>
@@ -609,19 +768,83 @@ Edge_Traits%&gt;%
 <h1>Visualizing and testing the clustering of species in trait space</h1>
 <div id="a-model-with-information-at-the-hyphal-level-showed-to-explain-very-little-the-variation-thus-it-is-not-worth-using-it.-thus-a-better-option-is-to-use-mean-values" class="section level5">
 <h5>A model with information at the hyphal level showed to explain very little the variation, thus it is not worth using it. Thus a better option is to use mean values</h5>
+<pre><code>## Call: rda(formula = Descriptive_traits[, c(&quot;Width&quot;, &quot;Log_Length&quot;,
+## &quot;Tortuosity&quot;, &quot;Log_Betweenness&quot;)] ~ Species + Condition(Distance),
+## data = Descriptive_traits, scale = TRUE)
+## 
+##               Inertia Proportion Rank
+## Total         4.00000    1.00000     
+## Conditional   0.71843    0.17961    1
+## Constrained   2.92904    0.73226    4
+## Unconstrained 0.35253    0.08813    4
+## Inertia is correlations 
+## 
+## Eigenvalues for constrained axes:
+##   RDA1   RDA2   RDA3   RDA4 
+## 2.6395 0.2720 0.0149 0.0027 
+## 
+## Eigenvalues for unconstrained axes:
+##     PC1     PC2     PC3     PC4 
+## 0.25440 0.04622 0.03951 0.01240</code></pre>
+<pre><code>##                            RDA1       RDA2
+## Eigenvalue            2.6394842 0.27196022
+## Proportion Explained  0.8043352 0.08287497
+## Cumulative Proportion 0.8043352 0.88721012</code></pre>
+<pre><code>## Permutation test for rda under reduced model
+## Terms added sequentially (first to last)
+## Permutation: free
+## Number of permutations: 999
+## 
+## Model: rda(formula = Descriptive_traits[, c(&quot;Width&quot;, &quot;Log_Length&quot;, &quot;Tortuosity&quot;, &quot;Log_Betweenness&quot;)] ~ Species + Condition(Distance), data = Descriptive_traits, scale = TRUE)
+##          Df Variance      F Pr(&gt;F)    
+## Species   5  2.92904 14.956  0.001 ***
+## Residual  9  0.35253                  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-30-1.png" width="960" /> #### Results from RDA</p>
 </div>
-<div id="results-from-rda" class="section level4">
-<h4>Results from RDA</h4>
 <div id="proportion-of-data-explained-by-constrained-axes" class="section level5">
 <h5>Proportion of data explained by constrained axes</h5>
 <pre class="r"><code>Model_descriptive_traits</code></pre>
-</div>
+<pre><code>## Call: rda(formula = Descriptive_traits[, c(&quot;Width&quot;, &quot;Log_Length&quot;,
+## &quot;Tortuosity&quot;, &quot;Log_Betweenness&quot;)] ~ Species + Condition(Distance),
+## data = Descriptive_traits, scale = TRUE)
+## 
+##               Inertia Proportion Rank
+## Total         4.00000    1.00000     
+## Conditional   0.71843    0.17961    1
+## Constrained   2.92904    0.73226    4
+## Unconstrained 0.35253    0.08813    4
+## Inertia is correlations 
+## 
+## Eigenvalues for constrained axes:
+##   RDA1   RDA2   RDA3   RDA4 
+## 2.6395 0.2720 0.0149 0.0027 
+## 
+## Eigenvalues for unconstrained axes:
+##     PC1     PC2     PC3     PC4 
+## 0.25440 0.04622 0.03951 0.01240</code></pre>
 </div>
 <div id="proportion-of-data-explained-by-the-first-and-second-rda-axes" class="section level4">
 <h4>Proportion of data explained by the first and second RDA axes</h4>
+<pre><code>##                            RDA1       RDA2
+## Eigenvalue            2.6394842 0.27196022
+## Proportion Explained  0.8043352 0.08287497
+## Cumulative Proportion 0.8043352 0.88721012</code></pre>
 </div>
 <div id="significance-testing-of-the-rda-permutation-based-test-of-vegan-package" class="section level4">
 <h4>Significance testing of the RDA (permutation based test of vegan package)</h4>
+<pre><code>## Permutation test for rda under reduced model
+## Terms added sequentially (first to last)
+## Permutation: free
+## Number of permutations: 999
+## 
+## Model: rda(formula = Descriptive_traits[, c(&quot;Width&quot;, &quot;Log_Length&quot;, &quot;Tortuosity&quot;, &quot;Log_Betweenness&quot;)] ~ Species + Condition(Distance), data = Descriptive_traits, scale = TRUE)
+##          Df Variance      F Pr(&gt;F)    
+## Species   5  2.92904 14.956  0.001 ***
+## Residual  9  0.35253                  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 </div>
 <div id="clustering-based-on-descriptive-traits-widthlog_lengthtortuositylog_betweenness" class="section level3">
 <h3>Clustering based on descriptive traits: “Width”,“Log_Length”,“Tortuosity”,“Log_Betweenness”</h3>
@@ -632,11 +855,43 @@ Edge_Traits%&gt;%
   scale_color_viridis_d()+
   labs(y=&quot;RDA2 8%&quot;,x=&quot;RDA1 80%&quot;)+
   my_theme</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-34-1.png" width="960" /></p>
 </div>
 </div>
 <div id="transport-to-tips-traits" class="section level1">
 <h1>Transport to tips traits</h1>
 <p>All relationships above consider each hyphal segment as separate replicate. This information is meaningful particularly for what I call the descriptive traits (width, lenght) but for the transport ones (accessibility) this is a bit misleading as the transport from on hyphal segment to the next one is not going to change that much (or at all). Thus I am going to make a new analysis, this time only based on “Routes”. That is the wholde path from the center of the inoculum to an endpoint.</p>
+<pre><code>##  [1] &quot;name&quot;                      &quot;channel&quot;                  
+##  [3] &quot;section&quot;                   &quot;frame&quot;                    
+##  [5] &quot;EndNodes_1&quot;                &quot;EndNodes_2&quot;               
+##  [7] &quot;node_Idx_1&quot;                &quot;node_Idx_2&quot;               
+##  [9] &quot;Name&quot;                      &quot;Type&quot;                     
+## [11] &quot;Weight&quot;                    &quot;Original&quot;                 
+## [13] &quot;Original_cv&quot;               &quot;Intensity&quot;                
+## [15] &quot;Intensity_cv&quot;              &quot;Gradient&quot;                 
+## [17] &quot;Gradient_cv&quot;               &quot;Width_initial&quot;            
+## [19] &quot;Width_initial_cv&quot;          &quot;Width_intact&quot;             
+## [21] &quot;Length&quot;                    &quot;Number&quot;                   
+## [23] &quot;Midpoint&quot;                  &quot;Tortuosity&quot;               
+## [25] &quot;Distance&quot;                  &quot;Width&quot;                    
+## [27] &quot;Width_cv&quot;                  &quot;Area&quot;                     
+## [29] &quot;Volume&quot;                    &quot;Resistance_2&quot;             
+## [31] &quot;Resistance_4&quot;              &quot;Resistance_2ave&quot;          
+## [33] &quot;Resistance_4ave&quot;           &quot;Or_ij&quot;                    
+## [35] &quot;Or_ji&quot;                     &quot;Region&quot;                   
+## [37] &quot;Route_factor&quot;              &quot;Accessibility&quot;            
+## [39] &quot;Accessibility_ratio&quot;       &quot;Betweenness&quot;              
+## [41] &quot;Ai&quot;                        &quot;Aj&quot;                       
+## [43] &quot;cord_Rank&quot;                 &quot;length_Disconnected&quot;      
+## [45] &quot;length_meanDisconnect&quot;     &quot;width_Disconnected&quot;       
+## [47] &quot;width_meanDisconnect&quot;      &quot;volume_Disconnected&quot;      
+## [49] &quot;volume_meanDisconnect&quot;     &quot;resistance_Disconnected&quot;  
+## [51] &quot;resistance_meanDisconnect&quot; &quot;random_Disconnected&quot;      
+## [53] &quot;random_meanDisconnect&quot;     &quot;spatial_Disconnected&quot;     
+## [55] &quot;spatial_meanDisconnect&quot;    &quot;Species&quot;                  
+## [57] &quot;node_1_name_ID&quot;            &quot;EndNodes_1_Type&quot;          
+## [59] &quot;EndNodes_1_Degree&quot;         &quot;node_2_name_ID&quot;           
+## [61] &quot;EndNodes_2_Type&quot;           &quot;EndNodes_2_Degree&quot;</code></pre>
 <div id="histograms-of-the-transport-traits-distanceaccessibilityroute_factorroute_length" class="section level4">
 <h4>Histograms of the transport traits: “Distance”,“Accessibility”,“Route_factor”,“Route_Length”</h4>
 <pre class="r"><code>        Re_org_2%&gt;%
@@ -647,6 +902,8 @@ Edge_Traits%&gt;%
         geom_histogram()+
         facet_wrap(Species ~ variable, scales = &quot;free&quot;,nrow = 6,ncol = 4)+
         theme(legend.position = &quot;none&quot;)</code></pre>
+<pre><code>## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-36-1.png" width="960" /></p>
 </div>
 <div id="relationship-among-the-transport-traits" class="section level4">
 <h4>Relationship among the transport traits</h4>
@@ -660,10 +917,9 @@ Edge_Traits%&gt;%
   #geom_bin2d()+
   geom_point(alpha=0.8,size=2)+
   facet_wrap(. ~ Species, scales = &quot;free&quot;,nrow = 6,ncol = 3)+
-  theme(legend.position = &quot;none&quot;)
-
-
-Edge_Traits%&gt;%
+  theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-37-1.png" width="960" /></p>
+<pre class="r"><code>Edge_Traits%&gt;%
   mutate(Route_Length=Distance*Route_factor)%&gt;%
   filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%&gt;%
   ggplot()+
@@ -674,6 +930,7 @@ Edge_Traits%&gt;%
   geom_point(alpha=0.8,size=2)+
   facet_wrap(. ~ Species, scales = &quot;free&quot;,nrow = 6,ncol = 3)+
   theme(legend.position = &quot;none&quot;)</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-37-2.png" width="960" /></p>
 </div>
 <div id="making-correlograms-for-these-transport-traits" class="section level4">
 <h4>Making correlograms for these transport traits</h4>
@@ -684,23 +941,56 @@ Edge_Traits%&gt;%
   mutate(Species=as.factor(Species))%&gt;%
   select(c(&quot;Distance&quot;,&quot;Accessibility&quot;,&quot;Route_factor&quot;,&quot;Route_Length&quot;,&quot;Species&quot;))%&gt;%
   ggpairs(title=&quot;All&quot;,columns = 1:4,ggplot2::aes(color=Species))</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-38-1.png" width="960" /></p>
 <p>Comment from Mark: Betweenness values less than one are a proxy of links that are not particularly useful because that route is never being used</p>
 </div>
 <div id="clustering-and-testing-the-signficance-of-the-clustering-for-these-transport-traits" class="section level4">
 <h4>Clustering and testing the signficance of the clustering for these transport traits</h4>
-<pre class="r"><code>Model_transport_traits
-#               Inertia Proportion Rank
+<pre class="r"><code>Model_transport_traits</code></pre>
+<pre><code>## Call: rda(formula = Transport_traits[, c(&quot;Distance&quot;,
+## &quot;Accessibility&quot;, &quot;Route_factor&quot;, &quot;Route_Length&quot;)] ~ Species, data
+## = Transport_traits, scale = TRUE)
+## 
+##               Inertia Proportion Rank
+## Total            4.00       1.00     
+## Constrained      2.76       0.69    4
+## Unconstrained    1.24       0.31    4
+## Inertia is correlations 
+## 
+## Eigenvalues for constrained axes:
+##   RDA1   RDA2   RDA3   RDA4 
+## 1.6710 0.8694 0.2194 0.0000 
+## 
+## Eigenvalues for unconstrained axes:
+##    PC1    PC2    PC3    PC4 
+## 0.9027 0.2059 0.1314 0.0002</code></pre>
+<pre class="r"><code>#               Inertia Proportion Rank
 # Total            4.00       1.00     
 # Constrained      2.76       0.69    4
 # Unconstrained    1.24       0.31    4
 # Inertia is correlations </code></pre>
-<pre class="r"><code>summary(Model_transport_traits)[[&quot;cont&quot;]][[&quot;importance&quot;]][,c(1:2)]
-#                       RDA1      RDA2
+<pre class="r"><code>summary(Model_transport_traits)[[&quot;cont&quot;]][[&quot;importance&quot;]][,c(1:2)]</code></pre>
+<pre><code>##                            RDA1      RDA2
+## Eigenvalue            1.6709939 0.8693697
+## Proportion Explained  0.4177485 0.2173424
+## Cumulative Proportion 0.4177485 0.6350909</code></pre>
+<pre class="r"><code>#                       RDA1      RDA2
 # Eigenvalue            1.6709939 0.8693697
 # Proportion Explained  0.4177485 0.2173424
 # Cumulative Proportion 0.4177485 0.6350909</code></pre>
-<pre class="r"><code>anova.cca(Model_transport_traits,by=&quot;term&quot;)
-#          Df   Variance  F       Pr(&gt;F)    
+<pre class="r"><code>anova.cca(Model_transport_traits,by=&quot;term&quot;)</code></pre>
+<pre><code>## Permutation test for rda under reduced model
+## Terms added sequentially (first to last)
+## Permutation: free
+## Number of permutations: 999
+## 
+## Model: rda(formula = Transport_traits[, c(&quot;Distance&quot;, &quot;Accessibility&quot;, &quot;Route_factor&quot;, &quot;Route_Length&quot;)] ~ Species, data = Transport_traits, scale = TRUE)
+##          Df Variance      F Pr(&gt;F)    
+## Species   5   2.7598 4.4506  0.001 ***
+## Residual 10   1.2402                  
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
+<pre class="r"><code>#          Df   Variance  F       Pr(&gt;F)    
 # Species   5   2.7598    4.4506  0.001 ***
 # Residual 10   1.2402                  
 #plot(Model_transport_traits$Ybar[,1],Transport_traits$Distance)</code></pre>
@@ -718,12 +1008,12 @@ Transport_traits %&gt;%
   scale_color_viridis_d()+
   labs(y=&quot;RDA2 21%&quot;,x=&quot;RDA1 41%&quot;)+
   my_theme</code></pre>
+<p><img src="Multivariate_files/figure-html/unnamed-chunk-43-1.png" width="960" /></p>
 </div>
 </div>
 <div id="to-do-list" class="section level1">
 <h1>To do list:</h1>
 <p>Check how to deal with not anastomosis from the images… maybe removing the node degree higher or equal than 3… also check whether i can measure route factor in R</p>
-<p>Other traits to include is the total length of the mycelium, and the total lenght divided by the number of hyphal segments</p>
 <p>Revise again how do I know that the traits are not not adjusted to micrometers but pixels</p>
 <p>Is mean length the same as the total length of the mycelium divided by the number of hyphae</p>
 <p>Check again what is Ybar from the output of vegan</p>

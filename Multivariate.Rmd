@@ -4,7 +4,9 @@ output: html_document
 ---
 
 ```{r setup, include = FALSE}
-knitr::opts_chunk$set(eval = FALSE)
+#knitr::opts_chunk$set(eval = FALSE)
+
+knitr::opts_chunk$set(fig.height = 15, fig.width = 10)
 ```
 
 
@@ -852,11 +854,13 @@ Transport_traits %>%
   my_theme
 ```
 
+```{r,echo=FALSE,eval=FALSE}
+rmarkdown::render("Multivariate.Rmd", quiet = T)
+```
+
 # To do list:
 
 Check how to deal with not anastomosis from the images... maybe removing the node degree higher or equal than 3... also check whether i can measure route factor in R
-
-Other traits to include is the total length of the mycelium, and the total lenght divided by the number of hyphal segments
 
 Revise again how do I know that the traits are not not adjusted to micrometers but pixels
 
