@@ -45,12 +45,52 @@ a csv file first. In this case, I saved the "edge" sheet of each excel file of e
 # First Edge files
 
 ```{r }
-#These lines will load all files saved as .csv in the folder "processedData" and then merging them ("row bind")
 temp = list.files(path="processedData\\",pattern="*-Edge.csv")
 temp<-paste("processedData\\",temp,sep = "")
-myfiles = lapply(temp,function(x){read.csv(x,header = TRUE,stringsAsFactors = FALSE)} )
+Edge_Traits_AZ = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
 #myfiles[[4]]<-myfiles[[4]][,c(1:42)]
-Edge_Traits<-do.call(rbind,myfiles)
+
+# Edge_Traits<-do.call(rbind,myfiles)
+# 
+# Edge_Traits$Species<-NA
+# Edge_Traits$Species[grep("C34",Edge_Traits$name)]<-"Mortierella elongata"
+# Edge_Traits$Species[grep("C35",Edge_Traits$name)]<-"Umbelopsis isabellina"
+# Edge_Traits$Species[grep("DF19",Edge_Traits$name)]<-"Mortierella alpina"
+# Edge_Traits$Species[grep("DF25",Edge_Traits$name)]<-"Mortierella elongata2"
+# Edge_Traits$Species[grep("DF56",Edge_Traits$name)]<-"Mucor fragilis"
+# Edge_Traits$Species[grep("M",Edge_Traits$name)]<-"Mortierella alpina2"
+
+#Node positions
+temp = list.files(path="processedData\\",pattern="*-Node.csv")
+temp<-paste("processedData\\",temp,sep = "")
+Node_Traits_AZ = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+
+#Adding Basidiomycete data
+temp = list.files(path="FreyasData\\",pattern="*-Edge.csv")
+temp<-paste("FreyasData\\",temp,sep = "")
+Edge_Traits_B = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+
+#Node positions
+temp = list.files(path="FreyasData\\",pattern="*-Node.csv")
+temp<-paste("FreyasData\\",temp,sep = "")
+Node_Traits_B = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+
+#Putting them all together
+Edge_Traits<-do.call(c, list(Edge_Traits_AZ, Edge_Traits_B))
+Node_Traits<-do.call(c, list(Node_Traits_AZ, Node_Traits_B))
+
+saveRDS(Edge_Traits,"List_Edge_Traits.RDS")
+saveRDS(Node_Traits,"List_Node_Traits.RDS")
+#Edge_Traits<-do.call(rbind,myfiles)
+```
+
+Loading the data
+```{r }
+Edge_Traits<-readRDS("List_Edge_Traits.RDS")
+
+Node_Traits<-readRDS("List_Node_Traits.RDS")
+
+Edge_Traits<-bind_rows(Edge_Traits)
 
 Edge_Traits$Species<-NA
 Edge_Traits$Species[grep("C34",Edge_Traits$name)]<-"Mortierella elongata"
@@ -59,6 +99,16 @@ Edge_Traits$Species[grep("DF19",Edge_Traits$name)]<-"Mortierella alpina"
 Edge_Traits$Species[grep("DF25",Edge_Traits$name)]<-"Mortierella elongata2"
 Edge_Traits$Species[grep("DF56",Edge_Traits$name)]<-"Mucor fragilis"
 Edge_Traits$Species[grep("M",Edge_Traits$name)]<-"Mortierella alpina2"
+
+Edge_Traits$Species[grep("DF9",Edge_Traits$name)]<-"Alternaria sp"
+Edge_Traits$Species[grep("C41",Edge_Traits$name)]<-"Fusarium redolens"
+Edge_Traits$Species[grep("FOX",Edge_Traits$name)]<-"Fusarium oxysporum"
+Edge_Traits$Species[grep("DF32",Edge_Traits$name)]<-"Fusarium solani"
+
+Edge_Traits$Species[grep("Pi",Edge_Traits$name)]<-"Pi"
+Edge_Traits$Species[grep("Pv",Edge_Traits$name)]<-"Pv"
+Edge_Traits$Species[grep("Rb",Edge_Traits$name)]<-"Rb"
+
 
 #Assuming the Or_ij can be expressed from 0 to 360 degrees
 Edge_Traits$Or_ij[which(Edge_Traits$Or_ij<0)]<-(Edge_Traits$Or_ij[which(Edge_Traits$Or_ij<0)]*-1)+180
@@ -72,15 +122,27 @@ Edge_Traits<-Edge_Traits[-which(Edge_Traits$Width==0),]
 
 # Adding nodes
 ```{r}
-temp = list.files(path="processedData\\",pattern="*-Node.csv")
-temp<-paste("processedData\\",temp,sep = "")
-myfiles = lapply(temp,function(x){read.csv(x,header = TRUE,stringsAsFactors = FALSE,sep = ";")} )
-#myfiles[[4]]<-myfiles[[4]][,c(1:42)]
-Node_Traits<-do.call(rbind,myfiles)
+Node_Traits<-bind_rows(Node_Traits)
 
 Node_Traits$node_name_ID<-paste(Node_Traits$name,Node_Traits$node_ID,sep = "_")
 
-#Edge_Traits_o<-Edge_Traits
+Node_Traits$Species<-NA
+Node_Traits$Species[grep("C34",Node_Traits$name)]<-"Mortierella elongata"
+Node_Traits$Species[grep("C35",Node_Traits$name)]<-"Umbelopsis isabellina"
+Node_Traits$Species[grep("DF19",Node_Traits$name)]<-"Mortierella alpina"
+Node_Traits$Species[grep("DF25",Node_Traits$name)]<-"Mortierella elongata2"
+Node_Traits$Species[grep("DF56",Node_Traits$name)]<-"Mucor fragilis"
+Node_Traits$Species[grep("M",Node_Traits$name)]<-"Mortierella alpina2"
+
+Node_Traits$Species[grep("DF9",Node_Traits$name)]<-"Alternaria sp"
+Node_Traits$Species[grep("C41",Node_Traits$name)]<-"Fusarium redolens"
+Node_Traits$Species[grep("FOX",Node_Traits$name)]<-"Fusarium oxysporum"
+Node_Traits$Species[grep("DF32",Node_Traits$name)]<-"Fusarium solani"
+
+Node_Traits$Species[grep("Pi",Node_Traits$name)]<-"Pi"
+Node_Traits$Species[grep("Pv",Node_Traits$name)]<-"Pv"
+Node_Traits$Species[grep("Rb",Node_Traits$name)]<-"Rb"
+
 ```
 
 #Merging them
@@ -111,6 +173,8 @@ trial<-trial%>%
 
 Edge_Traits_o<-Edge_Traits
 Edge_Traits<-trial;rm(trial)
+
+
 ```
 
 
@@ -183,6 +247,17 @@ names(Edge_Traits)
 
 
 ```{r,echo = FALSE,message=FALSE}
+
+Hist_Width_Length<-
+        Re_org%>%
+        filter(variable %in% c("Width","Length"))%>%#1_The completely indepedent variables
+        
+        ggplot()+
+        aes(value,fill=name)+
+        geom_histogram()+
+        facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 4)+
+        theme(legend.position = "none")
+
 Hist_Width_Length_Distance_1<-
         Re_org%>%
         filter(variable %in% c("Width","Length","Distance"))%>%#1_The completely indepedent variables
@@ -192,7 +267,8 @@ Hist_Width_Length_Distance_1<-
         geom_histogram()+
         facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 3)+
         theme(legend.position = "none")
-  
+
+
 Hist_Width_Length_Area_Vol_2<-
           Re_org%>%
         
@@ -274,6 +350,11 @@ Edge_Traits%>%
 Note: I am grouping the variables in different sets. Each set represents (to me) an intuitively logical set of related variables
 
 ```{r,fig.height = 15, fig.width = 10}
+Hist_Width_Length
+```
+
+
+```{r,fig.height = 15, fig.width = 10}
 Hist_Width_Length_Distance_1
 Hist_Width_Length_Area_Vol_2
 Hist_Width_Length_Resistance_3
@@ -335,13 +416,121 @@ Edge_Traits%>%
         gather(key=variable,
                value=value,Width:Log_Length)%>%
         
-        filter(variable %in% c("Log_Length","Distance"))%>%#4_Tortuosity has little variation and depends on Length
+        filter(variable %in% c("Log_Length"))%>%#4_Tortuosity has little variation and depends on Length
+        ggplot()+
+        aes(value,fill=name)+
+        geom_histogram()+
+        facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 2)+
+        theme(legend.position = "none")
+
+```
+
+Checking width distribution of tips
+
+```{r}
+
+Edge_Traits%>%
+        filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>%
+        select(c("name","Species","Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
+                 "Accessibility","Betweenness","Route_factor","Or_ij"))%>%
+        mutate(Log_Length=log10(Length))%>%
+        group_by(name)%>%
+        gather(key=variable,
+               value=value,Width:Log_Length)%>%
+        
+        filter(variable %in% c("Width"))%>%#4_Tortuosity has little variation and depends on Length
         ggplot()+
         aes(value,fill=name)+
         geom_histogram()+
         facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 2)+
         theme(legend.position = "none")
 ```
+This means that tip width can be log transformed
+
+```{r}
+tapply(log10(Edge_Traits[-which(Edge_Traits$EndNodes_1_Degree==1|Edge_Traits$EndNodes_1_Degree==2),]$Width),
+       Edge_Traits[-which(Edge_Traits$EndNodes_1_Degree==1|Edge_Traits$EndNodes_1_Degree==2),]$name,
+       summary)
+```
+
+
+```{r}
+Edge_Traits%>%
+        filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>%
+        select(c("name","Species","Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
+                 "Accessibility","Betweenness","Route_factor","Or_ij"))%>%
+        mutate(Log_Length=log10(Length))%>%
+        group_by(name)%>%
+        gather(key=variable,
+               value=value,Width:Log_Length)%>%
+        
+        filter(variable %in% c("Width"))%>%#4_Tortuosity has little variation and depends on Length
+        ggplot()+
+        aes(log10(value),fill=name)+
+        geom_histogram()+
+        facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 2)+
+          theme(legend.position = "none")
+```
+Now the main hyphae
+
+```{r}
+Edge_Traits%>%
+        #filter(!(EndNodes_1_Degree==1|EndNodes_2_Degree==1))%>%
+  filter(EndNodes_1_Degree==3|EndNodes_2_Degree==3)%>%
+        select(c("name","Species","Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
+                 "Accessibility","Betweenness","Route_factor","Or_ij"))%>%
+        mutate(Log_Length=log10(Length))%>%
+        group_by(name)%>%
+        gather(key=variable,
+               value=value,Width:Log_Length)%>%
+        
+        filter(variable %in% c("Width"))%>%#4_Tortuosity has little variation and depends on Length
+        ggplot()+
+        aes(value,fill=name)+
+        geom_histogram()+
+        facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 2)+
+          theme(legend.position = "none")
+```
+Log transforming this
+
+```{r}
+
+Edge_Traits%>%
+        #filter(!(EndNodes_1_Degree==1|EndNodes_2_Degree==1))%>%
+  filter(EndNodes_1_Degree==3|EndNodes_2_Degree==3)%>%
+        select(c("name","Species","Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
+                 "Accessibility","Betweenness","Route_factor","Or_ij"))%>%
+        mutate(Log_Length=log10(Length))%>%
+        group_by(name)%>%
+        gather(key=variable,
+               value=value,Width:Log_Length)%>%
+        
+        filter(variable %in% c("Width"))%>%#4_Tortuosity has little variation and depends on Length
+        ggplot()+
+        aes(log10(value),fill=name)+
+        geom_histogram()+
+        facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 2)+
+          theme(legend.position = "none")
+```
+
+
+```{r}
+
+Node_Traits%>%
+  filter(node_Type=="E") %>% 
+        ggplot()+
+        aes(node_Omin_Omid,fill=name)+
+        geom_histogram()+
+        facet_wrap(.~Species, scales = "free",nrow = 6,ncol = 2)+
+        theme(legend.position = "none")
+```
+
+```{r}
+tapply(Node_Traits$node_Omin_Omid,Node_Traits$name,summary,na.rm=T)
+```
+
+
+
 
 
 ### 2.3. Understanding relationships among variables. 
@@ -423,6 +612,51 @@ Distance_Volume<-
 Log_Length_Distance
 ```
 Out of this one is clear that there is no relationship between length and distance
+
+
+
+```{r}
+
+Edge_Traits%>%
+        #filter(!(EndNodes_1_Degree==1|EndNodes_2_Degree==1))%>%
+        #select(c("name","Species","Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
+                 #"Accessibility","Betweenness","Route_factor","Or_ij"))%>%
+        #mutate(Log_Length=log10(Length))%>%
+        # group_by(name)%>%
+        # gather(key=variable,
+        #        value=value,Width:Log_Length)%>%
+        
+        #filter(variable %in% c("Width"))%>%#4_Tortuosity has little variation and depends on Length
+        ggplot()+
+        aes(as.factor(EndNodes_1_Degree),Width)+
+        geom_jitter(alpha=0.1)+
+        geom_violin()+
+        facet_wrap(.~Species, scales = "free",nrow = 6,ncol = 2)+
+          theme(legend.position = "none")
+```
+
+
+```{r}
+Edge_Traits%>%
+        filter(EndNodes_1_Degree==3|EndNodes_2_Degree==3)%>%
+        select(c("name","Species","Width","Length","Area","Volume","Resistance_2ave","Tortuosity","Distance",
+                 "Accessibility","Betweenness","Route_factor","Or_ij"))%>%
+        mutate(Log_Length=log10(Length))%>%
+         # group_by(name)%>%
+         # gather(key=variable,
+         #        value=value,Width:Log_Length)%>%
+
+        #filter(variable %in% c("Width"))%>%#4_Tortuosity has little variation and depends on Length
+        ggplot()+
+        aes(as.factor(EndNodes_1_Degree),Width)+
+        geom_point()+
+        facet_wrap(.~Species, scales = "free",nrow = 6,ncol = 2)+
+          theme(legend.position = "none")
+```
+
+
+
+
 
 RESISTANCE WIDTH AND LENGTH (THIS IS MAINLY TO TEST THE MATHEMATICAL RELATIONSHIP AMONG THEM)
 ```{r echo=FALSE}
@@ -721,31 +955,92 @@ path from the center of the inoculum to an endpoint.
 
 ```{r, echo=FALSE}
 #To do this one need to filter the hyphae of degree 1
+Node_Traits_c<-Node_Traits
+Node_Traits_c$Species<-NA
+Node_Traits_c$Species[grep("C34",Node_Traits_c$name)]<-"Mortierella elongata"
+Node_Traits_c$Species[grep("C35",Node_Traits_c$name)]<-"Umbelopsis isabellina"
+Node_Traits_c$Species[grep("DF19",Node_Traits_c$name)]<-"Mortierella alpina"
+Node_Traits_c$Species[grep("DF25",Node_Traits_c$name)]<-"Mortierella elongata2"
+Node_Traits_c$Species[grep("DF56",Node_Traits_c$name)]<-"Mucor fragilis"
+Node_Traits_c$Species[grep("M",Node_Traits_c$name)]<-"Mortierella alpina2"
+
+Node_Traits_c$Species[grep("DF9",Node_Traits_c$name)]<-"Alternaria sp"
+Node_Traits_c$Species[grep("C41",Node_Traits_c$name)]<-"Fusarium redolens"
+Node_Traits_c$Species[grep("FOX",Node_Traits_c$name)]<-"Fusarium oxysporum"
+Node_Traits_c$Species[grep("DF32",Node_Traits_c$name)]<-"Fusarium solani"
+
+Node_Traits_c$Species[grep("Pi",Node_Traits_c$name)]<-"Pi"
+Node_Traits_c$Species[grep("Pv",Node_Traits_c$name)]<-"Pv"
+Node_Traits_c$Species[grep("Rb",Node_Traits_c$name)]<-"Rb"
+
 
 Re_org_2<-
-        Edge_Traits%>%
+        #Edge_Traits%>%
+  Node_Traits_c %>% 
         #filter(Area!=0)%>%
-        mutate(Route_Length=Distance*Route_factor)%>%
-        select(c("name","Species","node_1_name_ID","EndNodes_1_Type","EndNodes_1_Degree","node_2_name_ID","EndNodes_2_Type","EndNodes_2_Degree",
-                 "Distance","Accessibility","Betweenness","Route_factor","Route_Length"))%>%
+  filter(node_Type=="E") %>% 
+  filter(node_Degree==1)%>%
+  
+        mutate(Route_Length=node_Distance*node_RF)%>%
+        select(c("name","Species","node_Distance","node_RF","node_Accessibility","Route_Length"))%>%
         group_by(name)%>%
         gather(key=variable,
-               value=value,Distance:Route_Length)
+               value=value,node_Distance:Route_Length)
 names(Edge_Traits)
 ```
 
 #### Histograms of the transport traits: "Distance","Accessibility","Route_factor","Route_Length"
 ```{r,fig.height = 15, fig.width = 10}
 
+        Node_Traits_c%>%
+        mutate(Route_Length=node_Distance*node_RF)%>%  
+ 
+        #filter(variable %in% c("Distance"))%>%#1_The completely indepedent variables
+        ggplot()+
+        aes(Route_Length,node_Accessibility)+
+        geom_point()+
+        facet_wrap(Species ~ name, scales = "free")+
+        theme(legend.position = "none")
+```
+
+
+```{r}
+        Re_org_2%>%
+  
+          filter(variable %in% c("node_Accessibility"))%>%#1_The completely indepedent variables
+          
+        ggplot()+
+        #aes(log10(value),fill=name)+
+        aes(log10(value),fill=name)+
+        geom_histogram()+
+        facet_wrap(Species ~ variable, scales = "free",nrow = 4,ncol = 3)+
+        theme(legend.position = "none")
+```
+
+
+```{r}
         Re_org_2%>%
   filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>%
-        filter(variable %in% c("Distance","Accessibility","Route_factor","Route_Length"))%>%#1_The completely indepedent variables
+        filter(variable %in% c("Route_factor"))%>%#1_The completely indepedent variables
         ggplot()+
         aes(value,fill=name)+
         geom_histogram()+
         facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 4)+
         theme(legend.position = "none")
 ```
+
+
+```{r}
+        Re_org_2%>%
+  filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>%
+        filter(variable %in% c("Route_Length"))%>%#1_The completely indepedent variables
+        ggplot()+
+        aes(value,fill=name)+
+        geom_histogram()+
+        facet_wrap(Species ~ variable, scales = "free",nrow = 6,ncol = 4)+
+        theme(legend.position = "none")
+```
+
 
 
 #### Relationship among the transport traits
