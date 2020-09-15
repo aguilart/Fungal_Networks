@@ -11,47 +11,58 @@ output:
 knitr::opts_chunk$set(fig.height = 10, fig.width = 15)
 ```
 
+#Highlights
 
-## Introduction
-
-The background are the papers from Mark and also the recent papers on network software
-
-Core message:
 
 * We show that network parameters reveal the trait space in mycelium architecture across species
 * We show that the network parameters of fungi differ from model networks of same dimensions based on simple rules.
 * We advocate the use of network properties as functional traits for fungal ecology.
 
-Specifically, in this project we characterize fungal mycelia with 10 traits that describe its network. Then we use such traits to distinguish among species and to "model" networks which are based on the dimensions of the real networks but follow simple algorithms in their construction.
+
+## Introduction
+
+Although fungal mycelia  cosists of network interconnected filaments, ecologist rarely use network features as functional traits. We think this is a missed opportunity because such  body type is the the most comon among terretrial fungi, ocurring  along all major fungal phyla from basal to more recent clades. Besides, it is usually argued that the ecologcial sucess of fungi in land is partly due to such filamentous network growth. Given the widespread ocurrence of this body type, we hypothesized that if there is a large interpecific variation in network features, such variation may reflect distinct ecological strategies among species.
+
+To address this hypothesis we measured fungal network properties among fungal species in the Ascomycota, Basidiomycota, Mortierellomycota and Mucoromycota. Specifically we measure a set of properties that emerge from the connection arrangement patterns of hyphal filaments (i.e.the topology of the network). An important feature of our approach is that our measurements are based on recent models that explain the flow of nutrients and information withing a given topology when fungi is exploring for resources. Under such explorative phase, fungi transport resources located from a source (like a resource patch or spore reserves) to subsides hyphal tip extension and branching. Thus, we consider that the parameters we measured have a solid biologically basis rooted in hyphal anatomy an ecologically relevant scenarios.
+
+To further identify ecological strategies among species based on network properties, we also determine how different the observed network properties are in comparison to simplified base line network model that follows simple efficiency rules. Specifically, the base line network model constructs networks with the minimum amount of hyphal connections that presere connectivity of the entire mycelium while maximizing transport efficiency from the center to each hyphal each tip. Thus, fungal networks closer to this model indicate a strategy that maximizes transport efficieny, while networks departing from it indicates fungi that increase the amount of connections.
 
 ## Material and methods
 
-### Selection of network traits
+## Fungal species
 
-1. Descriptive traits
+
+
+### Microphotography, image analysis and network representation
+
+For ascomycete, mucoromycete and mortierellomycete fungi, we extracted network parameters from pictures of 10-14 hour old, 2mm diameter fungal mycelium growing on water agar (the mycelium was growing out of an agar plug to which 10ul 10% PDB were aded). Brefly,  were photographed under a stereoscope (AxioZoom).For basiomycete fungi, pictures were taken from 20 cm diameter fungal mycelium growing on inert sand out of wooden block [To add picture settings, age of the mycelia]. Thus, although the pictures come from different size and settings, both conditions reflect exploration phase of the mycelium. Each fungal species was replicated three times.
+
+Then we use a set of image processing algorithms in order to: segment the images, determine the connected patterns among hyphae (i.e. which hypha is connected to which), and estimate hyphal widths (all the algorithms used are wrapped in the MatLab App "Fungal Networks" developed by Mark Fricker). Here, hyphae are defined as links connecting two nodes, which in turn can be the hpyhal tips, branching points or anastomosis points (Figure 1). 
+
+This information was then stored in two matrices: the first one conatining a list of all pairs of nodes connected to each other which represent an individual hyphae (i.e. an edge list), to wich hyphal attributes like width and length (see below) were added.  The second matrix contains the position of the nodes in x, y coordinates. These two outputs were then used to calculate network parameters as indicated below.
+
+
+### Mycelial network parameters
+
+Using the outputs described above we measure 10 traits for each fungal colony (see table 1 for details). Five of those traits we classified them as "descriptive", representing direct average measurments of hyphal traits and are not directly related the connected arrengement of hyphae. The other traits, which are directly dependent on the connectedess arrengement, include: normalized coefficients that illustrate deviations of an observed metric (e.g. number of nodes or links) from a (hypothetical) fully connected network (where all nodes are linked to each other); and "efficiencies" which summarize the efficiency of transporting material throghout the network following the assumptions of the "Hydraulic Hyphal transport Model". Under this model, hyphae are idealized as interconnected cylindrical pipes where fluids moved from the center of the colony (the inoculum agar or wooden plut in our case) to each tip due to a difference in hydraulic preassure (citation). A fundamental metric of this model and in the "efficiency" metics, is the calculation "hypal transport resistance" based on hyphal lengths and widths (the longer and thinner the higher the resistance) 
+
+1. Mycelium descriptive traits
     + Mean hyphal length (log10 transformed)
     + Total number of hyphae
     + Mean tip hyphae width (log10 transformed)
     + Hyphal density (number of hyphae/area)
     + Angle (O_min_mid). Not transformed.
     
-2. Transport traits
-    + Mean accessibility to each tip hyphae: It is measured as the path of minimum resistance from the inoculum to the hyphal tip. The identity of the path is determined using the Dijkstra’s algorithm.
-    + Route efficiency: mean of the reciprocal of accessibility to each node.
-    + Alpha coefficient
+2. Myceliu Network traits
+    + Alpha coefficient: 
     + Beta coefficient
     + Global efficiency
-    + MST ratio (Length of the network/Lendth of MST of similar dimensions)
+    + Route tip efficiency: mean of the reciprocal of accessibility to each node.
+    + Route efficiency: mean of the reciprocal of accessibility to each node.
 
 
-### Microphotography and image analysis
 
-We extracted network parameter from pictuers of 2mm diameter fungal colonies growing on water agar. Ten to fourteen hour old colonies were photographed under a stereoscope (AxioZoom). Then we use the Fungal network matlab app developed by Professor Mark Fricker to translate the image into two matrices: the first one conatining a list of all pairs of nodes connected to each other which represent an individual hyphae. To this list we also added hyphal attributes like width and lendth [insert figure here explaining what is a node and a hyphae].  The second matrix contains the position of the nodes in x, y coordinates. These two outputs were then used to calculate network parameters as indicated below.
-
-
-### Mycelial network manipulation and toy model construction
-
-We calculate network paramater from the outputs of the FungalNetworks App using the r package igraph . First we calculated mean width of main and tip hyphae. Second we calculated mean accessibilty to hyphal tips. We consider tip hyphae all hyphal segments that connect to tip node (i.e. nodes degree= 1) and main hyphae as all hyphal segments that do not connect to a tip node.
+First we calculated mean width of main and tip hyphae. Second we calculated mean accessibilty to hyphal tips. We consider tip hyphae all hyphal segments that connect to tip node (i.e. nodes degree= 1) and main hyphae as all hyphal segments that do not connect to a tip node.
 
 We calculate three "model network" based on the data coming for each fungal colony: 
 
@@ -61,6 +72,13 @@ We calculate three "model network" based on the data coming for each fungal colo
 
 
 Then on each of these networks we measured the above mentioned traits.
+
+
+### Selection of network traits
+
+    + MST ratio (Length of the network/Lendth of MST of similar dimensions)
+
+
 
 
 ### Statistical analysis
