@@ -1,0 +1,812 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+Loading data (Here I add data from the csv tables stores in the folder). This takes time so I save the result.
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE}
+
+library(tidyverse)
+#These lines will load all files saved as .csv in the folder "processedData" and then merging them ("row bind")
+temp = list.files(path="processedData\\",pattern="*-Edge.csv")
+temp<-paste("processedData\\",temp,sep = "")
+Edge_Traits_AZ = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+#myfiles[[4]]<-myfiles[[4]][,c(1:42)]
+
+# Edge_Traits<-do.call(rbind,myfiles)
+# 
+# Edge_Traits$Species<-NA
+# Edge_Traits$Species[grep("C34",Edge_Traits$name)]<-"Mortierella elongata"
+# Edge_Traits$Species[grep("C35",Edge_Traits$name)]<-"Umbelopsis isabellina"
+# Edge_Traits$Species[grep("DF19",Edge_Traits$name)]<-"Mortierella alpina"
+# Edge_Traits$Species[grep("DF25",Edge_Traits$name)]<-"Mortierella elongata2"
+# Edge_Traits$Species[grep("DF56",Edge_Traits$name)]<-"Mucor fragilis"
+# Edge_Traits$Species[grep("M",Edge_Traits$name)]<-"Mortierella alpina2"
+
+#Node positions
+temp = list.files(path="processedData\\",pattern="*-Node.csv")
+temp<-paste("processedData\\",temp,sep = "")
+Node_Traits_AZ = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+#myfiles[[4]]<-myfiles[[4]][,c(1:42)]
+# Node_Traits<-do.call(rbind,myfiles)
+# 
+# Node_Traits$node_name_ID<-paste(Node_Traits$name,Node_Traits$node_ID,sep = "_")
+
+#Adding Basidiomycete data
+temp = list.files(path="FreyasData\\",pattern="*-Edge.csv")
+temp<-paste("FreyasData\\",temp,sep = "")
+Edge_Traits_B = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+
+#Node positions
+temp = list.files(path="FreyasData\\",pattern="*-Node.csv")
+temp<-paste("FreyasData\\",temp,sep = "")
+Node_Traits_B = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+
+#Putting them all together
+Edge_Traits<-do.call(c, list(Edge_Traits_AZ, Edge_Traits_B))
+Node_Traits<-do.call(c, list(Node_Traits_AZ, Node_Traits_B))
+
+```
+
+Loading data (stored from the chunck above)
+```{r}
+rm(list=ls())
+
+Edge_Traits<-readRDS("List_Edge_Traits.RDS")
+
+Node_Traits<-readRDS("List_Node_Traits.RDS")
+
+```
+
+Transforming it into igraph object
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#Transforming it into igraph object
+library(igraph)
+library(tidyverse)
+
+colonies_ntwk<-
+
+mapply(function(x,z){
+    y<-graph_from_edgelist(as.matrix(x[,c("EndNodes_1","EndNodes_2")]),directed = F)
+    E(y)$name<-x$name
+    E(y)$weight<-x$Resistance_2
+    E(y)$length<-x$Length
+    E(y)$width<-x$Width
+    
+    V(y)$Degrees<-degree(y)
+    V(y)$Accessibility<-distances(y,v=as.numeric(V(y)[Degrees==max(V(y)$Degrees)])
+    
+    
+                                                                )
+    
+    V(y)$angle<-z$node_Omin_Omid
+    
+    E(y)$type<-"Main"
+    
+    E(y)$e_distance<-(x$Length/x$Tortuosity)
+    
+    E(y)[incident(y,
+              as.numeric(V(y)[Degrees==max(V(y)$Degrees)])
+                    )]$type<-"Inoculum"
+    
+    y
+    },Edge_Traits,Node_Traits,SIMPLIFY = F)
+
+```
+
+
+Saving coordinates as a separate file
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#Spatial location
+spatial.data<-lapply(Node_Traits,function(x){x[,c("node_ID","node_X_pix","node_Y_pix","name")]})
+    # Node_Traits[,#Node_Traits[which(Node_Traits$name=="DF56(6)_t09"),
+    #                       c("node_ID","node_X_pix","node_Y_pix","name")]
+
+spatial.data<-lapply(spatial.data,function(l){as.matrix(l[,c(2,3)])})
+spatial.data<-lapply(spatial.data,function(l){norm_coords(l, ymin=-1, ymax=1, xmin=-1, xmax=1)})
+# 
+# l <- as.matrix(spatial.data[,c(2,3)])
+# l <- norm_coords(l, ymin=-1, ymax=1, xmin=-1, xmax=1)
+
+```
+
+
+```{r, eval=FALSE,echo=FALSE}
+#This one was an attempt to calculate euclidean distances among nodes by myself. It works but It takes too long. Thus I decided to use length/tortuosity in the meantime
+
+# lapply(Node_Traits,function(x){
+#     all(rownames(x)==as.character(x$node_ID))
+# })
+
+# lapply(Node_Traits,function(x){
+#     net<-graph_from_adjacency_matrix(as.matrix(dist(x)),weighted = T)
+#     net<-as_data_frame(net, what="edges")    
+# }
+#     )
+
+#This takes too long!
+# net_v<-graph_from_adjacency_matrix(as.matrix(dist(spatial.data[[1]])),weighted = T)
+# net_ed<-graph_from_edgelist(as.matrix(Edge_Traits[[1]][,c("EndNodes_1","EndNodes_2")]),directed = F)
+
+
+#look into add_layout_s
+
+```
+
+
+Calculating the summary (mean) values for each colony (hyphae traits like length and width)
+
+There might be the need to change this code. Instead of useing subgraph edges, just keep using subsetting 
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#Calculating the summary values for each colony
+
+colony_sum<-do.call("rbind",
+
+lapply(
+colonies_ntwk,function(x){
+    y<-subgraph.edges(x,E(x)[type=="Main"])
+    
+    E(y)$hyphae<-"main"
+    E(y)[inc(V(y)[Degrees==1])]$hyphae<-"tip"
+    
+    z<-data.frame(
+        name_col=unique(E(y)$name),
+        Hyphal_length=mean(log10(E(y)$length)),
+        Hyphal_number=length(E(y)$name),
+        Hyphal_tip_width=mean(log10(E(y)[hyphae=="tip"&width>0]$width)),
+        Hyphal_main_width=mean(E(y)[hyphae=="main"&width>0]$width),#The unstransformed looks better
+        Hyphal_tip_access=mean(V(y)[Degrees==1]$Accessibility),
+        Hyphal_angle=mean(V(y)[which(angle>0)]$angle),
+        
+        Mycelia_length=sum(E(y)$length)
+        
+            )
+    z
+    
+    })
+)
+
+# mean(V(net_ed)[which(angle>0)]$angle)
+# mean(Node_Traits$node_Omin_Omid[which(Node_Traits$node_Omin_Omid>0&Node_Traits$name=="C34(1)_t11")])
+```
+
+Loading summary tables. From these tables I only need area (from a shrunk convex hull) and (thus) hyphal density. All other variables I can calculate them myself (see chuncks below)
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+
+#This does not work at the moment!
+
+#Adding the other variables coming from Mark´s App
+
+temp = list.files(path="processedData\\",pattern="*-summaryTable.csv")
+temp<-paste("processedData\\",temp,sep = "")
+summary_Traits_AZ = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+
+# summary_Traits_AZ = lapply(summary_Traits_AZ,function(x){x[,c("summary_mean_area",
+#                                                               "summary_mean_Geff",
+#                                                         "summary_mean_edge_density","summary_mean_Reff",
+#                                                         "summary_mean_alpha","summary_mean_beta")]} )
+
+#Note: it seems the names have changed in some cases for the summary-table output in the august version of the
+#Mark´s app
+#summary_Traits_AZ<-do.call(rbind,summary_Traits_AZ)
+summary_Traits_AZ<-bind_rows(summary_Traits_AZ)
+summary_Traits_AZ$name_col<-gsub("processedData\\\\+","",temp)
+summary_Traits_AZ$name_col<-gsub("\\-summaryTable\\.csv","",summary_Traits_AZ$name)
+
+
+
+#For the moment I am nos using any data from the basidiomycetes data (Freya´s data) because area is not included.
+temp = list.files(path="FreyasData\\",pattern="*-summaryTable.csv")
+temp<-paste("FreyasData\\",temp,sep = "")
+summary_Traits_B = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+
+# summary_Traits_B = lapply(summary_Traits_B,function(x){x[,c(#"summary_mean_area",For the moment i do not have it for the basidiomycota
+#                                                             "summary_mean_Geff",
+#                                                         #"summary_mean_edge_density",
+#                                                         "summary_mean_Reff",
+#                                                         "summary_mean_alpha","summary_mean_beta")]} )
+
+summary_Traits_B<-do.call(rbind,summary_Traits_B)
+summary_Traits_B$name_col<-gsub("FreyasData\\\\+","",temp)
+summary_Traits_B$name_col<-gsub("\\-summaryTable\\.csv","",summary_Traits_B$name)
+summary_Traits_B$summary_mean_area<-c(217604,329047,217391,3411537,4061079,4437051,833413,2358936,2401926)
+
+#These values were sent by Mark via email on september 2020
+# Pi_ctrl1_d8_1
+# 217604
+# 
+# Pi_ctrl1_d8_2
+# 329047
+# 
+# Pi_ctrl1_d8_3
+# 217391
+# 
+# Pv_ctrl1_d8_1
+# 3411537
+# 
+# Pv_ctrl1_d8_2
+# 4061079
+# 
+# Pv_ctrl1_d8_3
+# 4437051
+# 
+# Rb_ctrl1_d8_1
+# 833413
+# 
+# Rb_ctrl1_d8_2
+# 2358936
+# 
+# Rb_ctrl1_d8_3
+# 2401926
+
+rm(temp)
+summary_Traits_table_AZB<-bind_rows(summary_Traits_AZ,summary_Traits_B)
+
+# colony_sum<-left_join(colony_sum,summary_Traits[,c("name_col","summary_mean_area",
+#                                                     "summary_mean_edge_density",
+#                                                     "summary_mean_Geff",#It´s computing demanding, I will do implement it later
+#                                                     "summary_mean_Reff",
+#                                                     "summary_mean_alpha",
+#                                                     "summary_mean_beta")])
+```
+
+Calculating summary network traits (coefficients and efficiencies)
+
+```{r,echo=FALSE, echo=FALSE}
+#Alternatively I can calculate them by myself (useful for calculating them for the MST´s below). I did not do this for Global efficiency of the zygos and ascos as this led to the computer crahsing. Thus I did it only for the Basidios as this data is not reported in the summary table sent by Mark
+
+#mean(1/V(net_ed)[Degrees==1&Accessibility>0]$Accessibility)
+
+summary_Traits<-do.call(rbind,
+lapply(colonies_ntwk,function(net_ed){
+  data.frame(
+    name_col=unique(E(net_ed)$name),
+    summary_mean_alpha=(ecount(net_ed)-vcount(net_ed)+1)/(2*vcount(net_ed)-5),
+    summary_mean_beta=ecount(net_ed)/vcount(net_ed),
+    summary_mean_Reff=mean(1/V(net_ed)[Accessibility>0]$Accessibility),
+    summary_mean_Reff_tip=mean(1/V(net_ed)[Degrees==1&Accessibility>0]$Accessibility))
+})
+)
+```
+
+For the global efficiency of the Basidiomycetes. A bit time consuming so I save the results
+
+```{r,echo=FALSE, eval=FALSE}
+
+library(brainGraph)
+
+summary_Geff<-do.call(rbind,
+lapply(colonies_ntwk[24:32],function(net_ed){
+  data.frame(
+    name_col=unique(E(net_ed)$name),
+    summary_mean_Geff=sum(1/distances(net_ed)[distances(net_ed)>0])*(1/(length(V(net_ed))*length(V(net_ed))-1))
+
+)
+})
+);saveRDS(summary_Geff,"summary_Geff.RDS")
+```
+
+
+Here I am loading the results from the global efficiency and merging them with the other summary parameters
+```{r}
+summary_Geff<-readRDS("summary_Geff.RDS")
+
+summary_Traits<-left_join(summary_Traits,summary_Traits_AZ[,c("name_col","summary_mean_Geff")])
+
+summary_Traits$summary_mean_Geff[summary_Traits$name_col%in%summary_Geff$name_col]<-
+  
+  summary_Geff$summary_mean_Geff[summary_Geff$name_col%in%summary_Traits$name_col]
+
+
+```
+
+
+```{r,echo=FALSE, echo=FALSE}
+colony_sum<-left_join(colony_sum,summary_Traits)
+
+```
+
+This is the explanation on how I got the formulas used above for the calculation of summary values
+
+```{r,echo=FALSE, eval=FALSE}
+#This is the explanation on how I got the formulas used above for the calculation of summary values
+
+net_ed<-colonies_ntwk[[1]]
+net_ed4<-colonies_ntwk[[4]]
+net_ed11<-colonies_ntwk[[11]]
+net_ed17<-colonies_ntwk[[17]]
+#alpha coefficient
+(ecount(net_ed)-vcount(net_ed)+1)/(2*vcount(net_ed)-5)#0.1644
+
+summary_Traits_AZ$summary_mean_alpha[1]#0.1644
+
+(ecount(Access_mst[[1]])-vcount(Access_mst[[1]])+1)/(2*vcount(Access_mst[[1]])-5)
+#beta coefficient
+ecount(net_ed)/vcount(net_ed)
+
+#Route efficiency 
+mean(1/V(net_ed)[Accessibility>0]$Accessibility)#This one is the closest to the values of Mark´s App
+#0.007947156
+
+
+summary_Traits_AZ$summary_mean_Reff[1]#0.0079467
+
+
+#other tested methods were that did not work but according the formula in manual should:
+# sum(1/V(net_ed)[Accessibility>0]$Accessibility)*(1/(vcount(net_ed)*(vcount(net_ed)-1)))
+# sum(1/V(net_ed)[Accessibility>0]$Accessibility)/vcount(net_ed)
+
+#Route efficiency is the mean of the inverses of all accessibilities. To it makes sense to measure this as route efficiency to the tip only:
+
+mean(1/V(net_ed)[Degrees==1&Accessibility>0]$Accessibility)
+
+
+#Global efficiency is more computing demanding as it would be mean of the inverse of all distances in the network. This one I would try to calculated it in the computer at the Uni
+
+probando<-
+sum(1/distances(net_ed)[distances(net_ed)>0])
+
+probando*(1/(28341*28340))
+
+(1/(length(V(net_ed))*length(V(net_ed))-1))
+
+          
+summary_Traits_AZ$summary_mean_Geff[1]#0.004068755
+summary_Traits_AZ$summary_mean_Geff[4]#0.005695598
+summary_Traits_AZ$summary_mean_Geff[11]#0.005236195
+summary_Traits_AZ$summary_mean_Geff[17]#0.01983892
+
+efficiency(net_ed,type = "global")#0.00406909
+
+net_ed<-colonies_ntwk[[1]]
+g<-net_ed
+
+# nodal efficiency function (fromo internet forum)
+get_eff <- function(i){return((1/(length(V(g)) - 1))*sum(1/distances(g, V(g)[i])[-i]))}
+no_cores <- detectCores() - 1 
+cl       <- makeCluster(no_cores)
+registerDoParallel(cl)  
+result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
+stopCluster(cl)
+rm(cl)
+global_eff <- mean(result)#0.00406909
+
+
+sum(1/distances(net_ed)[distances(net_ed)>0])*(1/(length(V(net_ed))*length(V(net_ed))-1))#0.004068947
+sum(1/distances(net_ed4)[distances(net_ed4)>0])*(1/(length(V(net_ed4))*length(V(net_ed4))-1))#0.005695659
+sum(1/distances(net_ed11)[distances(net_ed11)>0])*(1/(length(V(net_ed11))*length(V(net_ed11))-1))#0.005236075
+sum(1/distances(net_ed17)[distances(net_ed17)>0])*(1/(length(V(net_ed17))*length(V(net_ed17))-1))
+```
+
+This chunk has random code
+
+```{r,echo=FALSE, eval=FALSE}
+trial<-
+sapply(colonies_ntwk,function(x){
+    mean(1/V(x)[Accessibility>0]$Accessibility)
+})
+
+
+colony_sum[,c("name_col","summary_mean_alpha","summary_mean_beta","summary_mean_Geff","summary_mean_Reff")]
+
+
+plot(trial,colony_sum$summary_mean_Reff)
+trial/colony_sum$summary_mean_Reff
+
+#edgedensity
+
+head(E(colonies_ntwk[[1]])$e_distance)
+
+ecount(net_ed)/summary_Traits$summary_mean_area[1]
+
+summary_Traits$summary_mean_area
+
+summary_Traits$summary_mean_edge_density
+
+```
+
+Calculating (weighted) Minimum spanning trees based on the dimesnions of each of the networks. The weights are given by resistance_2
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+# We calculate two "model2 network for each fungal colony. First, euclidean minimum spanning tree. Second, weighted minimum spanning tree. Both networks the nodes are linked in a way tha minimizes the cost of the network. That is, without any cycles and with the minimum possible total edge weight. In the case of the EMST, it minimizes the total euclidean distance of the newtork while in the the WMST it minimized the total resistance of the network. Both models were calculated in igrpah.
+
+#Weighted MST (by accessibility)
+Access_mst<-
+        lapply(colonies_ntwk,
+               mst)
+```
+
+I calculated also other networks but in the end they are not so useful
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE}
+#stats::dist(x, method = "euclidean")
+
+#Euclidean MST 
+
+#For this one I am not so sure how to get it. I am going to run it either as an unweighted mst and another one weigted by the euclidean distance as measured in Mark´s App
+unweighted_mst<-
+        lapply(colonies_ntwk,function(x){
+            x<-delete_edge_attr(x,"weight")
+            mst(x)
+        }
+               )
+
+edistance_mst<-
+        lapply(colonies_ntwk,function(x){
+            E(x)$weight<-E(x)$e_distance
+            mst(x)
+        }
+               )
+
+#Quick comparison among the MST´s
+# head(Edge_Traits[[1]]$Resistance_2)
+# head(E(colonies_ntwk[[1]])$weight)
+# head(E(colonies_ntwk[[1]])$e_distance)
+# 
+# head(E(colonies_ntwk[[1]])$weight)
+# head(E(Access_mst[[1]])$weight)
+# head(E(unweighted_mst[[1]])$weight)
+# head(E(edistance_mst[[1]])$weight)
+# 
+# ecount(colonies_ntwk[[1]])
+# ecount(Access_mst[[1]])
+# ecount(unweighted_mst[[1]])
+# ecount(edistance_mst[[1]])
+```
+
+Calculating summary values (hypal traits, coefficients and efficiencies ) for the minimum spanning trees (MST´s)
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+#Summarizng the MST´s unweighted_mst, edistance_mst, Access_mst_sum
+
+Access_mst_sum<-do.call("rbind",
+    lapply(
+    Access_mst,function(x){
+        y<-subgraph.edges(x,E(x)[type=="Main"])
+        
+        E(y)$hyphae<-"main"
+        E(y)[inc(V(y)[Degrees==1])]$hyphae<-"tip"
+        
+        z<-data.frame(
+            name_col=unique(E(y)$name),
+            Hyphal_length=mean(E(y)$length),
+            Hyphal_number=length(E(y)$name),
+            Hyphal_tip_width=mean(E(y)[hyphae=="tip"]$width),
+            Hyphal_main_width=mean(E(y)[hyphae=="main"]$width),
+            Hyphal_tip_access=mean(V(y)[Degrees==1]$Accessibility),
+            Hyphal_angle=mean(V(y)[which(angle>0)]$angle),
+            
+            Mycelia_length=sum(E(y)$length),
+            
+            #Now the indexes and efficiencies
+            alpha_coeff=(ecount(x)-vcount(x)+1)/(2*vcount(x)-5),
+            beta_coeff=ecount(x)/vcount(x),
+            Route_eff=mean(1/V(x)[Accessibility>0]$Accessibility),
+            Reff_tip=mean(1/V(x)[Degrees==1&Accessibility>0]$Accessibility)
+        )
+        z
+        
+        })
+    )
+```
+
+
+For the global efficiency, It was more computing demanding. I save the results for not having to do it again
+
+```{r,echo=FALSE, eval=FALSE}
+MST_summary_Geff1<-#do.call(rbind,
+sapply(Access_mst[1:5],function(net_ed){
+      a<-efficiency(net_ed,type = "global")
+
+})
+#);
+
+saveRDS(MST_summary_Geff1,"MST_summary_Geff1.RDS")
+
+
+MST_summary_Geff6<-efficiency(Access_mst[[6]],type = "global");saveRDS(MST_summary_Geff6,"MST_summary_Geff6.RDS")
+MST_summary_Geff7<-efficiency(Access_mst[[7]],type = "global");saveRDS(MST_summary_Geff7,"MST_summary_Geff7.RDS")
+MST_summary_Geff8<-efficiency(Access_mst[[8]],type = "global");saveRDS(MST_summary_Geff8,"MST_summary_Geff8.RDS")
+
+#9 and 10 are in the chunck below because they are so big it crashes the way "efficiency" works
+
+MST_summary_Geff11<-efficiency(Access_mst[[11]],type = "global");saveRDS(MST_summary_Geff11,"MST_summary_Geff11.RDS")
+MST_summary_Geff12<-efficiency(Access_mst[[12]],type = "global");saveRDS(MST_summary_Geff12,"MST_summary_Geff12.RDS")
+MST_summary_Geff13<-efficiency(Access_mst[[13]],type = "global");saveRDS(MST_summary_Geff13,"MST_summary_Geff13.RDS")
+
+MST_summary_Geff14_32<-sapply(Access_mst[14:32],function(net_ed){
+      a<-efficiency(net_ed,type = "global")
+
+});saveRDS(MST_summary_Geff14_32,"MST_summary_Geff14_32.RDS")
+
+
+
+```
+
+This is for the two networks that were so big, that I had to use a function that "partitions" the operation
+```{r,echo=FALSE, eval=FALSE}
+# nodal efficiency function (from a forum in internet)
+
+g<-Access_mst[[9]]
+
+
+get_eff <- function(i){return((1/(length(V(g)) - 1))*sum(1/distances(g, V(g)[i])[-i]))}
+no_cores <- detectCores() - 1 
+cl       <- makeCluster(no_cores)
+registerDoParallel(cl)  
+result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
+stopCluster(cl)
+rm(cl)
+MST_summary_Geff9 <- mean(result);saveRDS(MST_summary_Geff9,"MST_summary_Geff9.RDS")
+result9<-result
+
+g<-Access_mst[[10]]
+
+get_eff <- function(i){return((1/(length(V(g)) - 1))*sum(1/distances(g, V(g)[i])[-i]))}
+no_cores <- detectCores() - 1 
+cl       <- makeCluster(no_cores)
+registerDoParallel(cl)  
+result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
+stopCluster(cl)
+rm(cl)
+MST_summary_Geff10 <- mean(result)
+result10<-result; saveRDS(MST_summary_Geff10,"MST_summary_Geff10.RDS")
+rm(result)
+```
+
+Here, I add the estimation of global efficieny from the two chuncks above to the MST´s.
+
+```{r}
+Access_mst_sum$Geff<-
+c(readRDS("MST_summary_Geff1.RDS"),
+  readRDS("MST_summary_Geff6.RDS"),
+  readRDS("MST_summary_Geff7.RDS"),
+  readRDS("MST_summary_Geff8.RDS"),
+  readRDS("MST_summary_Geff9.RDS"),
+  readRDS("MST_summary_Geff10.RDS"),
+  readRDS("MST_summary_Geff11.RDS"),
+  readRDS("MST_summary_Geff12.RDS"),
+  readRDS("MST_summary_Geff13.RDS"),
+  readRDS("MST_summary_Geff14_32.RDS")
+  )
+
+```
+
+
+This are calculations for the other toy networks that in the end are not goning to be used
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE}
+unweighted_mst_sum<-do.call("rbind",
+    lapply(
+    unweighted_mst,function(x){
+        y<-subgraph.edges(x,E(x)[type=="Main"])
+        
+        E(y)$hyphae<-"main"
+        E(y)[inc(V(y)[Degrees==1])]$hyphae<-"tip"
+        
+        z<-data.frame(
+            name_col=unique(E(y)$name),
+            Hyphal_length=mean(E(y)$length),
+            Hyphal_number=length(E(y)$name),
+            Hyphal_tip_width=mean(E(y)[hyphae=="tip"]$width),
+            Hyphal_main_width=mean(E(y)[hyphae=="main"]$width),
+            Hyphal_tip_access=mean(V(y)[Degrees==1]$Accessibility),
+            
+            #Now the indeces
+            alpha_coeff=(ecount(x)-vcount(x)+1)/(2*vcount(x)-5),
+            beta_coeff=ecount(x)/vcount(x),
+            Route_eff=mean(1/V(x)[Accessibility>0]$Accessibility)
+        )
+        z
+        
+        })
+    )
+
+
+edistance_mst_sum<-do.call("rbind",
+    lapply(
+    edistance_mst,function(x){
+        y<-subgraph.edges(x,E(x)[type=="Main"])
+        
+        E(y)$hyphae<-"main"
+        E(y)[inc(V(y)[Degrees==1])]$hyphae<-"tip"
+        
+        z<-data.frame(
+            name_col=unique(E(y)$name),
+            Hyphal_length=mean(E(y)$length),
+            Hyphal_number=length(E(y)$name),
+            Hyphal_tip_width=mean(E(y)[hyphae=="tip"]$width),
+            Hyphal_main_width=mean(E(y)[hyphae=="main"]$width),
+            Hyphal_tip_access=mean(V(y)[Degrees==1]$Accessibility),
+            #Now the indeces
+            alpha_coeff=(ecount(x)-vcount(x)+1)/(2*vcount(x)-5),
+            beta_coeff=ecount(x)/vcount(x),
+            Route_eff=mean(1/V(x)[Accessibility>0]$Accessibility)
+        )
+        z
+        
+        })
+    )
+#And here adding edge_density by using the area as reported in Mark´s App
+# Access_mst_sum$edge_density<-sapply(Access_mst,ecount)/summary_Traits$summary_mean_area
+# unweighted_mst_sum$edge_density<-sapply(unweighted_mst,ecount)/summary_Traits$summary_mean_area
+# edistance_mst_sum$edge_density<-sapply(edistance_mst,ecount)/summary_Traits$summary_mean_area
+
+
+
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# We used this data in a redundancy analysis (a type constrained multivariate ordination) to identify and test whether species differ among each other in term of their network traits and from the toy models. That is, the network traits are the response variables and species identiy (and their respective toy model) as explanatory (constraining) variables. To test significance of the ordination we used a permutation based test using the r package vegan.
+
+#Placing all data together:
+names(colony_sum)<-gsub("summary_mean_","",names(colony_sum))
+names(colony_sum)[11]<-"Root_eff"
+names(colony_sum)[9]<-"alpha_coeff"
+names(colony_sum)[10]<-"beta_coeff"
+# colony_sum<-colony_sum[,c("name_col","Hyphal_length","Hyphal_number","Hyphal_tip_width", 
+# "Hyphal_main_width","Hyphal_tip_access","alpha_coeff","beta_coeff","Route_eff"#,"edge_density"
+# )]
+
+names(Access_mst_sum)[11]<-"Root_eff"
+
+colony_sum$Network<-"Real"
+Access_mst_sum$Network<-"Resistance_MST"
+# unweighted_mst_sum$Network<-"Unweighted_Tree"
+# edistance_mst_sum$Network<-"Euclidean_Tree"
+
+
+#This was just to check whetehr the values between the summary tables from the csv´s and my calculation match.
+#which they do!
+
+#summary_Traits_table_AZB<-bind_rows(summary_Traits_AZ,summary_Traits_B)
+
+# testing<-sapply(
+#   colonies_ntwk,function(x){y<-mean(E(x)[type=="Main"]$length)}
+# )
+# 
+# 
+# plot(summary_Traits_table_AZB$cords_mean_Length,
+#      testing)
+# 
+# testing2<-sapply(
+#   colonies_ntwk,function(x){y<-mean(log10(E(x)[type=="Main"]$length))}
+# )
+# 
+# plot(colony_sum$Hyphal_length,
+#      testing2)
+```
+
+Checking MST ratio. According to the manual the MST ratio is: "The ratio of the total length to the length of the minimum spanning tree connecting all nodes"
+
+My numbers and the one of Mark do not match but they are correlated. The reasons for this are: 
+
+1) Mark´s total length include the inoclum edges, mine do not (I checked see code below).
+2) Mark´s total length is already saled by the scaling factor (0.79), mines are not.
+3) Mine total lenght are for some reason 3 order of magnitude larger than Mark´s (No idea why)
+
+However, even when I calculated total lengths including the inoculum edges for both the real colonies and the mst,
+my number still do match (although still correlated). Also in Mark´s the formula seem to be MST_length/real_length which sounds opposite to the statement above and it makes no so much sense to me.
+
+```{r, eval=FALSE}
+plot(
+summary_Traits_table_AZB$summary_mean_MST_ratio,
+
+Access_mst_sum$Mycelia_length/colony_sum$Mycelia_length)
+
+plot(colony_sum$Mycelia_length,summary_Traits_table_AZB$summary_mean_length_total)
+
+testing<-sapply(
+ colonies_ntwk,function(x){y<-sum(E(x)$length)}
+ )
+
+plot(summary_Traits_table_AZB$summary_mean_length_total,testing)
+
+testing_mst<-sapply(
+ Access_mst,function(x){y<-sum(E(x)$length)}
+ )
+
+plot(
+(testing_mst/testing),
+summary_Traits_table_AZB$summary_mean_MST_ratio)
+
+```
+
+
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+all_data<-bind_rows(colony_sum,
+                #unweighted_mst_sum,
+                #edistance_mst_sum,
+                Access_mst_sum)
+
+#Adding the species names
+all_data$Species<-NA
+all_data$Species[grep("C34",all_data$name_col)]<-"Mortierella elongata"
+all_data$Species[grep("C35",all_data$name_col)]<-"Umbelopsis isabellina"
+all_data$Species[grep("DF19",all_data$name_col)]<-"Mortierella alpina"
+all_data$Species[grep("DF25",all_data$name_col)]<-"Mortierella elongata2"
+all_data$Species[grep("DF56",all_data$name_col)]<-"Mucor fragilis"
+all_data$Species[grep("M",all_data$name_col)]<-"Mortierella alpina2"
+
+all_data$Species[grep("DF9",all_data$name_col)]<-"Alternaria sp"
+all_data$Species[grep("C41",all_data$name_col)]<-"Fusarium redolens"
+all_data$Species[grep("FOX",all_data$name_col)]<-"Fusarium oxysporum"
+all_data$Species[grep("DF32",all_data$name_col)]<-"Fusarium solani"
+
+all_data$Species[grep("Pi",all_data$name_col)]<-"Pi"
+all_data$Species[grep("Pv",all_data$name_col)]<-"Pv"
+all_data$Species[grep("Rb",all_data$name_col)]<-"Rb"
+
+
+#Adding area data
+all_data<-left_join(all_data,
+summary_Traits_table_AZB[,c("name_col","summary_mean_area")])
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#Checking edge density:
+summary_Traits_table_AZB$summary_mean_edge_density
+#This is calculated as;
+summary_Traits_table_AZB$summary_mean_num_edges/summary_Traits_table_AZB$summary_mean_area
+
+#Not as:
+summary_Traits_table_AZB$cords_mean_Number/summary_Traits_table_AZB$summary_mean_area
+
+#To be sure, both edge number from me and Mark are the same (very minor change)
+plot(summary_Traits_table_AZB$summary_mean_num_edges,colony_sum$Hyphal_number)
+
+#Thus edge density keeps constant as well 
+plot(
+colony_sum$Hyphal_number/all_data$summary_mean_area[1:32],
+summary_Traits_table_AZB$summary_mean_edge_density)
+```
+
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#Then I can just calculated edge density for all (including the MSt´s)
+
+all_data$Hyphal_density<-all_data$Hyphal_number/all_data$summary_mean_area
+
+#Changin the name of the area so it make more sense
+names(all_data)[16]<-"Mycelial_area"
+
+```
+
+
+
+```{r}
+all_data_scaled<-all_data[c(1:32),]
+
+all_data_scaled$Mycelia_length_scaled<-all_data[c(1:32),]$Mycelia_length/all_data[c(33:64),]$Mycelia_length
+
+#all_data_scaled$alpha_coeff_scaled<-all_data[c(1:32),]$alpha_coeff/all_data[c(33:64),]$alpha_coeff
+#all_data_scaled$beta_coeff_scaled<-all_data[c(1:32),]$beta_coeff/all_data[c(33:64),]$beta_coeff
+all_data_scaled$Root_eff_scaled<-all_data[c(1:32),]$Root_eff/all_data[c(33:64),]$Root_eff
+all_data_scaled$Reff_tip_scaled<-all_data[c(1:32),]$Reff_tip/all_data[c(33:64),]$Reff_tip
+all_data_scaled$Geff_scaled<-all_data[c(1:32),]$Geff/all_data[c(33:64),]$Geff
+
+```
+
+Both root efficincy and root tip efficiency have the same value between the real networks and the MST. Which it is also related
+to the fact that the accessibility to the tips seem to be the same between real networks and the MST
+
+I do not know why...
+
+Also it seems it makes no sense to scale alpha and beta coefficient as they are by definitions set to a value for an MST. But I still have to look. Maybe the beta coefficient does make sense to scale.
+
+Also, hyphal number from the real networks seems to always around 1.3 times the ones of the MST´s
+
+```{r}
+all_data_scaled$phylum<-NA
+all_data_scaled$phylum[grep("DF9|C41|FOX|DF32",all_data_scaled$name_col)]<-"Ascomycota"
+all_data_scaled$phylum[grep("C34|C35|DF19|DF25|DF56|M",all_data_scaled$name_col)]<-"Zygomycetous"
+all_data_scaled$phylum[grep("Pi|Pv|Rb",all_data_scaled$name_col)]<-"Basidiomycota"
+```
+

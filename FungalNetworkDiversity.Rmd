@@ -11,975 +11,362 @@ output:
 knitr::opts_chunk$set(fig.height = 10, fig.width = 15)
 ```
 
-#Highlights
+## Highlights
 
 
-* We show that network parameters reveal the trait space in mycelium architecture across species
-* We show that the network parameters of fungi differ from model networks of same dimensions based on simple rules.
+
+* We show high interpecfic variation in network parameters of fungi which partly correlates with taxonomy
 * We advocate the use of network properties as functional traits for fungal ecology.
-
+* We show that network parameters reveal the trait space in mycelium architecture across species
 
 ## Introduction
 
-Although fungal mycelia  cosists of network interconnected filaments, ecologist rarely use network features as functional traits. We think this is a missed opportunity because such  body type is the the most comon among terretrial fungi, ocurring  along all major fungal phyla from basal to more recent clades. Besides, it is usually argued that the ecologcial sucess of fungi in land is partly due to such filamentous network growth. Given the widespread ocurrence of this body type, we hypothesized that if there is a large interpecific variation in network features, such variation may reflect distinct ecological strategies among species.
+Fungal mycelia consist of interconnected network filaments, yet ecologists rarely use network features as functional traits. We think this is a missed opportunity because such a body type is the most common among terrestrial fungi, occurring along all major fungal phyla, from basal to more recent clades. Besides, it is usually argued that the ecological success of fungi on land is partly due to such filamentous network growth. Given the widespread occurrence of this body type, we hypothesized that if there is a large interspecific variation in network features, such variation may reflect distinct ecological strategies among species.
 
-To address this hypothesis we measured fungal network properties among fungal species in the Ascomycota, Basidiomycota, Mortierellomycota and Mucoromycota. Specifically we measure a set of properties that emerge from the connection arrangement patterns of hyphal filaments (i.e.the topology of the network). An important feature of our approach is that our measurements are based on recent models that explain the flow of nutrients and information withing a given topology when fungi is exploring for resources. Under such explorative phase, fungi transport resources located from a source (like a resource patch or spore reserves) to subsides hyphal tip extension and branching. Thus, we consider that the parameters we measured have a solid biologically basis rooted in hyphal anatomy an ecologically relevant scenarios.
+To address this hypothesis, we measured fungal network properties among fungal species in the Ascomycota, Basidiomycota, Mortierellomycota, and Mucoromycota. With this information, we aim to determine the degree of interspecific variation and whether is related to phylogenetic affiliation. Specifically, we measure and calculate a set of properties that emerge from the connection in the arrangement patterns of hyphal filaments after translating the mycelium into a network graph (i.e. a set of nodes connected through edges). An important feature of our approach is that our metrics are based on recent models that explain the flow of nutrients and information within a given topology when fungi are exploring for resources. During such an exploration phase, fungi transport resources located from a source (like a resource patch or spore reserves) to subsidize hyphal tip extension and branching. Thus, we consider that the parameters we measured have a solid biological basis rooted in hyphal anatomy and ecologically relevant scenarios.
 
-To further identify ecological strategies among species based on network properties, we also determine how different the observed network properties are in comparison to simplified base line network model that follows simple efficiency rules. Specifically, the base line network model constructs networks with the minimum amount of hyphal connections that presere connectivity of the entire mycelium while maximizing transport efficiency from the center to each hyphal each tip. Thus, fungal networks closer to this model indicate a strategy that maximizes transport efficieny, while networks departing from it indicates fungi that increase the amount of connections.
+We then use two approaches to further identify ecological strategies among species based on network properties. First, we determine how different the observed network properties are in comparison to a simplified baseline network model that follows simple efficiency rules. Specifically, the baseline network model constructs networks with the minimum number of hyphal connections that preserve the connectivity of the entire mycelium while maximizing transport efficiency from the center to each hyphal tip. Thus, fungal networks closer to this model indicate a strategy that maximizes transport efficiency, while networks departing from it indicates fungi that increase the amount of connections. Finally, we identify archetypical phenotypes based on network properties measured.These archetypes represent extreme points in the mycelium morphospace likely reflecting distinct ecological strategies.
+
+
 
 ## Material and methods
 
 ## Fungal species
 
+We used 11 fungi belogning to zygomycetous groups, Ascomycota and Basidiomycota (EXPAND MORE)
 
 
-### Microphotography, image analysis and network representation
+### Microphotography and image processing
 
 For ascomycete, mucoromycete and mortierellomycete fungi, we extracted network parameters from pictures of 10-14 hour old, 2mm diameter fungal mycelium growing on water agar (the mycelium was growing out of an agar plug to which 10ul 10% PDB were aded). Brefly,  were photographed under a stereoscope (AxioZoom).For basiomycete fungi, pictures were taken from 20 cm diameter fungal mycelium growing on inert sand out of wooden block [To add picture settings, age of the mycelia]. Thus, although the pictures come from different size and settings, both conditions reflect exploration phase of the mycelium. Each fungal species was replicated three times.
 
-Then we use a set of image processing algorithms in order to: segment the images, determine the connected patterns among hyphae (i.e. which hypha is connected to which), and estimate hyphal widths (all the algorithms used are wrapped in the MatLab App "Fungal Networks" developed by Mark Fricker). Here, hyphae are defined as links connecting two nodes, which in turn can be the hpyhal tips, branching points or anastomosis points (Figure 1). 
+Then we use a bundle of image processing algorithms in order to: segment the images, determine the connected patterns among hyphae (i.e. which hypha is connected to which), and estimate hyphal traits such as widths (these algorithms are wrapped in the MatLab App "Fungal Networks" developed by Mark Fricker).  This information is then stored in two matrices: an "edge list" conatining a list of all pairs of nodes (i.e. hyphae) and the traits of the hyphae.  The second matrix contains the position of the nodes in x, y coordinates.
 
-This information was then stored in two matrices: the first one conatining a list of all pairs of nodes connected to each other which represent an individual hyphae (i.e. an edge list), to wich hyphal attributes like width and length (see below) were added.  The second matrix contains the position of the nodes in x, y coordinates. These two outputs were then used to calculate network parameters as indicated below.
+### Graph network representation
+
+The outputs from the image processing step were used to translate of each mycelium picture into "spatially explicit weighted graph network" (Fig 1), where: 
+
+ + Nodes represnt hyphal tips, branching points and anastomosis points. These three node types are distinguished base on the amount of nodes they are connected from/to (that is, the degree of the node). For example, hyphal tips have degree = 1 as they connect to only one other node, while branching point have degree = 2 because they connect to two other "daugther" nodes.
+ + Edges (links) represent the hyphae. These ones are defined as links connecting two nodes.
+ + Edge attributes represent hyphal traits (such as length and width)
+ + Edge weight represent the transport resistance of the hyphae (see explanation below).
 
 
-### Mycelial network parameters
+### Calculation of mycelial traits
 
-Using the outputs described above we measure 10 traits for each fungal colony (see table 1 for details). Five of those traits we classified them as "descriptive", representing direct average measurments of hyphal traits and are not directly related the connected arrengement of hyphae. The other traits, which are directly dependent on the connectedess arrengement, include: normalized coefficients that illustrate deviations of an observed metric (e.g. number of nodes or links) from a (hypothetical) fully connected network (where all nodes are linked to each other); and "efficiencies" which summarize the efficiency of transporting material throghout the network following the assumptions of the "Hydraulic Hyphal transport Model". Under this model, hyphae are idealized as interconnected cylindrical pipes where fluids moved from the center of the colony (the inoculum agar or wooden plut in our case) to each tip due to a difference in hydraulic preassure (citation). A fundamental metric of this model and in the "efficiency" metics, is the calculation "hypal transport resistance" based on hyphal lengths and widths (the longer and thinner the higher the resistance) 
+From the network graph we calculated 12 traits for each fungal colony (see table 1 for details). Five of those traits we classified them as "descriptive", representing direct average measurements of hyphal traits (edge attributes) that are not directly related the connected arrengement of hyphae. The other traits, which are directly dependent on the connectedess arrengement, include:
 
-1. Mycelium descriptive traits
-    + Mean hyphal length (log10 transformed)
-    + Total number of hyphae
-    + Mean tip hyphae width (log10 transformed)
-    + Hyphal density (number of hyphae/area)
-    + Angle (O_min_mid). Not transformed.
+ + "Normalized coefficients" that illustrate deviations of an observed metric (e.g. number of nodes or links) from a (hypothetical) fully connected network (where all nodes are linked to each other). These coefficients are taken from transportation geography (Fricker et al X);
+
+ + "Efficiencies" which summarize the efficiency of transporting material throghout the network following the assumptions of the "Hydraulic Hyphal transport Model". Under this model, connected hyphae are idealized as series interconnected cylindrical pipes where fluids move from the center of the colony (the inoculum agar or wooden plut in our case) to each tip due to a difference in hydraulic preassure (citation). A fundamental metric of this model and in the "efficiency" metrics, is the calculation of "hyphal transport resistance" based on hyphal lengths and widths (where the longer and thinner the hypha is, the higher the resistance), and "path hydraulic accessibility" which is obtained as the minimal sum of hyphal resistances  connecting two nodes . In turn "efficiencies" represent mycelium-wide means based on such metrics (see table 1 for further details).
+
+ + MST-ratios: These metrics represent deviations of the observed traits (like mean hyphal length) from a base-line network that preserves the number of nodes, but maximizes transport efficiencies.  The base line model correspond to "resitance-weighted minimimum spanning tree". In this model all nodes are connected through hyphal paths with minimal resistance. As a result this base-line model does not contain any loops (see table 1 and Figure 2 for further details).
+
+*1. Mycelium descriptive traits*
+
+Mean hyphal length. This correspond to the mean of each hyphal length in the network (defined as the measured distance between two nodes during the imabe processing). Given that the distribution of these lengths was left-skewed, this mean actually correpson to log10 transformed lenghts.
+
+Total number of hyphae. The number of hyphae recorded for each network.
+
+Mean tip hyphae width. Tip hyphae are defined as hyphae connectig a hyphal tip node (which is identified as a node degree=1).Given that the distribution of these lengths was left-skewed, this mean actually correpson to log10 transformed widths.
+
+Mean main hyphae width. Main hyphae were defined as hyphae connecting branching or anastamosis nodes.Given that the distribution of these lengths was left-skewed, this mean actually correpson to log10 transformed widths.
+
+Hyphal density. This correspond to the number hyphae in a given area
+
+Angle (O_min_mid). Not transformed [ADD MORE EXPLANATION].
     
-2. Myceliu Network traits
-    + Alpha coefficient: 
-    + Beta coefficient
-    + Global efficiency
-    + Route tip efficiency: mean of the reciprocal of accessibility to each node.
-    + Route efficiency: mean of the reciprocal of accessibility to each node.
+*2. Mycelium Network traits*
+
+Alpha coefficient. propotrion of cylces out of the toal number of possible cycles given a number of nodes.  
+
+Beta coefficient: the ratio of edges and nodes.
+
+Gamma coefficient: the proportion of edges out the total number of possible edges given a number of nodes.
+
+Root-tip efficiency (R-Teff). The mean transport efficiency from the inoculum to each tip. To calculate this mean, first the paths that results in the lowest summations of resistances connecing the inoculum to each tip node are identified .That is, the paths with the highest hydraulic accessibility are identified (using the Dijkstra algorithm). Root-tip efficency is then calculated as the mean of the sums of the inverse of resistances for all identified paths. 
+
+Root efficiency (Reff): The mean transport efficiency from the inoculum to each node. It is calculated as above, but including not only paths from inoculum to tips, but also to each node.
+
+Global efficiency (Geff): The mean trasport efficiency between any two nodes. It is similar as the root efficiency, but includes all paths connecting two nodes (not only the ones rooted to the inoculum).
+
+Length-MST: The ratio of the mean hyphal length of the observed mycelium with respect to a base line network with the same number of nodes but that maximizes transport efficiency.
+
+Geff-MST: The ratio of the Global efficiency of the observed network to that of the base-line network (as above, the "resistance weighted minimium spanning tree").
 
 
+Descriptive traits were calculated during the image processing (using the MatLab App) while network traits were computed using the igraph package for R. 
 
-First we calculated mean width of main and tip hyphae. Second we calculated mean accessibilty to hyphal tips. We consider tip hyphae all hyphal segments that connect to tip node (i.e. nodes degree= 1) and main hyphae as all hyphal segments that do not connect to a tip node.
+```{r,echo=FALSE,warning=FALSE}
+source_rmd <- function(file, local = FALSE, ...){
+  options(knitr.duplicate.label = 'allow')
+  tempR <- tempfile(tmpdir = ".", fileext = ".R")
+  on.exit(unlink(tempR))
+  knitr::purl(file, output=tempR, quiet = TRUE)
+  envir <- globalenv()
+  source(tempR, local = envir, ...)
+}
 
-We calculate three "model network" based on the data coming for each fungal colony: 
+source_rmd("Assembling_Network_Trait_Data.Rmd")
+```
 
-1. Euclidean minimum spanning tree. It minimizes the total euclidean distance of the network
-2. Resitance-weighted minimum spanning tree. It minimizes the total resistance of the network
-3. Unweighed minimum spanning tree.
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+library(igraph)
+par(mfrow=c(2,4), mar=c(0,0,0,0)) 
+
+plot(colonies_ntwk[[1]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color="cyan",
+     edge.size=150,vertex.size=0,layout=spatial.data[[1]]*1,main="Mortierella elongata Real Network")
+
+plot(colonies_ntwk[[16]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color="magenta",
+     edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="Mucor fragilis Real Network")
+
+plot(colonies_ntwk[[5]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color="orange",
+     edge.size=150,vertex.size=0,layout=spatial.data[[5]]*1,main="Fusarium redolens Real network")
+
+plot(colonies_ntwk[[30]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color="green",
+     edge.size=150,vertex.size=0,layout=spatial.data[[30]]*1,main="Resinisium bicolor- Real network")
+
+plot(Access_mst[[1]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color="cyan",
+     edge.size=150,vertex.size=0,layout=spatial.data[[1]]*1,main="Mortierella elongata- Baseline network")
+
+plot(Access_mst[[16]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color="magenta",
+     edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="Mucor fragilis- Baseline network")
+
+plot(Access_mst[[5]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color="orange",
+     edge.size=150,vertex.size=0,layout=spatial.data[[5]]*1,main="Fusarium redolens- Baseline network")
 
 
-Then on each of these networks we measured the above mentioned traits.
+plot(Access_mst[[30]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color="green",
+     edge.size=150,vertex.size=0,layout=spatial.data[[30]]*1,main="Resinisium bicolor- Baseline network")
 
+```
 
-### Selection of network traits
-
-    + MST ratio (Length of the network/Lendth of MST of similar dimensions)
-
-
-
+Figure 2. Examples of represenation of fungal mycelium as network graphs. Top: Graph based on the observed mycelium. Bottom: Graph based on base line model for each corresponding colony. Cyan: Mortierellomycota; Magenta: Mucor; Orange: Ascomycete; Green: Basidiomycota.
 
 ### Statistical analysis
 
-We used this data in a redundancy analysis (RDA, a type constrained multivariate ordination) to identify and test whether species differ among each other in term of their network traits and from the toy models. That is, the network traits are the response variables and species identiy (and their respective toy model) as explanatory (constraining) variables. To test significance of the ordination we used a permutation based test using the r package vegan.
+We performed redundancy analysis (RDA, a type constrained multivariate ordination) in order identify interspecific differences in term mycelial traits. We used both descriptive and network traits as the response variables and species identiy as explanatory (constraining) variables. Prior to RDA, we standardize all variables in units of standard deviations (Z scaling). By doing this, we are effectively removing obvious differences among species due to absolute size differences. Because we also are interested in determining to what extend interespecific differences in mycelial traits is correlated with phylogeny, our RDA model included phylum affiliation as condition (thus the full rda model was in the form Mycelial traits ~ Species identity + Condition (Phylum)). To determine to what extent the variance explained by  constrained ordidnation  deviate from a random distribution, we repeated  RDA as above after randomizing the mycelial traits dataset (999x times in total) and compute F values and associated p-values (i.e. statistical significance).   Standardizations, RDA and significance testing from randomized approach were performed using the functions "rda" and "anova.cca" in the r package vegan.
 
-To be done: We identifying optimal network strategies by using the Pareto approach. Part of this can be done with the package geometry with which one can calculate convex hull. I have not found though how to calculate a triangle, and how to statistically test for this. One could repeat the anlaysis of the Alon´s papers, for that one need to download software from: http://www.weizmann.ac.il/mcb/UriAlon/download/pareto-front-software
+Finally, we also identify  mycelial archetypes as descriebed in Alon et al (200X). This technique consist in identifying the vertices from best fitting convex hull that includes all data points in the ordintaion space. To determine how likely these archetypes are from a random distribution, we repeated this calcuation after randomizing the dataset (for a total of X randomization). Archetype identification and randomizations were performed  in the open-access Uri Alon software (http://www.weizmann.ac.il/mcb/UriAlon/download/pareto-front-software).
 
 
 ## Results
 
-These are are the results from the RDA using the network traits and a permutation based two way ANOVA-like test. They support the hypotheses that different species differ in their network traits and that they also differ from simple toy models.
+*Separation of species based on mycelial traits*
 
-Loading data (Here I add data from the csv tables stores in the folder). This takes time so I save the result.
+We found support for the hypotheses that species differ in their network traits. For example, The observed constrained ordination, which includes species identity as explanatory variable, explain more variation than unconstrained one (87% vs  13%) and it significantly deviated from permutation-based random distribution (999 randomizations) (table 2).
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-
-library(tidyverse)
-#These lines will load all files saved as .csv in the folder "processedData" and then merging them ("row bind")
-temp = list.files(path="processedData\\",pattern="*-Edge.csv")
-temp<-paste("processedData\\",temp,sep = "")
-Edge_Traits_AZ = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
-#myfiles[[4]]<-myfiles[[4]][,c(1:42)]
-
-# Edge_Traits<-do.call(rbind,myfiles)
-# 
-# Edge_Traits$Species<-NA
-# Edge_Traits$Species[grep("C34",Edge_Traits$name)]<-"Mortierella elongata"
-# Edge_Traits$Species[grep("C35",Edge_Traits$name)]<-"Umbelopsis isabellina"
-# Edge_Traits$Species[grep("DF19",Edge_Traits$name)]<-"Mortierella alpina"
-# Edge_Traits$Species[grep("DF25",Edge_Traits$name)]<-"Mortierella elongata2"
-# Edge_Traits$Species[grep("DF56",Edge_Traits$name)]<-"Mucor fragilis"
-# Edge_Traits$Species[grep("M",Edge_Traits$name)]<-"Mortierella alpina2"
-
-#Node positions
-temp = list.files(path="processedData\\",pattern="*-Node.csv")
-temp<-paste("processedData\\",temp,sep = "")
-Node_Traits_AZ = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
-#myfiles[[4]]<-myfiles[[4]][,c(1:42)]
-# Node_Traits<-do.call(rbind,myfiles)
-# 
-# Node_Traits$node_name_ID<-paste(Node_Traits$name,Node_Traits$node_ID,sep = "_")
-
-#Adding Basidiomycete data
-temp = list.files(path="FreyasData\\",pattern="*-Edge.csv")
-temp<-paste("FreyasData\\",temp,sep = "")
-Edge_Traits_B = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
-
-#Node positions
-temp = list.files(path="FreyasData\\",pattern="*-Node.csv")
-temp<-paste("FreyasData\\",temp,sep = "")
-Node_Traits_B = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
-
-#Putting them all together
-Edge_Traits<-do.call(c, list(Edge_Traits_AZ, Edge_Traits_B))
-Node_Traits<-do.call(c, list(Node_Traits_AZ, Node_Traits_B))
-
-```
-
-Loading data (stored from the chunck above)
-```{r}
-Edge_Traits<-readRDS("List_Edge_Traits.RDS")
-
-Node_Traits<-readRDS("List_Node_Traits.RDS")
-
-```
-
-Transforming it into igraph object
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-#Transforming it into igraph object
-library(igraph)
-library(tidyverse)
-
-colonies_ntwk<-
-# lapply(Edge_Traits,function(x){
-#     y<-graph_from_edgelist(as.matrix(x[,c("EndNodes_1","EndNodes_2")]),directed = F)
-#     E(y)$name<-x$name
-#     E(y)$weight<-x$Resistance_2
-#     E(y)$length<-x$Length
-#     E(y)$width<-x$Width
-#     
-#     V(y)$Degrees<-degree(y)
-#     V(y)$Accessibility<-distances(y,v=as.numeric(V(y)[Degrees==max(V(y)$Degrees)])#Check whether these values are correct in the computer at Uni
-#                                   )
-#     E(y)$type<-"Main"
-#     
-#     E(y)$e_distance<-(x$Length/x$Tortuosity)
-#     
-#     E(y)[incident(y,
-#               as.numeric(V(y)[Degrees==max(V(y)$Degrees)])
-#                     )]$type<-"Inoculum"
-#     
-#     y
-#     })
-# 
-# probando<-
-mapply(function(x,z){
-    y<-graph_from_edgelist(as.matrix(x[,c("EndNodes_1","EndNodes_2")]),directed = F)
-    E(y)$name<-x$name
-    E(y)$weight<-x$Resistance_2
-    E(y)$length<-x$Length
-    E(y)$width<-x$Width
-    
-    V(y)$Degrees<-degree(y)
-    V(y)$Accessibility<-distances(y,v=as.numeric(V(y)[Degrees==max(V(y)$Degrees)])
-    
-    
-                                                                )
-    
-    V(y)$angle<-z$node_Omin_Omid
-    
-    E(y)$type<-"Main"
-    
-    E(y)$e_distance<-(x$Length/x$Tortuosity)
-    
-    E(y)[incident(y,
-              as.numeric(V(y)[Degrees==max(V(y)$Degrees)])
-                    )]$type<-"Inoculum"
-    
-    y
-    },Edge_Traits,Node_Traits,SIMPLIFY = F)
-
-# all(
-#   E(colonies_ntwk[[1]])$length==E(probando[[1]])$length
-# )
-# 
-# 
-# 
-# probando<-
-# mapply(function(x,y){
-#   V(x)$angle<-y$node_Omin_Omid
-#   x<-x
-# },colonies_ntwk,Node_Traits
-#   
-# )
-
-#Just checking that everything is as it should, and it is!
-# all(
-# E(colonies_ntwk[[12]])$weight==Edge_Traits[[12]]$Resistance_2
-# )
-# 
-# V(colonies_ntwk[[12]])[to(E(colonies_ntwk[[12]])[type=="Inoculum"])];
-#     unique(Edge_Traits[[12]][Edge_Traits[[12]]$Type=="F",]$EndNodes_2)
-# 
-
-```
-
-
-Saving coordinates as a separate file
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-#Spatial location
-spatial.data<-lapply(Node_Traits,function(x){x[,c("node_ID","node_X_pix","node_Y_pix","name")]})
-    # Node_Traits[,#Node_Traits[which(Node_Traits$name=="DF56(6)_t09"),
-    #                       c("node_ID","node_X_pix","node_Y_pix","name")]
-
-spatial.data<-lapply(spatial.data,function(l){as.matrix(l[,c(2,3)])})
-spatial.data<-lapply(spatial.data,function(l){norm_coords(l, ymin=-1, ymax=1, xmin=-1, xmax=1)})
-# 
-# l <- as.matrix(spatial.data[,c(2,3)])
-# l <- norm_coords(l, ymin=-1, ymax=1, xmin=-1, xmax=1)
-
-```
-
-
-```{r, eval=FALSE,echo=FALSE}
-#This one was an attempt to calculate euclidean distances among nodes by myself. It works but It takes too long. Thus I decided to use length/tortuosity in the meantime
-
-# lapply(Node_Traits,function(x){
-#     all(rownames(x)==as.character(x$node_ID))
-# })
-
-# lapply(Node_Traits,function(x){
-#     net<-graph_from_adjacency_matrix(as.matrix(dist(x)),weighted = T)
-#     net<-as_data_frame(net, what="edges")    
-# }
-#     )
-
-#This takes too long!
-# net_v<-graph_from_adjacency_matrix(as.matrix(dist(spatial.data[[1]])),weighted = T)
-# net_ed<-graph_from_edgelist(as.matrix(Edge_Traits[[1]][,c("EndNodes_1","EndNodes_2")]),directed = F)
-
-
-#look into add_layout_s
-
-```
-
-
-Calculating the summary (mean) values for each colony (hyphae traits like length and width)
-
-There might be the need to change this code. Instead of useing subgraph edges, just keep using subsetting 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-#Calculating the summary values for each colony
-
-colony_sum<-do.call("rbind",
-
-lapply(
-colonies_ntwk,function(x){
-    y<-subgraph.edges(x,E(x)[type=="Main"])
-    
-    E(y)$hyphae<-"main"
-    E(y)[inc(V(y)[Degrees==1])]$hyphae<-"tip"
-    
-    z<-data.frame(
-        name_col=unique(E(y)$name),
-        Hyphal_length=mean(log10(E(y)$length)),
-        Hyphal_number=length(E(y)$name),
-        Hyphal_tip_width=mean(log10(E(y)[hyphae=="tip"]$width)),
-        Hyphal_main_width=mean(E(y)[hyphae=="main"]$width),
-        Hyphal_tip_access=mean(V(y)[Degrees==1]$Accessibility),
-        Hyphal_angle=mean(V(y)[which(angle>0)]$angle),
-        
-        Mycelia_length=sum(E(y)$length)
-        
-            )
-    z
-    
-    })
-)
-
-# mean(V(net_ed)[which(angle>0)]$angle)
-# mean(Node_Traits$node_Omin_Omid[which(Node_Traits$node_Omin_Omid>0&Node_Traits$name=="C34(1)_t11")])
-```
-
-Loading summary tables. From these tables I only need area (from a shrunk convex hull) and (thus) hyphal density. All other variables I can calculate them myself (see chuncks below)
-
-```{r,echo=FALSE, message=FALSE, warning=FALSE}
-
-#This does not work at the moment!
-
-#Adding the other variables coming from Mark´s App
-
-temp = list.files(path="processedData\\",pattern="*-summaryTable.csv")
-temp<-paste("processedData\\",temp,sep = "")
-summary_Traits_AZ = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
-
-# summary_Traits_AZ = lapply(summary_Traits_AZ,function(x){x[,c("summary_mean_area",
-#                                                               "summary_mean_Geff",
-#                                                         "summary_mean_edge_density","summary_mean_Reff",
-#                                                         "summary_mean_alpha","summary_mean_beta")]} )
-
-#Note: it seems the names have changed in some cases for the summary-table output in the august version of the
-#Mark´s app
-#summary_Traits_AZ<-do.call(rbind,summary_Traits_AZ)
-summary_Traits_AZ<-bind_rows(summary_Traits_AZ)
-summary_Traits_AZ$name_col<-gsub("processedData\\\\+","",temp)
-summary_Traits_AZ$name_col<-gsub("\\-summaryTable\\.csv","",summary_Traits_AZ$name)
-
-
-
-#For the moment I am nos using any data from the basidiomycetes data (Freya´s data) because area is not included.
-temp = list.files(path="FreyasData\\",pattern="*-summaryTable.csv")
-temp<-paste("FreyasData\\",temp,sep = "")
-summary_Traits_B = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
-
-# summary_Traits_B = lapply(summary_Traits_B,function(x){x[,c(#"summary_mean_area",For the moment i do not have it for the basidiomycota
-#                                                             "summary_mean_Geff",
-#                                                         #"summary_mean_edge_density",
-#                                                         "summary_mean_Reff",
-#                                                         "summary_mean_alpha","summary_mean_beta")]} )
-
-summary_Traits_B<-do.call(rbind,summary_Traits_B)
-summary_Traits_B$name_col<-gsub("FreyasData\\\\+","",temp)
-summary_Traits_B$name_col<-gsub("\\-summaryTable\\.csv","",summary_Traits_B$name)
-summary_Traits_B$summary_mean_area<-c(217604,329047,217391,3411537,4061079,4437051,833413,2358936,2401926)
-
-#These values were sent by Mark via email on september 2020
-# Pi_ctrl1_d8_1
-# 217604
-# 
-# Pi_ctrl1_d8_2
-# 329047
-# 
-# Pi_ctrl1_d8_3
-# 217391
-# 
-# Pv_ctrl1_d8_1
-# 3411537
-# 
-# Pv_ctrl1_d8_2
-# 4061079
-# 
-# Pv_ctrl1_d8_3
-# 4437051
-# 
-# Rb_ctrl1_d8_1
-# 833413
-# 
-# Rb_ctrl1_d8_2
-# 2358936
-# 
-# Rb_ctrl1_d8_3
-# 2401926
-
-rm(temp)
-
-# colony_sum<-left_join(colony_sum,summary_Traits[,c("name_col","summary_mean_area",
-#                                                     "summary_mean_edge_density",
-#                                                     "summary_mean_Geff",#It´s computing demanding, I will do implement it later
-#                                                     "summary_mean_Reff",
-#                                                     "summary_mean_alpha",
-#                                                     "summary_mean_beta")])
-```
-
-Calculating summary network traits (coefficients and efficiencies)
-
-```{r,echo=FALSE, echo=FALSE}
-#Alternatively I can calculate them by myself (useful for calculating them for the MST´s below). I did not do this for Global efficiency of the zygos and ascos as this led to the computer crahsing. Thus I did it only for the Basidios as this data is not reported in the summary table sent by Mark
-
-#mean(1/V(net_ed)[Degrees==1&Accessibility>0]$Accessibility)
-
-summary_Traits<-do.call(rbind,
-lapply(colonies_ntwk,function(net_ed){
-  data.frame(
-    name_col=unique(E(net_ed)$name),
-    summary_mean_alpha=(ecount(net_ed)-vcount(net_ed)+1)/(2*vcount(net_ed)-5),
-    summary_mean_beta=ecount(net_ed)/vcount(net_ed),
-    summary_mean_Reff=mean(1/V(net_ed)[Accessibility>0]$Accessibility),
-    summary_mean_Reff_tip=mean(1/V(net_ed)[Degrees==1&Accessibility>0]$Accessibility))
-})
-)
-```
-
-For the global efficiency of the Basidiomycetes. A bit time consuming so I save the results
-
-```{r,echo=FALSE, echo=FALSE}
-
-library(brainGraph)
-
-summary_Geff<-do.call(rbind,
-lapply(colonies_ntwk[24:32],function(net_ed){
-  data.frame(
-    name_col=unique(E(net_ed)$name),
-    summary_mean_Geff=sum(1/distances(net_ed)[distances(net_ed)>0])*(1/(length(V(net_ed))*length(V(net_ed))-1))
-
-)
-})
-);saveRDS(summary_Geff,"summary_Geff.RDS")
-```
-
-
-Here I am loading the results from the global efficiency and merging them with the other summary parameters
-```{r}
-summary_Geff<-readRDS("summary_Geff.RDS")
-
-summary_Traits<-left_join(summary_Traits,summary_Traits_AZ[,c("name_col","summary_mean_Geff")])
-
-summary_Traits$summary_mean_Geff[summary_Traits$name_col%in%summary_Geff$name_col]<-
-  
-  summary_Geff$summary_mean_Geff[summary_Geff$name_col%in%summary_Traits$name_col]
-
-
-```
-
-
-```{r,echo=FALSE, echo=FALSE}
-colony_sum<-left_join(colony_sum,summary_Traits)
-
-```
-
-This is the explanation on how I got the formulas used above for the calculation of summary values
-
-```{r,echo=FALSE, eval=FALSE}
-#This is the explanation on how I got the formulas used above for the calculation of summary values
-
-net_ed<-colonies_ntwk[[1]]
-net_ed4<-colonies_ntwk[[4]]
-net_ed11<-colonies_ntwk[[11]]
-net_ed17<-colonies_ntwk[[17]]
-#alpha coefficient
-(ecount(net_ed)-vcount(net_ed)+1)/(2*vcount(net_ed)-5)#0.1644
-
-summary_Traits_AZ$summary_mean_alpha[1]#0.1644
-
-(ecount(Access_mst[[1]])-vcount(Access_mst[[1]])+1)/(2*vcount(Access_mst[[1]])-5)
-#beta coefficient
-ecount(net_ed)/vcount(net_ed)
-
-#Route efficiency 
-mean(1/V(net_ed)[Accessibility>0]$Accessibility)#This one is the closest to the values of Mark´s App
-#0.007947156
-
-
-summary_Traits_AZ$summary_mean_Reff[1]#0.0079467
-
-
-#other tested methods were that did not work but according the formula in manual should:
-# sum(1/V(net_ed)[Accessibility>0]$Accessibility)*(1/(vcount(net_ed)*(vcount(net_ed)-1)))
-# sum(1/V(net_ed)[Accessibility>0]$Accessibility)/vcount(net_ed)
-
-#Route efficiency is the mean of the inverses of all accessibilities. To it makes sense to measure this as route efficiency to the tip only:
-
-mean(1/V(net_ed)[Degrees==1&Accessibility>0]$Accessibility)
-
-
-#Global efficiency is more computing demanding as it would be mean of the inverse of all distances in the network. This one I would try to calculated it in the computer at the Uni
-
-probando<-
-sum(1/distances(net_ed)[distances(net_ed)>0])
-
-probando*(1/(28341*28340))
-
-(1/(length(V(net_ed))*length(V(net_ed))-1))
-
-          
-summary_Traits_AZ$summary_mean_Geff[1]#0.004068755
-summary_Traits_AZ$summary_mean_Geff[4]#0.005695598
-summary_Traits_AZ$summary_mean_Geff[11]#0.005236195
-summary_Traits_AZ$summary_mean_Geff[17]#0.01983892
-
-efficiency(net_ed,type = "global")#0.00406909
-
-net_ed<-colonies_ntwk[[1]]
-g<-net_ed
-
-# nodal efficiency function (fromo internet forum)
-get_eff <- function(i){return((1/(length(V(g)) - 1))*sum(1/distances(g, V(g)[i])[-i]))}
-no_cores <- detectCores() - 1 
-cl       <- makeCluster(no_cores)
-registerDoParallel(cl)  
-result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
-stopCluster(cl)
-rm(cl)
-global_eff <- mean(result)#0.00406909
-
-
-sum(1/distances(net_ed)[distances(net_ed)>0])*(1/(length(V(net_ed))*length(V(net_ed))-1))#0.004068947
-sum(1/distances(net_ed4)[distances(net_ed4)>0])*(1/(length(V(net_ed4))*length(V(net_ed4))-1))#0.005695659
-sum(1/distances(net_ed11)[distances(net_ed11)>0])*(1/(length(V(net_ed11))*length(V(net_ed11))-1))#0.005236075
-sum(1/distances(net_ed17)[distances(net_ed17)>0])*(1/(length(V(net_ed17))*length(V(net_ed17))-1))
-```
-
-This chunk has random code
-
-```{r,echo=FALSE, eval=FALSE}
-trial<-
-sapply(colonies_ntwk,function(x){
-    mean(1/V(x)[Accessibility>0]$Accessibility)
-})
-
-
-colony_sum[,c("name_col","summary_mean_alpha","summary_mean_beta","summary_mean_Geff","summary_mean_Reff")]
-
-
-plot(trial,colony_sum$summary_mean_Reff)
-trial/colony_sum$summary_mean_Reff
-
-#edgedensity
-
-head(E(colonies_ntwk[[1]])$e_distance)
-
-ecount(net_ed)/summary_Traits$summary_mean_area[1]
-
-summary_Traits$summary_mean_area
-
-summary_Traits$summary_mean_edge_density
-
-```
-
-Calculating (weighted) Minimum spanning trees based on the dimesnions of each of the networks. The weights are given by resistance_2
-
-```{r,echo=FALSE, message=FALSE, warning=FALSE}
-# We calculate two "model2 network for each fungal colony. First, euclidean minimum spanning tree. Second, weighted minimum spanning tree. Both networks the nodes are linked in a way tha minimizes the cost of the network. That is, without any cycles and with the minimum possible total edge weight. In the case of the EMST, it minimizes the total euclidean distance of the newtork while in the the WMST it minimized the total resistance of the network. Both models were calculated in igrpah.
-
-#Weighted MST (by accessibility)
-Access_mst<-
-        lapply(colonies_ntwk,
-               mst)
-```
-
-I calculated also other networks but in the end they are not so useful
-
-```{r,echo=FALSE, message=FALSE, warning=FALSE}
-#stats::dist(x, method = "euclidean")
-
-#Euclidean MST 
-
-#For this one I am not so sure how to get it. I am going to run it either as an unweighted mst and another one weigted by the euclidean distance as measured in Mark´s App
-unweighted_mst<-
-        lapply(colonies_ntwk,function(x){
-            x<-delete_edge_attr(x,"weight")
-            mst(x)
-        }
-               )
-
-edistance_mst<-
-        lapply(colonies_ntwk,function(x){
-            E(x)$weight<-E(x)$e_distance
-            mst(x)
-        }
-               )
-
-#Quick comparison among the MST´s
-# head(Edge_Traits[[1]]$Resistance_2)
-# head(E(colonies_ntwk[[1]])$weight)
-# head(E(colonies_ntwk[[1]])$e_distance)
-# 
-# head(E(colonies_ntwk[[1]])$weight)
-# head(E(Access_mst[[1]])$weight)
-# head(E(unweighted_mst[[1]])$weight)
-# head(E(edistance_mst[[1]])$weight)
-# 
-# ecount(colonies_ntwk[[1]])
-# ecount(Access_mst[[1]])
-# ecount(unweighted_mst[[1]])
-# ecount(edistance_mst[[1]])
-```
-
-Calculating summary values (hypal traits, coefficients and efficiencies ) for the minimum spanning trees (MST´s)
-
-```{r,echo=FALSE, message=FALSE, warning=FALSE}
-#Summarizng the MST´s unweighted_mst, edistance_mst, Access_mst_sum
-
-Access_mst_sum<-do.call("rbind",
-    lapply(
-    Access_mst,function(x){
-        y<-subgraph.edges(x,E(x)[type=="Main"])
-        
-        E(y)$hyphae<-"main"
-        E(y)[inc(V(y)[Degrees==1])]$hyphae<-"tip"
-        
-        z<-data.frame(
-            name_col=unique(E(y)$name),
-            Hyphal_length=mean(E(y)$length),
-            Hyphal_number=length(E(y)$name),
-            Hyphal_tip_width=mean(E(y)[hyphae=="tip"]$width),
-            Hyphal_main_width=mean(E(y)[hyphae=="main"]$width),
-            Hyphal_tip_access=mean(V(y)[Degrees==1]$Accessibility),
-            Hyphal_angle=mean(V(y)[which(angle>0)]$angle),
-            
-            Mycelia_length=sum(E(y)$length),
-            
-            #Now the indexes and efficiencies
-            alpha_coeff=(ecount(x)-vcount(x)+1)/(2*vcount(x)-5),
-            beta_coeff=ecount(x)/vcount(x),
-            Route_eff=mean(1/V(x)[Accessibility>0]$Accessibility),
-            Reff_tip=mean(1/V(x)[Degrees==1&Accessibility>0]$Accessibility)
-        )
-        z
-        
-        })
-    )
-```
-
-
-For the global efficiency, It was more computing demanding. I save the results for not having to do it again
-
-```{r,echo=FALSE, echo=FALSE}
-MST_summary_Geff1<-#do.call(rbind,
-sapply(Access_mst[1:5],function(net_ed){
-      a<-efficiency(net_ed,type = "global")
-
-})
-#);
-
-saveRDS(MST_summary_Geff1,"MST_summary_Geff1.RDS")
-
-
-MST_summary_Geff6<-efficiency(Access_mst[[6]],type = "global");saveRDS(MST_summary_Geff6,"MST_summary_Geff6.RDS")
-MST_summary_Geff7<-efficiency(Access_mst[[7]],type = "global");saveRDS(MST_summary_Geff7,"MST_summary_Geff7.RDS")
-MST_summary_Geff8<-efficiency(Access_mst[[8]],type = "global");saveRDS(MST_summary_Geff8,"MST_summary_Geff8.RDS")
-
-#9 and 10 are in the chunck below because they are so big it crashes the way "efficiency" works
-
-MST_summary_Geff11<-efficiency(Access_mst[[11]],type = "global");saveRDS(MST_summary_Geff11,"MST_summary_Geff11.RDS")
-MST_summary_Geff12<-efficiency(Access_mst[[12]],type = "global");saveRDS(MST_summary_Geff12,"MST_summary_Geff12.RDS")
-MST_summary_Geff13<-efficiency(Access_mst[[13]],type = "global");saveRDS(MST_summary_Geff13,"MST_summary_Geff13.RDS")
-
-MST_summary_Geff14_32<-sapply(Access_mst[14:32],function(net_ed){
-      a<-efficiency(net_ed,type = "global")
-
-});saveRDS(MST_summary_Geff14_32,"MST_summary_Geff14_32.RDS")
-
-
-
-```
-
-This is for the two networks that were so big, that I had to use a function that "partitions" the operation
-```{r}
-# nodal efficiency function (from a forum in internet)
-
-g<-Access_mst[[9]]
-
-
-get_eff <- function(i){return((1/(length(V(g)) - 1))*sum(1/distances(g, V(g)[i])[-i]))}
-no_cores <- detectCores() - 1 
-cl       <- makeCluster(no_cores)
-registerDoParallel(cl)  
-result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
-stopCluster(cl)
-rm(cl)
-MST_summary_Geff9 <- mean(result);saveRDS(MST_summary_Geff9,"MST_summary_Geff9.RDS")
-result9<-result
-
-g<-Access_mst[[10]]
-
-get_eff <- function(i){return((1/(length(V(g)) - 1))*sum(1/distances(g, V(g)[i])[-i]))}
-no_cores <- detectCores() - 1 
-cl       <- makeCluster(no_cores)
-registerDoParallel(cl)  
-result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
-stopCluster(cl)
-rm(cl)
-MST_summary_Geff10 <- mean(result)
-result10<-result; saveRDS(MST_summary_Geff10,"MST_summary_Geff10.RDS")
-rm(result)
-```
-
-Here, I add the estimation of global efficieny from the two chuncks above to the MST´s.
-
-```{r}
-Access_mst_sum$Geff<-
-c(readRDS("MST_summary_Geff1.RDS"),
-  readRDS("MST_summary_Geff6.RDS"),
-  readRDS("MST_summary_Geff7.RDS"),
-  readRDS("MST_summary_Geff8.RDS"),
-  readRDS("MST_summary_Geff9.RDS"),
-  readRDS("MST_summary_Geff10.RDS"),
-  readRDS("MST_summary_Geff11.RDS"),
-  readRDS("MST_summary_Geff12.RDS"),
-  readRDS("MST_summary_Geff13.RDS"),
-  readRDS("MST_summary_Geff14_32.RDS")
-  )
-
-```
-
-
-This are calculations for the other toy networks that in the end are not goning to be used
-
-```{r,echo=FALSE, message=FALSE, warning=FALSE}
-unweighted_mst_sum<-do.call("rbind",
-    lapply(
-    unweighted_mst,function(x){
-        y<-subgraph.edges(x,E(x)[type=="Main"])
-        
-        E(y)$hyphae<-"main"
-        E(y)[inc(V(y)[Degrees==1])]$hyphae<-"tip"
-        
-        z<-data.frame(
-            name_col=unique(E(y)$name),
-            Hyphal_length=mean(E(y)$length),
-            Hyphal_number=length(E(y)$name),
-            Hyphal_tip_width=mean(E(y)[hyphae=="tip"]$width),
-            Hyphal_main_width=mean(E(y)[hyphae=="main"]$width),
-            Hyphal_tip_access=mean(V(y)[Degrees==1]$Accessibility),
-            
-            #Now the indeces
-            alpha_coeff=(ecount(x)-vcount(x)+1)/(2*vcount(x)-5),
-            beta_coeff=ecount(x)/vcount(x),
-            Route_eff=mean(1/V(x)[Accessibility>0]$Accessibility)
-        )
-        z
-        
-        })
-    )
-
-
-edistance_mst_sum<-do.call("rbind",
-    lapply(
-    edistance_mst,function(x){
-        y<-subgraph.edges(x,E(x)[type=="Main"])
-        
-        E(y)$hyphae<-"main"
-        E(y)[inc(V(y)[Degrees==1])]$hyphae<-"tip"
-        
-        z<-data.frame(
-            name_col=unique(E(y)$name),
-            Hyphal_length=mean(E(y)$length),
-            Hyphal_number=length(E(y)$name),
-            Hyphal_tip_width=mean(E(y)[hyphae=="tip"]$width),
-            Hyphal_main_width=mean(E(y)[hyphae=="main"]$width),
-            Hyphal_tip_access=mean(V(y)[Degrees==1]$Accessibility),
-            #Now the indeces
-            alpha_coeff=(ecount(x)-vcount(x)+1)/(2*vcount(x)-5),
-            beta_coeff=ecount(x)/vcount(x),
-            Route_eff=mean(1/V(x)[Accessibility>0]$Accessibility)
-        )
-        z
-        
-        })
-    )
-#And here adding edge_density by using the area as reported in Mark´s App
-# Access_mst_sum$edge_density<-sapply(Access_mst,ecount)/summary_Traits$summary_mean_area
-# unweighted_mst_sum$edge_density<-sapply(unweighted_mst,ecount)/summary_Traits$summary_mean_area
-# edistance_mst_sum$edge_density<-sapply(edistance_mst,ecount)/summary_Traits$summary_mean_area
-
-
-
-```
-
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-# We used this data in a redundancy analysis (a type constrained multivariate ordination) to identify and test whether species differ among each other in term of their network traits and from the toy models. That is, the network traits are the response variables and species identiy (and their respective toy model) as explanatory (constraining) variables. To test significance of the ordination we used a permutation based test using the r package vegan.
-
-#Placing all data together:
-names(colony_sum)<-gsub("summary_mean_","",names(colony_sum))
-names(colony_sum)[11]<-"Root_eff"
-names(colony_sum)[9]<-"alpha_coeff"
-names(colony_sum)[10]<-"beta_coeff"
-# colony_sum<-colony_sum[,c("name_col","Hyphal_length","Hyphal_number","Hyphal_tip_width", 
-# "Hyphal_main_width","Hyphal_tip_access","alpha_coeff","beta_coeff","Route_eff"#,"edge_density"
-# )]
-
-names(Access_mst_sum)[11]<-"Root_eff"
-
-colony_sum$Network<-"Real"
-Access_mst_sum$Network<-"Resistance_MST"
-# unweighted_mst_sum$Network<-"Unweighted_Tree"
-# edistance_mst_sum$Network<-"Euclidean_Tree"
-
-
-#This was just to check whetehr the values between the summary tables from the csv´s and my calculation match.
-#which they do!
-
-#summary_Traits_table_AZB<-bind_rows(summary_Traits_AZ,summary_Traits_B)
-
-# testing<-sapply(
-#   colonies_ntwk,function(x){y<-mean(E(x)[type=="Main"]$length)}
-# )
-# 
-# 
-# plot(summary_Traits_table_AZB$cords_mean_Length,
-#      testing)
-# 
-# testing2<-sapply(
-#   colonies_ntwk,function(x){y<-mean(log10(E(x)[type=="Main"]$length))}
-# )
-# 
-# plot(colony_sum$Hyphal_length,
-#      testing2)
-```
-
-Checking MST ratio. According to the manual the MST ratio is: "The ratio of the total length to the length of the minimum spanning tree connecting all nodes"
-
-My numbers and the one of Mark do not match but they are correlated. The reasons for this are: 
-
-1) Mark´s total length include the inoclum edges, mine do not (I checked see code below).
-2) Mark´s total length is already saled by the scaling factor (0.79), mines are not.
-3) Mine total lenght are for some reason 3 order of magnitude larger than Mark´s (No idea why)
-
-However, even when I calculated total lengths including the inoculum edges for both the real colonies and the mst,
-my number still do match (although still correlated). Also in Mark´s the formula seem to be MST_length/real_length which sounds opposite to the statement above and it makes no so much sense to me.
-
-```{r}
-plot(
-summary_Traits_table_AZB$summary_mean_MST_ratio,
-
-Access_mst_sum$Mycelia_length/colony_sum$Mycelia_length)
-
-plot(colony_sum$Mycelia_length,summary_Traits_table_AZB$summary_mean_length_total)
-
-testing<-sapply(
- colonies_ntwk,function(x){y<-sum(E(x)$length)}
- )
-
-plot(summary_Traits_table_AZB$summary_mean_length_total,testing)
-
-testing_mst<-sapply(
- Access_mst,function(x){y<-sum(E(x)$length)}
- )
-
-plot(
-(testing_mst/testing),
-summary_Traits_table_AZB$summary_mean_MST_ratio)
-
-```
-
-
-
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-all_data<-bind_rows(colony_sum,
-                #unweighted_mst_sum,
-                #edistance_mst_sum,
-                Access_mst_sum)
-
-#Adding the species names
-all_data$Species<-NA
-all_data$Species[grep("C34",all_data$name_col)]<-"Mortierella elongata"
-all_data$Species[grep("C35",all_data$name_col)]<-"Umbelopsis isabellina"
-all_data$Species[grep("DF19",all_data$name_col)]<-"Mortierella alpina"
-all_data$Species[grep("DF25",all_data$name_col)]<-"Mortierella elongata2"
-all_data$Species[grep("DF56",all_data$name_col)]<-"Mucor fragilis"
-all_data$Species[grep("M",all_data$name_col)]<-"Mortierella alpina2"
-
-all_data$Species[grep("DF9",all_data$name_col)]<-"Alternaria sp"
-all_data$Species[grep("C41",all_data$name_col)]<-"Fusarium redolens"
-all_data$Species[grep("FOX",all_data$name_col)]<-"Fusarium oxysporum"
-all_data$Species[grep("DF32",all_data$name_col)]<-"Fusarium solani"
-
-all_data$Species[grep("Pi",all_data$name_col)]<-"Pi"
-all_data$Species[grep("Pv",all_data$name_col)]<-"Pv"
-all_data$Species[grep("Rb",all_data$name_col)]<-"Rb"
-
-
-#Adding area data
-all_data<-left_join(all_data,
-summary_Traits_table_AZB[,c("name_col","summary_mean_area")])
-
-#Checking edge density:
-summary_Traits_table_AZB$summary_mean_edge_density
-#This is calculated as;
-summary_Traits_table_AZB$summary_mean_num_edges/summary_Traits_table_AZB$summary_mean_area
-
-#Not as:
-summary_Traits_table_AZB$cords_mean_Number/summary_Traits_table_AZB$summary_mean_area
-
-#To be sure, both edge number from me and Mark are the same (very minor change)
-plot(summary_Traits_table_AZB$summary_mean_num_edges,colony_sum$Hyphal_number)
-
-#Thus edge density keeps constant as well 
-plot(
-colony_sum$Hyphal_number/all_data$summary_mean_area[1:32],
-summary_Traits_table_AZB$summary_mean_edge_density)
-
-#Then I can just calculated edge density for all (including the MSt´s)
-
-all_data$Hyphal_density<-all_data$Hyphal_number/all_data$summary_mean_area
-
-#Changin the name of the area so it make more sense
-names(all_data)[16]<-"Mycelial_area"
-
-```
-
-Excuting an RDA on the data
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+Table 2.
+```{r,echo=FALSE, warning=FALSE,message=FALSE}
 library(vegan)
 
-Model_network_traits<-rda(all_data[,c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
-                                     "Hyphal_main_width","Hyphal_tip_access","Hyphal_angle",
-                                     "Mycelia_length","alpha_coeff","beta_coeff",
-                                     "Root_eff","Reff_tip","Geff",
-                                     "Mycelial_area","Hyphal_density" )]~Species+Network,scale = TRUE,data = all_data)
+Model_network_traits_sps_scaled<-rda(all_data_scaled[,                                        
+                                  c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
+                                     "Hyphal_main_width",#"Hyphal_tip_access",
+                                    "Hyphal_angle",
+                                     "Mycelia_length_scaled","alpha_coeff","beta_coeff",
+                                     "Root_eff","Reff_tip","Geff_scaled",
+                                     "Mycelial_area","Hyphal_density" )]~Species + Condition(phylum),scale = TRUE,data = all_data_scaled)
 
+Model_network_traits_sps_scaled_2<-rda(all_data_scaled[,                                        
+                                  c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
+                                     "Hyphal_main_width",#"Hyphal_tip_access",
+                                    "Hyphal_angle",
+                                     "Mycelia_length_scaled","alpha_coeff","beta_coeff",
+                                     "Root_eff","Reff_tip","Geff_scaled",
+                                     "Mycelial_area","Hyphal_density" )]~Species, scale = TRUE,data = all_data_scaled)
+
+Model_network_traits_sps_scaled
 ```
 
-First, because the RDA (constrained)  explain 85% of the variation compared to the unconstrained analysis that explains only 14%
-```{r}
-Model_network_traits
-
+Table 3. 
+```{r, echo=FALSE}
+anova.cca(Model_network_traits_sps_scaled,by="term")
 ```
+This strong effect can be easily visualized constrained ordination space (Figure 3).
 
-Second, the first two axis of the RDA explain a large proportion of the variation (40% and 24% respectively)
-```{r}
-summary(Model_network_traits)[["cont"]][["importance"]][,c(1:2)]
-```
+```{r, echo=FALSE, eval=FALSE}
+RsquareAdj(Model_network_traits_sps_scaled)$adj.r.squared#This the adjusted r squared to the number of variables, the more variables the smaller the r square gets.
 
-Third, the statistical testing on whether constrained ordination is better at explaining variation than the unconstrained variationis highly significant. (based on 999 permutations)
-```{r}
-anova.cca(Model_network_traits,by="term")
+RsquareAdj(Model_network_traits_sps_scaled)$r.squared#This one corresponds to the value above
 ```
 
 
-Visualizing the clustering also supports the clustering of species and how different they are from the model networks. That said, the strongest effect comes from Mucor fragilis that departs a lot from the other species and it also the closest to the model networks
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-#Making the plot
-temporal<-as.data.frame(scores(Model_network_traits,display = "sites",scaling = "species",choices=c(1,2)))
+```{r,echo=FALSE, eval=FALSE}
+summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][,c(1:2)]
+summary(Model_network_traits_sps_scaled_2)[["cont"]][["importance"]][,c(1:2)]
+```
 
-all_data_ord<-cbind(all_data,temporal);rm(temporal)
+```{r, echo=FALSE}
 
+#Adding the two RDA axis to the dataframe
+temporal<-as.data.frame(scores(Model_network_traits_sps_scaled,display = "sites",scaling = "species",choices=c(1,2)))
+
+all_data_scaled1<-cbind(all_data_scaled,temporal);rm(temporal)
+
+#Extracting the "site" or variable scores.
+e_vectors_traits_scaled<-as.data.frame(
+  scores(Model_network_traits_sps_scaled,display = "species",choices = c(1,2),scaling = "species"));
+e_vectors_traits_scaled$traits<-rownames(e_vectors_traits_scaled)
+
+names(e_vectors_traits_scaled)[1]<-"RDA1_species"
+names(e_vectors_traits_scaled)[2]<-"RDA2_species"
+
+#
 my_theme<-
   theme(title = element_text(size = 18),
-        #axis.title.x=element_blank(),
+        axis.title.x=element_text(size=29),
+        panel.background = element_blank(),
+        panel.grid.major.x = element_line(size=0.25,linetype = "longdash",colour = "gray"),
+        panel.grid.major.y = element_line(size=0.25,linetype = "longdash",colour = "gray"),
         #axis.text.x = element_text(size = 20,angle = 45,hjust = 1),
-        axis.text.x = element_text(size = 20),
-        axis.text.y = element_text(size = 20),
+        axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
         strip.text.x = element_text(size = 20),
         strip.text.y = element_text(size = 25)#,
         #legend.position = "none"
         )
 
-e_vectors_traits<-as.data.frame(
-  scores(Model_network_traits,display = "species",choices = c(1,2),scaling = "species"));
-e_vectors_traits$traits<-rownames(e_vectors_traits)
-
-names(e_vectors_traits)[1]<-"RDA1_species"
-names(e_vectors_traits)[2]<-"RDA2_species"
-```
-
-
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
-all_data_ord %>% 
+#
+all_data_scaled1%>% 
   ggplot()+
   aes(x=RDA1,y=RDA2) +
   #geom_point(size=2)+
-    geom_text(aes(color=Network,label=Species)) +
-    labs(y="RDA2 28%",x="RDA1 37%")+
+    geom_text(aes(color=phylum,label=Species)) +
+    labs(y="RDA2 11%",x="RDA1 56%")+
   
   geom_text(size=2,aes(x=RDA1_species,y=RDA2_species,label=traits,fontface="bold"),
             hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
-            data = e_vectors_traits)+
+            data = e_vectors_traits_scaled)+
   geom_segment(aes(x=0, y=0, xend=RDA1_species, yend=RDA2_species), 
-        arrow = arrow(),data = e_vectors_traits)+
+        arrow = arrow(),data = e_vectors_traits_scaled)+
+  ggtitle(label = "Taxonomy corrected")+
   
     my_theme
-#rmarkdown::render("FungalNetworkDiversity.Rmd", quiet = T)
+```
+
+```{r, echo=FALSE}
+
+#Adding the two RDA axis to the dataframe
+temporal<-as.data.frame(scores(Model_network_traits_sps_scaled_2,display = "sites",scaling = "species",choices=c(1,2)))
+
+all_data_scaled2<-cbind(all_data_scaled,temporal);rm(temporal)
+
+#Extracting the "site" or variable scores.
+e_vectors_traits_scaled<-as.data.frame(
+  scores(Model_network_traits_sps_scaled_2,display = "species",choices = c(1,2),scaling = "species"));
+e_vectors_traits_scaled$traits<-rownames(e_vectors_traits_scaled)
+
+names(e_vectors_traits_scaled)[1]<-"RDA1_species"
+names(e_vectors_traits_scaled)[2]<-"RDA2_species"
+
+#
+all_data_scaled2 %>% 
+  ggplot()+
+  aes(x=RDA1,y=RDA2) +
+  #geom_point(size=2)+
+    geom_text(aes(color=phylum,label=Species)) +
+    labs(y="RDA2 27%",x="RDA1 45%")+
+  
+  geom_text(size=2,aes(x=RDA1_species,y=RDA2_species,label=traits,fontface="bold"),
+            hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
+            data = e_vectors_traits_scaled)+
+  geom_segment(aes(x=0, y=0, xend=RDA1_species, yend=RDA2_species), 
+        arrow = arrow(),data = e_vectors_traits_scaled)+
+  ggtitle(label = "No taxonomy correction")+
+  
+    my_theme
+```
+
+Figure 3. Constrained (RDA) ordination based on mycelial trait. Each name correspods to one colony and colors refers to phylum. Upper panel shows ordination based on mycelial traits after taking into account phylongeny affiliation (i.e. correcting for taxonomy), while bottom panel shows uncorrected ordination. 
+
+We also found that the species ordination was partly correlated with taxonomy (half of the variation explained in constrained ordination can be attributed to taxonomic affiliation) (Table 2).
+
+Finally, the ordination was largely driven by network traits contribution and not only by hyphal traits. For example, the loadings of the alpha coefficient, beta coefficient, scaled Global efficiency and the scaled mycelial length had some of the highest loadings (scaled eigenvectors) for the first RDA axis, whlile both root-tip and root efficieny had large loadings for the second axis. 
+```{r,echo=FALSE,message=FALSE,warning=FALSE}
+e_vectors_traits_scaled$type<-NA
+e_vectors_traits_scaled$type[grep("Hyphal",e_vectors_traits_scaled$traits)]<-"Descriptive"
+e_vectors_traits_scaled$type[which(e_vectors_traits_scaled$traits=="Mycelial_area")]<-"Descriptive"
+e_vectors_traits_scaled$type[which(is.na(e_vectors_traits_scaled$type))]<-"Network"
+
+pivot_longer(e_vectors_traits_scaled,RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
+    ggplot()+
+  aes(x=traits,y=abs(loading),fill=type)+
+    geom_bar(stat="identity",position = "dodge")+
+  facet_wrap(.~Axis)+
+  labs(y="Loadings")+
+  theme(axis.text.x = element_text(size=15,angle = 45,hjust = 1),
+        strip.text = element_text(size = 20),
+        legend.position = "bottom")
+```
+
+Figure 4. Loadings (eigenvectors) of different mycelial traits for the first two mains RDA axis (that jointly explain up to 75% of the data)-
+
+
+*Archetype identification*
+
+Based on the species included, we found three achetypes in the mycelial trait morphospace [Expand more]. 
+
+```{r, eval=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
+#This is done thrrough the Uri Alon´s softawer, thus I need to export the data and then use the software
+all_data_t<-all_data[which(all_data$Network=="Real"),
+                     c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
+                       "Hyphal_main_width","alpha_coeff","beta_coeff","Root_eff","Reff_tip","Geff","Hyphal_density","Mycelial_area")]
+
+all_data_t<-sapply(all_data_t,function(x){(x-mean(x))/sd(x)})
+
+write.csv2(all_data_t,"alldata_forTriangularity0.csv",row.names = F, col.names = F)
+write.csv(all_data_t,"alldata_forTriangularity.csv",row.names = F, col.names = F)#This one can be read in my laptop
+rm(all_data_t)
 ```
 
 
-```{r}
+## Discussion
+
+Our results showed that: a) species differ in terms of mycelial traits; b) such variation reflects to large extent phylogey and c) a large proportion of the difference among species is due to netowrk connectedeness pattern and not only due to hyphal descriptive traits. 
+
+Thus, our work goes one step further in the use of mycelial properites as ecologically relevant traits by showcasing the relevance of network properties (i.e. properties that emerge from connectedness patterns among hyphae). To our knwoledge, previous studies in ecology using mycelial features have mainly being restricted to descriptive hyphal traits. For example Lehmann et al (200X) used hyphal branching, hyphal tip extension rate and hyphal tip lenght as morphological variables that correlated with the enzymatic activities used by soil fungi to acquire resources. While Boddy et al (200X) use metrics that refelect the amount of mycelium "filling the substrate space" (e.g. fractal dimension). Even recent studies that do represent fungi in terms of network graph, restrict metrics to descriptive ones such as number of nodes and links (Dikec et al 2020)-
+
+In addition, the network model we used (and its metrics) emphasize the dynamic nature of fungal mycelia as connected trasnport network (Fricker et al 200x) during exploration phase. This is phase has been understudied in comparison to resource explotation phase (that is, when fungi grow on resource rich substrate). This is paradoxical, because exploration phase is is likely the dominant phenotype due to extremely patchy distrbution of resources where most fungi grow (e.g. soil). 
+
+Metrics we used, like  efficiency, could be used to predict the transport of resources from the center of the colony to every point of the expanding mycelium. Such differences would be extremely useful to understand the ecological ecological strategies among fungal species during competition or fungivory. For example, a mycelium network consisting mostly of thick "roads" allows for faster transfer of resources to expanding front, a strategy useful to: occupy find new resource patchs before competitors; synthetize chemical compounds to combat other competitors at the hyphal front or reduce palatability in face of fungivory. On the other hand, due to the reliance on few main roads, these networks would be very suscepible to loose connectivity due to manage (which can be caused by fungivory or catastrophic events).
+
+[HERE DISCUSSSION ON MEANING OF THE ARCHETYPES]
+
+We consider that our work as a blueprint for future research on the ecological and evoluationary meaning of network connectedness traits in three main ways. First, by including more species spanning a better resolution in phylogenetic resolution. It is premature to make conclusive remarks on this point based on limited number of species we used, but it indicates that a larege proportion of differences in mycelial traits is due to taxomy.  Thus, larger species pool would allow to uncover not only the real diversity of network traits but also determine to what extent such diversity is due to few early evolutionary events that have been preserved among extant taxa (high phylogenetic conservatisms) or whether differences among species arise due to ecological pressures multiple and independent times through fungal evoution (low phylogenetic consevartism) using state-of-the art phylogenetic comparative anylytical tools. Second, by including intraspecific variation driven by plasticity and within species genetic variation. We only a limited set of conditions on which we measured mycelial tratis. Such work should be used using standardized protocols so that comparisions among species are straightforward. Third, include 3D scenarios. In this study we force the fungi to grow on 2 dimensions and thus network reprsentation is strictly speaking 2D. In reality fungal networks are 3D and thus, representing this dimension not only would increase the precision of our metrics, but could also reveal different emergent properties not observable as 3D. 
+
+
+
+## Supplementary material
+
+Previous models
+
+```{r,eval=FALSE}
+#This one is optional
 Model_network_traits_sps<-rda(all_data[which(all_data$Network=="Real"),
                                        c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
                                      "Hyphal_main_width","Hyphal_tip_access","Hyphal_angle",
@@ -988,11 +375,7 @@ Model_network_traits_sps<-rda(all_data[which(all_data$Network=="Real"),
                                      "Mycelial_area","Hyphal_density" )]~Species,scale = TRUE,data = all_data[which(all_data$Network=="Real"),])
 
 
-
-summary(Model_network_traits_sps)[["cont"]][["importance"]][,c(1:2)]
-```
-
-```{r}
+#
 temporal2<-as.data.frame(scores(Model_network_traits_sps,display = "sites",scaling = "species",choices=c(1,2)))
 
 sps_data<-cbind(all_data[which(all_data$Network=="Real"),],temporal2);rm(temporal2)
@@ -1001,9 +384,7 @@ sps_data$phylum[grep("DF9|C41|FOX|DF32",sps_data$name_col)]<-"Ascomycota"
 sps_data$phylum[grep("C34|C35|DF19|DF25|DF56|M",sps_data$name_col)]<-"Zygomycetous"
 sps_data$phylum[grep("Pi|Pv|Rb",sps_data$name_col)]<-"Basidiomycota"
 
-```
-
-```{r}
+#
 e_vectors_traits_sps<-as.data.frame(
   scores(Model_network_traits_sps,display = "species",choices = c(1,2),scaling ="species"));
 names(e_vectors_traits_sps)<-c("RDA1_species","RDA2_species")
@@ -1014,10 +395,7 @@ names(e_vectors_traits_sps)<-c("RDA1_species","RDA2_species")
 
 #e_vectors_traits<-cbind(e_vectors_traits,temporal)
 e_vectors_traits_sps$traits<-rownames(e_vectors_traits_sps)
-```
-
-
-```{r}
+#
 sps_data %>% 
   ggplot()+
   aes(x=RDA1,y=RDA2) +
@@ -1037,9 +415,9 @@ sps_data %>%
 
 
 
-How much each variable contributes to the axis
 
-```{r}
+```{r, echo=FALSE, eval=FALSE}
+#How much each variable contributes to the axis
 e_vectors_traits_sps %>% 
   select(RDA1_species,RDA2_species,traits) %>% 
   pivot_longer(RDA1_species:RDA2_species, names_to="Principal_axes",values_to="loading") %>% 
@@ -1052,143 +430,50 @@ e_vectors_traits_sps %>%
     
 ```
 
-RDA with scaled variables to MST
-
-```{r}
-all_data_scaled<-all_data[c(1:32),]
-
-all_data_scaled$Mycelia_length_scaled<-all_data[c(1:32),]$Mycelia_length/all_data[c(33:64),]$Mycelia_length
-
-#all_data_scaled$alpha_coeff_scaled<-all_data[c(1:32),]$alpha_coeff/all_data[c(33:64),]$alpha_coeff
-#all_data_scaled$beta_coeff_scaled<-all_data[c(1:32),]$beta_coeff/all_data[c(33:64),]$beta_coeff
-all_data_scaled$Root_eff_scaled<-all_data[c(1:32),]$Root_eff/all_data[c(33:64),]$Root_eff
-all_data_scaled$Reff_tip_scaled<-all_data[c(1:32),]$Reff_tip/all_data[c(33:64),]$Reff_tip
-all_data_scaled$Geff_scaled<-all_data[c(1:32),]$Geff/all_data[c(33:64),]$Geff
-
-```
-
-Both root efficincy and root tip efficiency have the same value between the real networks and the MST. Which it is also related
-to the fact that the accessibility to the tips seem to be the same between real networks and the MST
-
-I do not know why...
-
-Also it seems it makes no sense to scale alpha and beta coefficient as they are by definitions set to a value for an MST. But I still have to look. Maybe the beta coefficient does make sense to scale.
-
-Also, hyphal number from the real networks seems to always around 1.3 times the ones of the MST´s
 
 
-```{r}
-Model_network_traits_sps_scaled<-rda(all_data_scaled[,                                        
-                                  c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
+```{r, eval=FALSE, message=FALSE, warning=FALSE}
+
+Model_network_traits<-rda(all_data[,c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
                                      "Hyphal_main_width","Hyphal_tip_access","Hyphal_angle",
-                                     "Mycelia_length_scaled","alpha_coeff","beta_coeff",
-                                     "Root_eff","Reff_tip","Geff_scaled",
-                                     "Mycelial_area","Hyphal_density" )]~Species,scale = TRUE,data = all_data_scaled)
-```
+                                     "Mycelia_length","alpha_coeff","beta_coeff",
+                                     "Root_eff","Reff_tip","Geff",
+                                     "Mycelial_area","Hyphal_density" )]~Species+Network,scale = TRUE,data = all_data)
+#
+Model_network_traits
 
+summary(Model_network_traits)[["cont"]][["importance"]][,c(1:2)]
 
-```{r}
-temporal<-as.data.frame(scores(Model_network_traits_sps_scaled,display = "sites",scaling = "species",choices=c(1,2)))
+anova.cca(Model_network_traits,by="term")
+#
 
-all_data_scaled<-cbind(all_data_scaled,temporal);rm(temporal)
+#Making the plot
+temporal<-as.data.frame(scores(Model_network_traits,display = "sites",scaling = "species",choices=c(1,2)))
 
-all_data_scaled$phylum<-NA
-all_data_scaled$phylum[grep("DF9|C41|FOX|DF32",all_data_scaled$name_col)]<-"Ascomycota"
-all_data_scaled$phylum[grep("C34|C35|DF19|DF25|DF56|M",all_data_scaled$name_col)]<-"Zygomycetous"
-all_data_scaled$phylum[grep("Pi|Pv|Rb",all_data_scaled$name_col)]<-"Basidiomycota"
+all_data_ord<-cbind(all_data,temporal);rm(temporal)
 
+e_vectors_traits<-as.data.frame(
+  scores(Model_network_traits,display = "species",choices = c(1,2),scaling = "species"));
+e_vectors_traits$traits<-rownames(e_vectors_traits)
 
-e_vectors_traits_scaled<-as.data.frame(
-  scores(Model_network_traits_sps_scaled,display = "species",choices = c(1,2),scaling = "species"));
-e_vectors_traits_scaled$traits<-rownames(e_vectors_traits_scaled)
+names(e_vectors_traits)[1]<-"RDA1_species"
+names(e_vectors_traits)[2]<-"RDA2_species"
 
-names(e_vectors_traits_scaled)[1]<-"RDA1_species"
-names(e_vectors_traits_scaled)[2]<-"RDA2_species"
+#
 
-```
-
-
-```{r}
-Model_network_traits_sps_scaled
-```
-
-
-```{r}
-anova.cca(Model_network_traits_sps_scaled,by="term")
-```
-
-
-
-
-```{r}
-summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][,c(1:2)]
-```
-
-```{r}
-all_data_scaled %>% 
+all_data_ord %>% 
   ggplot()+
   aes(x=RDA1,y=RDA2) +
   #geom_point(size=2)+
-    geom_text(aes(color=phylum,label=Species)) +
-    labs(y="RDA2 28%",x="RDA1 43%")+
+    geom_text(aes(color=Network,label=Species)) +
+    labs(y="RDA2 28%",x="RDA1 37%")+
   
   geom_text(size=2,aes(x=RDA1_species,y=RDA2_species,label=traits,fontface="bold"),
             hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
-            data = e_vectors_traits_scaled)+
+            data = e_vectors_traits)+
   geom_segment(aes(x=0, y=0, xend=RDA1_species, yend=RDA2_species), 
-        arrow = arrow(),data = e_vectors_traits_scaled)+
-  ggtitle(label = "Scaled Length and Global efficiency to MST")+
+        arrow = arrow(),data = e_vectors_traits)+
   
     my_theme
+#rmarkdown::render("FungalNetworkDiversity.Rmd", quiet = T)
 ```
-
-
-
-## Discussion
-
-
-## Supplementary material
-
-Plotting some networks
-
-```{r}
-par(mfrow=c(2,3), mar=c(0,0,0,0)) 
-
-plot(colonies_ntwk[[1]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     #edge.color=ecol,
-     edge.size=150,vertex.size=0,layout=spatial.data[[1]]*1,main="Real Network")
-
-plot(Access_mst[[1]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     #edge.color=ecol,
-     edge.size=150,vertex.size=0,layout=spatial.data[[1]]*1,main="Resistance weighted minimum spanning tree")
-
-plot(edistance_mst[[1]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     #edge.color=ecol,
-     edge.size=150,vertex.size=0,layout=spatial.data[[1]]*1,main="Euclidean minimum spanning tree")
-
-plot(colonies_ntwk[[5]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     #edge.color=ecol,
-     edge.size=150,vertex.size=0,layout=spatial.data[[5]]*1,main="Real network")
-
-plot(Access_mst[[5]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     #edge.color=ecol,
-     edge.size=150,vertex.size=0,layout=spatial.data[[5]]*1,main="Resistance weighted minimum spanning tree")
-
-plot(edistance_mst[[5]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     #edge.color=ecol,
-     edge.size=150,vertex.size=0,layout=spatial.data[[5]]*1,main="Euclidean minimum spanning tree")
-
-```
-
