@@ -5,6 +5,8 @@ date: "08/04/2020"
 output:
   word_document: default
   html_document: default
+bibliography: bibliography.enl  
+
 ---
 
 ```{r setup, include=FALSE}
@@ -21,11 +23,12 @@ knitr::opts_chunk$set(fig.height = 10, fig.width = 15)
 
 ## Introduction
 
-Fungal mycelia consist of interconnected network filaments, yet ecologists rarely use network features as functional traits. We think this is a missed opportunity because such a body type is the most common among terrestrial fungi, occurring along all major fungal phyla, from basal to more recent clades. Besides, it is usually argued that the ecological success of fungi on land is partly due to such filamentous network growth. Given the widespread occurrence of this body type, we hypothesized that if there is a large interspecific variation in network features, such variation may reflect distinct ecological strategies among species.
+Fungal mycelia consist of interconnected network filaments, yet ecologists rarely use network features as functional traits. We think this is a missed opportunity because such a body type is the most common among terrestrial fungi, occurring along all major fungal phyla, from basal to more recent clades (Stajich, J E et al 2009), and second, it is usually argued that the ecological success of fungi on land is partly due to such filamentous network growth  (Moore, D et al 2011). Given the widespread occurrence of this body type, we hypothesized that if there is a large interspecific variation in network features, such variation may reflect distinct ecological strategies among species.
 
-To address this hypothesis, we measured fungal network properties among fungal species in the Ascomycota, Basidiomycota, Mortierellomycota, and Mucoromycota. With this information, we aim to determine the degree of interspecific variation and whether is related to phylogenetic affiliation. Specifically, we measure and calculate a set of properties that emerge from the connection in the arrangement patterns of hyphal filaments after translating the mycelium into a network graph (i.e. a set of nodes connected through edges). An important feature of our approach is that our metrics are based on recent models that explain the flow of nutrients and information within a given topology when fungi are exploring for resources. During such an exploration phase, fungi transport resources located from a source (like a resource patch or spore reserves) to subsidize hyphal tip extension and branching. Thus, we consider that the parameters we measured have a solid biological basis rooted in hyphal anatomy and ecologically relevant scenarios.
+To address this hypothesis, we measured fungal network properties among fungal species in the Ascomycota, Basidiomycota, Mortierellomycota, and Mucoromycota. With this information, we aim to determine the degree of interspecific variation and whether it is related to phylogenetic affiliation. Specifically, we measure and calculate a set of properties that emerge from the connection in the arrangement patterns of hyphal filaments after translating the mycelium into a network graph (i.e. a set of nodes connected through edges). An important feature of our approach is that our metrics are based on recent models that explain the flow of nutrients and information within a given topology when fungi are exploring for resources. During such an exploration phase, fungi transport resources located from a source (like a resource patch or spore reserves) to subsidize hyphal tip extension and branching. Thus, we consider that the parameters we measured have a solid biological basis rooted in hyphal anatomy and ecologically relevant scenarios.
 
-We then use two approaches to further identify ecological strategies among species based on network properties. First, we determine how different the observed network properties are in comparison to a simplified baseline network model that follows simple efficiency rules. Specifically, the baseline network model constructs networks with the minimum number of hyphal connections that preserve the connectivity of the entire mycelium while maximizing transport efficiency from the center to each hyphal tip. Thus, fungal networks closer to this model indicate a strategy that maximizes transport efficiency, while networks departing from it indicates fungi that increase the amount of connections. Finally, we identify archetypical phenotypes based on network properties measured.These archetypes represent extreme points in the mycelium morphospace likely reflecting distinct ecological strategies.
+We then use two approaches to further identify ecological strategies among species based on network properties. First, we determine how different the observed network properties are in comparison to a simplified baseline network model that follows simple efficiency rules. Specifically, the baseline network model constructs networks with the minimum number of hyphal connections that preserve the connectivity of the entire mycelium while maximizing transport efficiency from the center to each hyphal tip. Thus, fungal networks closer to this model indicate a strategy that maximizes transport efficiency, while networks departing from it indicates fungi that increase the number of connections. Finally, we identify archetypal phenotypes based on network properties measured. These archetypes represent extreme points in the mycelium morphospace, likely reflecting distinct ecological strategies.
+
 
 
 
@@ -38,64 +41,69 @@ We used 11 fungi belogning to zygomycetous groups, Ascomycota and Basidiomycota 
 
 ### Microphotography and image processing
 
-For ascomycete, mucoromycete and mortierellomycete fungi, we extracted network parameters from pictures of 10-14 hour old, 2mm diameter fungal mycelium growing on water agar (the mycelium was growing out of an agar plug to which 10ul 10% PDB were aded). Brefly,  were photographed under a stereoscope (AxioZoom).For basiomycete fungi, pictures were taken from 20 cm diameter fungal mycelium growing on inert sand out of wooden block [To add picture settings, age of the mycelia]. Thus, although the pictures come from different size and settings, both conditions reflect exploration phase of the mycelium. Each fungal species was replicated three times.
+For ascomycete, mucoromycete, and mortierellomycete fungi, we extracted network parameters from pictures of 10-to-14 hours-old, 2mm-diameter fungal mycelium growing on water agar (the mycelium was growing out of an agar plug to which 10ul 10% PDB were added). Pictures were taken under a stereoscope (AxioZoom). For basidiomycete fungi, pictures were taken of 20-cm-diameter fungal mycelium growing on a wooden block on inert sand [To be added: picture settings, age of the mycelia]. Thus, although the pictures come from different sizes and settings, both conditions reflect the exploration phase of the mycelium. Each fungal species was replicated three times.
 
-Then we use a bundle of image processing algorithms in order to: segment the images, determine the connected patterns among hyphae (i.e. which hypha is connected to which), and estimate hyphal traits such as widths (these algorithms are wrapped in the MatLab App "Fungal Networks" developed by Mark Fricker).  This information is then stored in two matrices: an "edge list" conatining a list of all pairs of nodes (i.e. hyphae) and the traits of the hyphae.  The second matrix contains the position of the nodes in x, y coordinates.
+Then we used a bundle of image processing algorithms to segment the images, determine the connected patterns among hyphae (i.e. which hypha is connected to which), and estimate hyphal traits such as widths (these algorithms are wrapped in the MatLab App “Fungal Networks” developed by Mark Fricker). This information was then stored in two matrices: an “edge list” containing a list of all pairs of nodes (i.e. hyphae) and the traits of the hyphae. The second matrix contains the position of the nodes in x, y coordinates.
+
 
 ### Graph network representation
 
-The outputs from the image processing step were used to translate of each mycelium picture into "spatially explicit weighted graph network" (Fig 1), where: 
+The outputs from the image-processing step were used to translate each mycelium picture into “spatially explicit weighted graph network” (Fig 1), where:
 
- + Nodes represnt hyphal tips, branching points and anastomosis points. These three node types are distinguished base on the amount of nodes they are connected from/to (that is, the degree of the node). For example, hyphal tips have degree = 1 as they connect to only one other node, while branching point have degree = 2 because they connect to two other "daugther" nodes.
- + Edges (links) represent the hyphae. These ones are defined as links connecting two nodes.
- + Edge attributes represent hyphal traits (such as length and width)
- + Edge weight represent the transport resistance of the hyphae (see explanation below).
+ + Nodes represent hyphal tips, branching points, and anastomosis points. These three node types are distinguished based on the amount of nodes they are connected from/to (that is, the degree of the node). For example, hyphal tips have degree = 1, as they connect only to one other node, while branching points have degree = 2 because they connect to two other “daughter” nodes.
++ Edges (links) represent the hyphae. These are defined as links connecting two nodes.
++ Edge attributes represent hyphal traits (such as length and width)
++ Edge weight represents the transport resistance of the hyphae (see explanation below).
+
+![Figure 1.  Left: Red hyphal tips, orange branching points. Hyphae connect two nodes on which several attributes are measured (here just depicted length and width).  Right. Translation into a graph object (nodes are numerated, colors do not refer to node types).](Figures/Explaing_nodes_edges.png)
 
 
 ### Calculation of mycelial traits
 
-From the network graph we calculated 12 traits for each fungal colony (see table 1 for details). Five of those traits we classified them as "descriptive", representing direct average measurements of hyphal traits (edge attributes) that are not directly related the connected arrengement of hyphae. The other traits, which are directly dependent on the connectedess arrengement, include:
+From the network graph we calculated 12 traits for each fungal colony (see table 1 for details). Five of those traits we classified as “descriptive,” representing direct average measurements of hyphal traits (edge attributes) that are not directly related to the connected arrangement of hyphae. The other traits, which are directly dependent on the connectedness arrangement, we refer to as “network traits” and include:
 
- + "Normalized coefficients" that illustrate deviations of an observed metric (e.g. number of nodes or links) from a (hypothetical) fully connected network (where all nodes are linked to each other). These coefficients are taken from transportation geography (Fricker et al X);
++ Normalized coefficients that illustrate deviations of an observed metric (e.g. number of nodes or links) from a (hypothetical) fully connected network (where all nodes are linked to each other). These coefficients are taken from transportation geography (Fricker et al. X);
 
- + "Efficiencies" which summarize the efficiency of transporting material throghout the network following the assumptions of the "Hydraulic Hyphal transport Model". Under this model, connected hyphae are idealized as series interconnected cylindrical pipes where fluids move from the center of the colony (the inoculum agar or wooden plut in our case) to each tip due to a difference in hydraulic preassure (citation). A fundamental metric of this model and in the "efficiency" metrics, is the calculation of "hyphal transport resistance" based on hyphal lengths and widths (where the longer and thinner the hypha is, the higher the resistance), and "path hydraulic accessibility" which is obtained as the minimal sum of hyphal resistances  connecting two nodes . In turn "efficiencies" represent mycelium-wide means based on such metrics (see table 1 for further details).
++ Transport efficiencies, which summarize the efficiency of transporting material throughout the network following the assumptions of the “Hydraulic Hyphal transport Model.” Under this model, connected hyphae are idealized as a series of interconnected cylindrical pipes in which fluids move from the center of the colony (the inoculum agar or wooden plug, in our case) to each tip due to a difference in hydraulic pressure (citation). A fundamental metric of this model and in the “efficiency” metrics is the calculation of “hyphal transport resistance” based on hyphal lengths and widths (where the longer and thinner the hypha is, the higher the resistance) and “path hydraulic accessibility,” which is obtained as the minimal sum of hyphal resistances connecting two nodes . In turn, “efficiencies” represent mycelium-wide means based on such metrics (see table 1 for further details).
 
- + MST-ratios: These metrics represent deviations of the observed traits (like mean hyphal length) from a base-line network that preserves the number of nodes, but maximizes transport efficiencies.  The base line model correspond to "resitance-weighted minimimum spanning tree". In this model all nodes are connected through hyphal paths with minimal resistance. As a result this base-line model does not contain any loops (see table 1 and Figure 2 for further details).
++ MST-ratios: These metrics represent deviations of the observed traits (like mean hyphal length) from a baseline network that preserves the number of nodes but reduces the edges to only include the ones that maximize transport efficiencies. The baseline model corresponds to “resistance-weighted minimum spanning tree.” In this model all nodes are connected through hyphal paths with minimal resistance. As a result, this baseline model does not contain any loops (see table 1 and Figure 2 for further details).
 
-*1. Mycelium descriptive traits*
+Table 1.
 
-Mean hyphal length. This correspond to the mean of each hyphal length in the network (defined as the measured distance between two nodes during the imabe processing). Given that the distribution of these lengths was left-skewed, this mean actually correpson to log10 transformed lenghts.
+1. Mycelium descriptive traits
 
-Total number of hyphae. The number of hyphae recorded for each network.
++ Mean hyphal length. This corresponds to the mean of each hyphal length in the network (defined as the measured distance between two nodes during the image processing). Given that the distribution of these lengths was left-skewed, this mean actually corresponds to log10 transformed lengths.
 
-Mean tip hyphae width. Tip hyphae are defined as hyphae connectig a hyphal tip node (which is identified as a node degree=1).Given that the distribution of these lengths was left-skewed, this mean actually correpson to log10 transformed widths.
++ Total number of hyphae. The number of hyphae recorded for each network.
 
-Mean main hyphae width. Main hyphae were defined as hyphae connecting branching or anastamosis nodes.Given that the distribution of these lengths was left-skewed, this mean actually correpson to log10 transformed widths.
++ Mean tip hyphae width. Tip hyphae are defined as hyphae connecting a hyphal tip node (which is identified as a node degree = 1).Given that the distribution of these lengths was left-skewed, this mean actually corresponds to log10 transformed widths.
 
-Hyphal density. This correspond to the number hyphae in a given area
++ Mean main hyphae width. Main hyphae were defined as hyphae connecting branching or anastomosis nodes. Given that the distribution of these lengths was left-skewed, this mean actually corresponds to log10 transformed widths.
 
-Angle (O_min_mid). Not transformed [ADD MORE EXPLANATION].
-    
-*2. Mycelium Network traits*
++ Hyphal density. This corresponds to the number of hyphae in a given area
 
-Alpha coefficient. propotrion of cylces out of the toal number of possible cycles given a number of nodes.  
++ Angle (O_min_mid). Not transformed [MORE EXPLANATION WILL BE ADDED].
 
-Beta coefficient: the ratio of edges and nodes.
+2. Mycelium Network traits
 
-Gamma coefficient: the proportion of edges out the total number of possible edges given a number of nodes.
++ Alpha coefficient. Proportion of cycles out of the total number of possible cycles given a certain number of nodes.
 
-Root-tip efficiency (R-Teff). The mean transport efficiency from the inoculum to each tip. To calculate this mean, first the paths that results in the lowest summations of resistances connecing the inoculum to each tip node are identified .That is, the paths with the highest hydraulic accessibility are identified (using the Dijkstra algorithm). Root-tip efficency is then calculated as the mean of the sums of the inverse of resistances for all identified paths. 
++ Beta coefficient. The ratio of edges and nodes.
 
-Root efficiency (Reff): The mean transport efficiency from the inoculum to each node. It is calculated as above, but including not only paths from inoculum to tips, but also to each node.
++ Gamma coefficient. The proportion of edges out the total number of possible edges given a certain number of nodes.
 
-Global efficiency (Geff): The mean trasport efficiency between any two nodes. It is similar as the root efficiency, but includes all paths connecting two nodes (not only the ones rooted to the inoculum).
++ Root-tip efficiency (R-Teff). The mean transport efficiency from the inoculum to each tip. To calculate this mean, first the paths that result in the lowest summations of resistances connecting the inoculum to each tip node are identified. That is, the paths with the highest hydraulic accessibility are identified (using the Dijkstra algorithm). Root-tip efficiency is then calculated as the mean of the sums of the inverse of resistances for all identified paths.
 
-Length-MST: The ratio of the mean hyphal length of the observed mycelium with respect to a base line network with the same number of nodes but that maximizes transport efficiency.
++ Root efficiency (Reff). The mean transport efficiency from the inoculum to each node is calculated as described above, but includes not only paths from inoculum to tips, but also to each node.
 
-Geff-MST: The ratio of the Global efficiency of the observed network to that of the base-line network (as above, the "resistance weighted minimium spanning tree").
++ Global efficiency (Geff). The mean transport efficiency between any two nodes. It is similar to the root efficiency, but includes all paths connecting two nodes (not only the ones rooted to the inoculum).
 
++ Length-MST. The ratio of the mean hyphal length of the observed mycelium with respect to a baseline network with the same number of nodes, but that maximizes transport efficiency.
 
-Descriptive traits were calculated during the image processing (using the MatLab App) while network traits were computed using the igraph package for R. 
++ Geff-MST. The ratio of the Global efficiency of the observed network to that of the baseline network (as described above, the “resistance weighted minimum spanning tree”).
+
++ Descriptive traits were calculated during the image processing (using the MatLab App), while network traits were computed using the igraph package for R.
+
 
 ```{r,echo=FALSE,warning=FALSE}
 source_rmd <- function(file, local = FALSE, ...){
@@ -165,13 +173,14 @@ plot(Access_mst[[30]],
 
 ```
 
-Figure 2. Examples of represenation of fungal mycelium as network graphs. Top: Graph based on the observed mycelium. Bottom: Graph based on base line model for each corresponding colony. Cyan: Mortierellomycota; Magenta: Mucor; Orange: Ascomycete; Green: Basidiomycota.
+Figure 2. Examples of representation of fungal mycelium as network graphs. Top: Graph based on the observed mycelium. Bottom: Graph based on baseline model for each corresponding colony. Cyan: Mortierellomycota; Magenta: Mucor; Orange: Ascomycete; Green: Basidiomycota.
 
 ### Statistical analysis
 
-We performed redundancy analysis (RDA, a type constrained multivariate ordination) in order identify interspecific differences in term mycelial traits. We used both descriptive and network traits as the response variables and species identiy as explanatory (constraining) variables. Prior to RDA, we standardize all variables in units of standard deviations (Z scaling). By doing this, we are effectively removing obvious differences among species due to absolute size differences. Because we also are interested in determining to what extend interespecific differences in mycelial traits is correlated with phylogeny, our RDA model included phylum affiliation as condition (thus the full rda model was in the form Mycelial traits ~ Species identity + Condition (Phylum)). To determine to what extent the variance explained by  constrained ordidnation  deviate from a random distribution, we repeated  RDA as above after randomizing the mycelial traits dataset (999x times in total) and compute F values and associated p-values (i.e. statistical significance).   Standardizations, RDA and significance testing from randomized approach were performed using the functions "rda" and "anova.cca" in the r package vegan.
+We performed redundancy analysis (RDA, a type-constrained multivariate ordination) in order to identify interspecific differences in terms of  mycelial traits. We used both descriptive and network traits as the response variables and species identity as explanatory (constraining) variables. Prior to RDA, we standardized all variables in units of standard deviations (Z scaling). By doing this, we are effectively removing obvious differences among species due to absolute size differences. Because we also are interested in determining to what extent interspecific differences in mycelial traits is correlates with phylogeny, our RDA model included phylum affiliation as a condition (thus the full RDA model was in the form Mycelial traits ~ Species identity + Condition (Phylum)). To determine to what extent the variance explained by constrained ordination deviates from a random distribution, we repeated RDA as above after randomizing the mycelial traits dataset (999x times in total) and computed F values and associated p-values (i.e. statistical significance). Standardizations, RDA, and significance testing from randomized approach were performed using the functions “rda” and “anova.cca” in the R package vegan.
 
-Finally, we also identify  mycelial archetypes as descriebed in Alon et al (200X). This technique consist in identifying the vertices from best fitting convex hull that includes all data points in the ordintaion space. To determine how likely these archetypes are from a random distribution, we repeated this calcuation after randomizing the dataset (for a total of X randomization). Archetype identification and randomizations were performed  in the open-access Uri Alon software (http://www.weizmann.ac.il/mcb/UriAlon/download/pareto-front-software).
+Finally, we also identified mycelial archetypes as described in Alon et al. (200X). This technique consists of identifying the vertices from the best-fitting convex hull that includes all data points in the ordination space. To determine how likely these archetypes are from a random distribution, we repeated this calculation after randomizing the dataset (for a total of X randomizations). Archetype identification and randomizations were performed in the open-access Uri Alon software.
+ (http://www.weizmann.ac.il/mcb/UriAlon/download/pareto-front-software).
 
 
 ## Results
@@ -302,11 +311,11 @@ all_data_scaled2 %>%
     my_theme
 ```
 
-Figure 3. Constrained (RDA) ordination based on mycelial trait. Each name correspods to one colony and colors refers to phylum. Upper panel shows ordination based on mycelial traits after taking into account phylongeny affiliation (i.e. correcting for taxonomy), while bottom panel shows uncorrected ordination. 
+Figure 3. Constrained (RDA) ordination based on mycelial trait. Each name corresponds to one colony and colors refers to phylum. Upper panel shows ordination based on mycelial traits after taking into account phylogeny affiliation (i.e. correcting for taxonomy), while the bottom panel shows uncorrected ordination.
 
 We also found that the species ordination was partly correlated with taxonomy (half of the variation explained in constrained ordination can be attributed to taxonomic affiliation) (Table 2).
-
-Finally, the ordination was largely driven by network traits contribution and not only by hyphal traits. For example, the loadings of the alpha coefficient, beta coefficient, scaled Global efficiency and the scaled mycelial length had some of the highest loadings (scaled eigenvectors) for the first RDA axis, whlile both root-tip and root efficieny had large loadings for the second axis. 
+Finally, the ordination was largely driven by network-traits contribution and not only by hyphal traits. For example, the loadings of the alpha coefficient, beta coefficient, scaled Global efficiency, and the scaled mycelial length had some of the highest loadings (scaled eigenvectors) for the first RDA axis, while both root-tip and root efficiency had large loadings for the second axis.
+ 
 ```{r,echo=FALSE,message=FALSE,warning=FALSE}
 e_vectors_traits_scaled$type<-NA
 e_vectors_traits_scaled$type[grep("Hyphal",e_vectors_traits_scaled$traits)]<-"Descriptive"
@@ -330,6 +339,9 @@ Figure 4. Loadings (eigenvectors) of different mycelial traits for the first two
 *Archetype identification*
 
 Based on the species included, we found three achetypes in the mycelial trait morphospace [Expand more]. 
+
+![Figure 4. Archetype identification as vertices of the best-fitting convex hull. Each point represents a colony in ordination space.](Figures/trial2_triangle.png)
+
 
 ```{r, eval=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
 #This is done thrrough the Uri Alon´s softawer, thus I need to export the data and then use the software
