@@ -1,5 +1,5 @@
 ---
-title: "FungalNetworkDiversity"
+title: "Network trait variation reveals fungal ecological strategies"
 author: "Carlos"
 date: "08/04/2020"
 output:
@@ -23,14 +23,32 @@ knitr::opts_chunk$set(fig.height = 10, fig.width = 15)
 
 ## Introduction
 
-Fungal mycelia consist of interconnected network filaments, yet ecologists rarely use network features as functional traits. We think this is a missed opportunity because such a body type is the most common among terrestrial fungi, occurring along all major fungal phyla, from basal to more recent clades (Stajich, J E et al 2009), and second, it is usually argued that the ecological success of fungi on land is partly due to such filamentous network growth  (Moore, D et al 2011). Given the widespread occurrence of this body type, we hypothesized that if there is a large interspecific variation in network features, such variation may reflect distinct ecological strategies among species.
+The body of most fungal species consists of an interconnected network filaments, yet fungal ecologists rarely use features of this network as fungal functional traits. We think not using network properties represents a missed opportunity because it is likely that the ecological success of fungi on land is partly due to such network growth  (Moore, D et al 2011). Indeed, such network body has become a signature feature through the diversification of this kingdom (already present in basal clades (Stajich, J E et al 2009)) which showcase its versatility in response to ecological interactions. In this paper, we lay the foundation to gain understanding on the ecologcical significance of network properties in fungi by identifying traits  encapsulates the network-structure of fungi, measure their variation and link them possible ecological strategies. 
 
-To address this hypothesis, we measured fungal network properties among fungal species in the Ascomycota, Basidiomycota, Mortierellomycota, and Mucoromycota. With this information, we aim to determine the degree of interspecific variation and whether it is related to phylogenetic affiliation. Specifically, we measure and calculate a set of properties that emerge from the connection in the arrangement patterns of hyphal filaments after translating the mycelium into a network graph (i.e. a set of nodes connected through edges). An important feature of our approach is that our metrics are based on recent models that explain the flow of nutrients and information within a given topology when fungi are exploring for resources. During such an exploration phase, fungi transport resources located from a source (like a resource patch or spore reserves) to subsidize hyphal tip extension and branching. Thus, we consider that the parameters we measured have a solid biological basis rooted in hyphal anatomy and ecologically relevant scenarios.
+We specifically identify traits that take into account the connection arrangement pattern of filaments once the mycelium is translateted into network graph (i.e. a set of nodes connected through edges Barthelemy 200X). In addition, the traits are further use recent biophysical models of transport dynamics of nutrients and information within the myceliy when fungi are exploring for resources (Luke and Mark paper). During such an exploration phase, fungi transport resources located from a source (like a resource patch or spore reserves) to subsidize hyphal tip extension and branching (ref). Because of the extremely patchy distribution of resources in their soil habitat, we think it is very likely that fungi will be in exploration phase for most of their life time. Thus, we consider that the traits we identify have a solid biological basis rooted in fungal anatomy and ecologically relevant scenarios. 
 
-We then use two approaches to further identify ecological strategies among species based on network properties. First, we determine how different the observed network properties are in comparison to a simplified baseline network model that follows simple efficiency rules. Specifically, the baseline network model constructs networks with the minimum number of hyphal connections that preserve the connectivity of the entire mycelium while maximizing transport efficiency from the center to each hyphal tip. Thus, fungal networks closer to this model indicate a strategy that maximizes transport efficiency, while networks departing from it indicates fungi that increase the number of connections. Finally, we identify archetypal phenotypes based on network properties measured. These archetypes represent extreme points in the mycelium morphospace, likely reflecting distinct ecological strategies.
+Second, we determine the degree of interspecific variation in network traits and whether it is related to phylogenetic affiliation across a diverse set of soil borne saprotrophic fungi. We included species in the Ascomycota, Basidiomycota and zygomycetous fungi (Mortierellomycota and Mucoromycota) and measured their network traits at both the micrometer and  macro (centimeter) scale. Doing so is imporant because fungi produce networks at both scales. For example, zygoymecetous and ascomycte soil fungi typically prouced mycelial networks composed of interconnected individual hyphae that span micrometer to milimiter scales through the soil (ref). In contrast, wood-decomposing basidiomycetes can produce networks consisting of cords (that results the fusion of several hyphae) that reach several centimeter in scale (ref).
+
+Finally, we use the network traits to identify potential ecological strategies associated to differnces in transport through the connected pattern arregement of mycelia. To do this, we first determine how different the observed network properties are in comparison to a baseline network models that follow simple rules of minimized connectivity while maximizing transport. Thus, fungal networks closer to this model indicate a strategy that maximizes transport efficiency, while networks departing from it indicate fungi that increase the number of connections. Finally, we identify mycelial network that represent extreme phenotypes (or archetypal phenotypes) in the network trait morphospace (Alon´s paper) based on the differences in network properties. These archetypes represent extreme points in the realized mycelium morphospace.
+
+What is the ecological meaning of these traits? 
+
+Also, while you give the taxonomy of the fungi, we know little of their ecology or why these particular ones were used. What is their ecology, why were they chosen, and can their ecology throw light on their characters. 
+
+From Fig. 2, it looks like some have three patterns – saturate the space (phalanx strategy – blue and orange), disperse and then saturate (guerrilla), and establish a base, and then explore (the consolidate and then explore); is this related to their ecology. Are these visual patterns identifiable in the network statistics, or should they be (do the network statistics change from center to edge….?)."
 
 
+Things I want to add: How this might be useful to allometry; and the comments from Janis:
 
+"In this study the big negative is that you have measured Basidio traits differently from the others, and I just cannot see how you can put them into the same analysis. Also, isn’t the measure of hyphal width/length different for a 20cm diameter mycelium on wood, where the hyphae form “compound strands” (I forget their technical name – rhizomorphs or something) of smaller hyphae? Surely it would be better to show that the analysis is applicable at different scales – one the micro, and the other the macro, using separate analyses.
+
+Secondly, I think you need to do much more to explain how and why these network traits may have biological meaning. It is clear for some, but for others it seems just like calculating them “just because we can”, and their interpretation for biology needs to be explained.
+
+Also, while you give the taxonomy of the fungi, we know little of their ecology or why these particular ones were used. What is their ecology, why were they chosen, and can their ecology throw light on their characters. From Fig. 2, it looks like some have three patterns – saturate the space (phalanx strategy – blue and orange), disperse and then saturate (guerrilla), and establish a base, and then explore (the consolidate and then explore); is this related to their ecology. Are these visual patterns identifiable in the network statistics, or should they be (do the network statistics change from center to edge….?)."
+
+ 
+
+Reading some of the large clonal plant literature might be useful, and should be referred to, if only to broaden the relevance of the paper for readers.
 
 ## Material and methods
 
@@ -66,7 +84,7 @@ From the network graph we calculated 12 traits for each fungal colony (see table
 
 + Transport efficiencies, which summarize the efficiency of transporting material throughout the network following the assumptions of the “Hydraulic Hyphal transport Model.” Under this model, connected hyphae are idealized as a series of interconnected cylindrical pipes in which fluids move from the center of the colony (the inoculum agar or wooden plug, in our case) to each tip due to a difference in hydraulic pressure (citation). A fundamental metric of this model and in the “efficiency” metrics is the calculation of “hyphal transport resistance” based on hyphal lengths and widths (where the longer and thinner the hypha is, the higher the resistance) and “path hydraulic accessibility,” which is obtained as the minimal sum of hyphal resistances connecting two nodes . In turn, “efficiencies” represent mycelium-wide means based on such metrics (see table 1 for further details).
 
-+ MST-ratios: These metrics represent deviations of the observed traits (like mean hyphal length) from a baseline network that preserves the number of nodes but reduces the edges to only include the ones that maximize transport efficiencies. The baseline model corresponds to “resistance-weighted minimum spanning tree.” In this model all nodes are connected through hyphal paths with minimal resistance. As a result, this baseline model does not contain any loops (see table 1 and Figure 2 for further details).
++ Minimum Spanning Tree (MST) ratios: These metrics represent deviations of the observed traits (like mean hyphal length) from a baseline network that preserves the number of nodes but reduces the edges to only include the ones that maximize transport efficiencies. The baseline model corresponds to “resistance-weighted minimum spanning tree.” In this model all nodes are connected through hyphal paths with minimal resistance. As a result, this baseline model does not contain any loops (see table 1 and Figure 2 for further details).
 
 Table 1.
 
@@ -76,9 +94,9 @@ Table 1.
 
 + Total number of hyphae. The number of hyphae recorded for each network.
 
-+ Mean tip hyphae width. Tip hyphae are defined as hyphae connecting a hyphal tip node (which is identified as a node degree = 1).Given that the distribution of these lengths was left-skewed, this mean actually corresponds to log10 transformed widths.
++ Mean tip hyphal width. Tip hyphae are defined as hyphae connecting a hyphal tip node (which is identified as a node degree = 1).Given that the distribution of these lengths was left-skewed, this mean actually corresponds to log10 transformed widths.
 
-+ Mean main hyphae width. Main hyphae were defined as hyphae connecting branching or anastomosis nodes. Given that the distribution of these lengths was left-skewed, this mean actually corresponds to log10 transformed widths.
++ Mean main hyphal width. Main hyphae were defined as hyphae connecting branching or anastomosis nodes. Given that the distribution of these lengths was left-skewed, this mean actually corresponds to log10 transformed widths.
 
 + Hyphal density. This corresponds to the number of hyphae in a given area
 
@@ -177,7 +195,7 @@ Figure 2. Examples of representation of fungal mycelium as network graphs. Top: 
 
 ### Statistical analysis
 
-We performed redundancy analysis (RDA, a type-constrained multivariate ordination) in order to identify interspecific differences in terms of  mycelial traits. We used both descriptive and network traits as the response variables and species identity as explanatory (constraining) variables. Prior to RDA, we standardized all variables in units of standard deviations (Z scaling). By doing this, we are effectively removing obvious differences among species due to absolute size differences. Because we also are interested in determining to what extent interspecific differences in mycelial traits is correlates with phylogeny, our RDA model included phylum affiliation as a condition (thus the full RDA model was in the form Mycelial traits ~ Species identity + Condition (Phylum)). To determine to what extent the variance explained by constrained ordination deviates from a random distribution, we repeated RDA as above after randomizing the mycelial traits dataset (999x times in total) and computed F values and associated p-values (i.e. statistical significance). Standardizations, RDA, and significance testing from randomized approach were performed using the functions “rda” and “anova.cca” in the R package vegan.
+We performed redundancy analysis (RDA, a type-constrained multivariate ordination) in order to identify interspecific differences in terms of  mycelial traits. We used both descriptive and network traits as the response variables and species identity as explanatory (constraining) variables. Prior to RDA, we standardized all variables in units of standard deviations (Z scaling). By doing this, we are effectively removing obvious differences among species due to absolute size differences. Because we also are interested in determining to what extent interspecific differences in mycelial traits correlate with phylogeny, our RDA model included phylum affiliation as a condition (thus the full RDA model was in the form Mycelial traits ~ Species identity + Condition (Phylum)). To determine to what extent the variance explained by constrained ordination deviates from a random distribution, we repeated RDA as above after randomizing the mycelial traits dataset (999x times in total) and computed F values and associated p-values (i.e. statistical significance). Standardizations, RDA, and significance testing from randomized approach were performed using the functions “rda” and “anova.cca” in the R package vegan.
 
 Finally, we also identified mycelial archetypes as described in Alon et al. (200X). This technique consists of identifying the vertices from the best-fitting convex hull that includes all data points in the ordination space. To determine how likely these archetypes are from a random distribution, we repeated this calculation after randomizing the dataset (for a total of X randomizations). Archetype identification and randomizations were performed in the open-access Uri Alon software.
  (http://www.weizmann.ac.il/mcb/UriAlon/download/pareto-front-software).
@@ -187,7 +205,7 @@ Finally, we also identified mycelial archetypes as described in Alon et al. (200
 
 *Separation of species based on mycelial traits*
 
-We found support for the hypotheses that species differ in their network traits. For example, The observed constrained ordination, which includes species identity as explanatory variable, explain more variation than unconstrained one (87% vs  13%) and it significantly deviated from permutation-based random distribution (999 randomizations) (table 2).
+We found support for the hypotheses that species differ in their network traits. For example, The observed constrained ordination, which includes species identity as explanatory variable, explains more variation than unconstrained one (87% vs  13%) and it significantly deviated from a permutation-based random distribution (999 randomizations) (table 2).
 
 Table 2.
 ```{r,echo=FALSE, warning=FALSE,message=FALSE}
@@ -216,7 +234,7 @@ Table 3.
 ```{r, echo=FALSE}
 anova.cca(Model_network_traits_sps_scaled,by="term")
 ```
-This strong effect can be easily visualized constrained ordination space (Figure 3).
+This strong effect can be easily visualized in constrained ordination space (Figure 3).
 
 ```{r, echo=FALSE, eval=FALSE}
 RsquareAdj(Model_network_traits_sps_scaled)$adj.r.squared#This the adjusted r squared to the number of variables, the more variables the smaller the r square gets.
@@ -328,9 +346,18 @@ pivot_longer(e_vectors_traits_scaled,RDA1_species:RDA2_species,names_to = "Axis"
     geom_bar(stat="identity",position = "dodge")+
   facet_wrap(.~Axis)+
   labs(y="Loadings")+
-  theme(axis.text.x = element_text(size=15,angle = 45,hjust = 1),
-        strip.text = element_text(size = 20),
-        legend.position = "bottom")
+  theme(title = element_text(size = 18),
+        axis.title.x=element_text(size=20),
+        panel.background = element_blank(),
+        panel.grid.major.y = element_line(size=0.25,linetype = "longdash",colour = "gray"),
+        panel.grid.major.x = element_blank(),
+        axis.text.x = element_text(size = 15,angle = 45,hjust = 1),
+        #axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        strip.text.x = element_text(size = 20),
+        strip.text.y = element_text(size = 25),
+        legend.position = "bottom"
+        )
 ```
 
 Figure 4. Loadings (eigenvectors) of different mycelial traits for the first two mains RDA axis (that jointly explain up to 75% of the data)-
@@ -359,15 +386,37 @@ rm(all_data_t)
 
 ## Discussion
 
-Our results showed that: a) species differ in terms of mycelial traits; b) such variation reflects to large extent phylogey and c) a large proportion of the difference among species is due to netowrk connectedeness pattern and not only due to hyphal descriptive traits. 
+Other network traits that do not work but one would expect to be asked about
+Connection with other type of networks (xylem networks)
+How to expand on the network front (dual graph)
+Is this a scalable pipeline
+How is this work linked to other morphological traits with potetial ecological value: fruiting body traits. vegetatitive mycelia (qualitative ones); up to more recent is 
 
-Thus, our work goes one step further in the use of mycelial properites as ecologically relevant traits by showcasing the relevance of network properties (i.e. properties that emerge from connectedness patterns among hyphae). To our knwoledge, previous studies in ecology using mycelial features have mainly being restricted to descriptive hyphal traits. For example Lehmann et al (200X) used hyphal branching, hyphal tip extension rate and hyphal tip lenght as morphological variables that correlated with the enzymatic activities used by soil fungi to acquire resources. While Boddy et al (200X) use metrics that refelect the amount of mycelium "filling the substrate space" (e.g. fractal dimension). Even recent studies that do represent fungi in terms of network graph, restrict metrics to descriptive ones such as number of nodes and links (Dikec et al 2020)-
+Note: there is paper by Anne Pringle about the morphospace for fungi. My papers.
+
+Our work introduces a new set of quantitative parameters that can be used to understand and compare the ecology of fungal species, thus expanding the limited set of phenotypic fungal characteristics that can be used as functional traits. So far most phenotypic traits used in ecological literature have been restricted to easy measures of reproductive structures like fruiting bodies or spore characteristics (ref). While valuable to understand the reproductive and early ecology of fungi (Aguilar-Trigueros et al 2019. other ref), there are considerable less attention to phentypic characteriscs of the vegetative phase, which in comparison to the reproductive one, is the predominant one in the lifetime of fungi.
+
+Thus, our work goes one step further in understanding the ecology of the vegetative phase of fungi by focusing on network properties (i.e. properties that emerge from connectedness patterns mycelia) . Historically, vegetative mycelial phenotypes have been described using caterogies like "guerrilla" and "phalynx" strategies (borrowed from the work on clonal plants (ref)), or exploration types (Agerer 2001). The use of quantitative metrics of mycelial features has picked up not until recently after numerous calls for their need ecology (my paper, Tresseder, Crowther). For example, to identify potential resource aquisition strategies Lehmann et al (200X) relied on hyphal traits (e.g. branching, extension rate and lenght) of soil fungi while Boddy et al (200X) while Boddy et al (200X) used "space filling" (e.g. fractal dimension) for wood deomposing fungi . Yet, to our knoledge, connected arrengment of the mycelia has not been included. Even Dicke et al (2020), that while not an ecological study did represent fungi as a network graph, restrict their analysis to descriptive parameters such as number of nodes and links. 
+
+The network traits allow us to identify potential strategies.
+
+Looking into the future, we think that using the network framework leads to a fruitful researh prospect. Dual graphs, comparisons to other transport networks like plant vascular tissue (xylem, leaf vains)
+
+
+wresults showed that: a) species differ in terms of mycelial traits; b) such variation reflects to large extent phylogey and c) a large proportion of the difference among species is due to netowrk connectedeness pattern and not only due to hyphal descriptive traits. 
+
+
+[From Janis] saturate the space (phalanx strategy – blue and orange), disperse and then saturate (guerrilla), and establish a base, and then explore (the consolidate and then explore); is this related to their ecology. Are these visual patterns identifiable in the network statistics, or should they be (do the network statistics change from center to edge….?)."
+
+
 
 In addition, the network model we used (and its metrics) emphasize the dynamic nature of fungal mycelia as connected trasnport network (Fricker et al 200x) during exploration phase. This is phase has been understudied in comparison to resource explotation phase (that is, when fungi grow on resource rich substrate). This is paradoxical, because exploration phase is is likely the dominant phenotype due to extremely patchy distrbution of resources where most fungi grow (e.g. soil). 
 
 Metrics we used, like  efficiency, could be used to predict the transport of resources from the center of the colony to every point of the expanding mycelium. Such differences would be extremely useful to understand the ecological ecological strategies among fungal species during competition or fungivory. For example, a mycelium network consisting mostly of thick "roads" allows for faster transfer of resources to expanding front, a strategy useful to: occupy find new resource patchs before competitors; synthetize chemical compounds to combat other competitors at the hyphal front or reduce palatability in face of fungivory. On the other hand, due to the reliance on few main roads, these networks would be very suscepible to loose connectivity due to manage (which can be caused by fungivory or catastrophic events).
 
 [HERE DISCUSSSION ON MEANING OF THE ARCHETYPES]
+
+What about othe network properties? why are they not used?
 
 We consider that our work as a blueprint for future research on the ecological and evoluationary meaning of network connectedness traits in three main ways. First, by including more species spanning a better resolution in phylogenetic resolution. It is premature to make conclusive remarks on this point based on limited number of species we used, but it indicates that a larege proportion of differences in mycelial traits is due to taxomy.  Thus, larger species pool would allow to uncover not only the real diversity of network traits but also determine to what extent such diversity is due to few early evolutionary events that have been preserved among extant taxa (high phylogenetic conservatisms) or whether differences among species arise due to ecological pressures multiple and independent times through fungal evoution (low phylogenetic consevartism) using state-of-the art phylogenetic comparative anylytical tools. Second, by including intraspecific variation driven by plasticity and within species genetic variation. We only a limited set of conditions on which we measured mycelial tratis. Such work should be used using standardized protocols so that comparisions among species are straightforward. Third, include 3D scenarios. In this study we force the fungi to grow on 2 dimensions and thus network reprsentation is strictly speaking 2D. In reality fungal networks are 3D and thus, representing this dimension not only would increase the precision of our metrics, but could also reveal different emergent properties not observable as 3D. 
 
