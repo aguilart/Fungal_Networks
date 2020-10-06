@@ -33,24 +33,14 @@ Second, we determine the degree of interspecific variation in network traits and
 
 Finally, we use the network traits to identify potential ecological strategies associated to differnces in transport through the connected pattern arregement of mycelia. To do this, we first determine how different the observed network properties are in comparison to a baseline network models that follow simple rules of minimized connectivity while maximizing transport. Thus, fungal networks closer to this model indicate a strategy that maximizes transport efficiency, while networks departing from it indicate fungi that increase the number of connections. Finally, we identify mycelial network that represent extreme phenotypes (or archetypal phenotypes) in the network trait morphospace (Alon´s paper) based on the differences in network properties. These archetypes represent extreme points in the realized mycelium morphospace.
 
-What is the ecological meaning of these traits? 
-
-Also, while you give the taxonomy of the fungi, we know little of their ecology or why these particular ones were used. What is their ecology, why were they chosen, and can their ecology throw light on their characters. 
-
-From Fig. 2, it looks like some have three patterns – saturate the space (phalanx strategy – blue and orange), disperse and then saturate (guerrilla), and establish a base, and then explore (the consolidate and then explore); is this related to their ecology. Are these visual patterns identifiable in the network statistics, or should they be (do the network statistics change from center to edge….?)."
 
 
-Things I want to add: How this might be useful to allometry; and the comments from Janis:
+Comments from Janis:
 
-"In this study the big negative is that you have measured Basidio traits differently from the others, and I just cannot see how you can put them into the same analysis. Also, isn’t the measure of hyphal width/length different for a 20cm diameter mycelium on wood, where the hyphae form “compound strands” (I forget their technical name – rhizomorphs or something) of smaller hyphae? Surely it would be better to show that the analysis is applicable at different scales – one the micro, and the other the macro, using separate analyses.
-
-Secondly, I think you need to do much more to explain how and why these network traits may have biological meaning. It is clear for some, but for others it seems just like calculating them “just because we can”, and their interpretation for biology needs to be explained.
 
 Also, while you give the taxonomy of the fungi, we know little of their ecology or why these particular ones were used. What is their ecology, why were they chosen, and can their ecology throw light on their characters. From Fig. 2, it looks like some have three patterns – saturate the space (phalanx strategy – blue and orange), disperse and then saturate (guerrilla), and establish a base, and then explore (the consolidate and then explore); is this related to their ecology. Are these visual patterns identifiable in the network statistics, or should they be (do the network statistics change from center to edge….?)."
 
  
-
-Reading some of the large clonal plant literature might be useful, and should be referred to, if only to broaden the relevance of the paper for readers.
 
 ## Material and methods
 
@@ -80,7 +70,7 @@ The outputs from the image-processing step were used to translate each mycelium 
 
 ### Calculation of mycelial traits
 
-From the network graph we calculated 12 traits for each fungal colony (see table 1 for details). Five of those traits we classified as “descriptive,” representing direct average measurements of hyphal traits (edge attributes) that are not directly related to the connected arrangement of hyphae. The other traits, which are directly dependent on the connectedness arrangement, we refer to as “network traits” and include:
+From the network graph we calculated several traits as means of hyphal attributes (e.g. widhts, lenghs, accessibility resistances) and network connectivity properites (e.g. degree, centrality metrics) see supplemnentary table 1). From these complete universe of option, we narrow  our analysis to 12 traits for each fungal colony (see table 1 for details) based on screenings on mathematical relatioships between traits, frequency distriution properties and potential biological meaning. Five of those selected traits we classified as “hyphal attributes” representing direct average measurements of hyphal traits that are not directly related to the connected arrangement of hyphae. The other traits, which are directly dependent on the connectedness arrangement, we refer to as “network traits” and include:
 
 + Normalized coefficients that illustrate deviations of an observed metric (e.g. number of nodes or links) from a (hypothetical) fully connected network (where all nodes are linked to each other). These coefficients are taken from transportation geography (Fricker et al. X);
 
@@ -207,11 +197,33 @@ Finally, we also identified mycelial archetypes as described in Alon et al. (200
 
 *Separation of species based on mycelial traits*
 
-We found support for the hypotheses that species differ in their network traits. For example, The observed constrained ordination, which includes species identity as explanatory variable, explains more variation than unconstrained one (87% vs  13%) and it significantly deviated from a permutation-based random distribution (999 randomizations) (table 2).
+We found support for the hypotheses that species differ in their mycelial traits at  macro ad micro scales as well as when analyzing both types together. For example, in all cases  constrained ordination, which includes species identity as explanatory variable, always explained more variation than unconstrained one and it also significantly deviated from a permutation-based random distribution (9999 randomizations) (table 2).
 
-Table 2.
+
 ```{r,echo=FALSE, warning=FALSE,message=FALSE}
 library(vegan)
+
+Ascos_zygos<-all_data_scaled[-which(all_data_scaled$phylum=="Basidiomycota"),]
+
+Basidios<-all_data_scaled[which(all_data_scaled$phylum=="Basidiomycota"),]
+
+Model_Ascos_Zygos<-rda(Ascos_zygos[,                                        
+                                  c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
+                                     "Hyphal_main_width",#"Hyphal_tip_access",
+                                    "Hyphal_angle",
+                                     "Mycelia_length_scaled","alpha_coeff","beta_coeff",
+                                     "Root_eff","Reff_tip","Geff_scaled",
+                                     "Mycelial_area","Hyphal_density" )]~Species + Condition(phylum),scale = TRUE,data = Ascos_zygos)
+
+
+Model_Basidios<-rda(Basidios[,                                        
+                                  c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
+                                     "Hyphal_main_width",#"Hyphal_tip_access",
+                                    "Hyphal_angle",
+                                     "Mycelia_length_scaled","alpha_coeff","beta_coeff",
+                                     "Root_eff","Reff_tip","Geff_scaled",
+                                     "Mycelial_area","Hyphal_density" )]~Species,scale = TRUE,data = Basidios)
+
 
 Model_network_traits_sps_scaled<-rda(all_data_scaled[,                                        
                                   c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
@@ -229,43 +241,8 @@ Model_network_traits_sps_scaled_2<-rda(all_data_scaled[,
                                      "Root_eff","Reff_tip","Geff_scaled",
                                      "Mycelial_area","Hyphal_density" )]~Species, scale = TRUE,data = all_data_scaled)
 
-Model_network_traits_sps_scaled
-```
 
-Table 3. 
-```{r, echo=FALSE}
-anova.cca(Model_network_traits_sps_scaled,by="term")
-```
-This strong effect can be easily visualized in constrained ordination space (Figure 3).
-
-```{r, echo=FALSE, eval=FALSE}
-RsquareAdj(Model_network_traits_sps_scaled)$adj.r.squared#This the adjusted r squared to the number of variables, the more variables the smaller the r square gets.
-
-RsquareAdj(Model_network_traits_sps_scaled)$r.squared#This one corresponds to the value above
-```
-
-
-```{r,echo=FALSE, eval=FALSE}
-summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][,c(1:2)]
-summary(Model_network_traits_sps_scaled_2)[["cont"]][["importance"]][,c(1:2)]
-```
-
-```{r, echo=FALSE}
-
-#Adding the two RDA axis to the dataframe
-temporal<-as.data.frame(scores(Model_network_traits_sps_scaled,display = "sites",scaling = "species",choices=c(1,2)))
-
-all_data_scaled1<-cbind(all_data_scaled,temporal);rm(temporal)
-
-#Extracting the "site" or variable scores.
-e_vectors_traits_scaled<-as.data.frame(
-  scores(Model_network_traits_sps_scaled,display = "species",choices = c(1,2),scaling = "species"));
-e_vectors_traits_scaled$traits<-rownames(e_vectors_traits_scaled)
-
-names(e_vectors_traits_scaled)[1]<-"RDA1_species"
-names(e_vectors_traits_scaled)[2]<-"RDA2_species"
-
-#
+#Adding some aesthetic parameters
 my_theme<-
   theme(title = element_text(size = 18),
         axis.title.x=element_text(size=29),
@@ -279,6 +256,145 @@ my_theme<-
         strip.text.y = element_text(size = 25)#,
         #legend.position = "none"
         )
+```
+
+Table 2 Proportion of explained variation in ordination when axes are unconstrained (equivalent to a PCA), constrained by species identity (RDA) and, when applicable by Phylum as a conditional.
+
+
+Basidiomycota
+```{r,echo=FALSE, warning=FALSE,message=FALSE}
+Model_Basidios
+```
+Ascomycota
+```{r,echo=FALSE, warning=FALSE,message=FALSE}
+Model_Ascos_Zygos
+```
+All together
+```{r,echo=FALSE, warning=FALSE,message=FALSE}
+Model_network_traits_sps_scaled
+```
+
+Table 3. 
+
+Basidiomycota
+```{r}
+anova.cca(Model_Basidios,by="term",permutations = 9999)
+```
+Ascomycota & Zygomycetous
+```{r}
+anova.cca(Model_Ascos_Zygos,by="term",permutations = 9999)
+```
+All fungi
+```{r, echo=FALSE}
+anova.cca(Model_network_traits_sps_scaled,by="term",permutations = 9999)
+```
+
+
+This strong effect can be easily visualized in constrained ordination space (Figure 3).
+
+```{r, echo=FALSE, eval=FALSE}
+RsquareAdj(Model_network_traits_sps_scaled)$adj.r.squared#This the adjusted r squared to the number of variables, the more variables the smaller the r square gets.
+
+RsquareAdj(Model_network_traits_sps_scaled)$r.squared#This one corresponds to the value above
+```
+
+
+```{r,echo=FALSE, eval=FALSE}
+axes<-list(
+  c("Basidios"),
+summary(Model_Basidios)[["cont"]][["importance"]][,c(1:2)],
+c("Ascos_Zygos"),
+summary(Model_Ascos_Zygos)[["cont"]][["importance"]][,c(1:2)],
+c("all together with phylogeny"),
+summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][,c(1:2)],
+c("all together without phylogeny"),
+summary(Model_network_traits_sps_scaled_2)[["cont"]][["importance"]][,c(1:2)])
+
+axes
+```
+
+Basidios
+```{r, echo=FALSE, fig.height=10,fig.width=15}
+
+#Adding the two RDA axis to the dataframe
+temporal<-as.data.frame(scores(Model_Basidios,display = "sites",scaling = "species",choices=c(1,2)))
+
+Basidios1<-cbind(Basidios,temporal);rm(temporal)
+
+#Extracting the "site" or variable scores.
+e_vectors_traits_scaled_b<-as.data.frame(
+  scores(Model_Basidios, display = "species",choices = c(1,2),scaling = "species"));
+e_vectors_traits_scaled_b$traits<-rownames(e_vectors_traits_scaled_b)
+
+names(e_vectors_traits_scaled_b)[1]<-"RDA1_species"
+names(e_vectors_traits_scaled_b)[2]<-"RDA2_species"
+
+Basidios1%>% 
+  ggplot()+
+  aes(x=RDA1,y=RDA2) +
+  #geom_point(size=2)+
+    geom_text(aes(color=phylum,label=Species)) +
+    labs(y="RDA2 13%",x="RDA1 46%")+
+  
+  geom_text(size=2,aes(x=RDA1_species,y=RDA2_species,label=traits,fontface="bold"),
+            hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
+            data = e_vectors_traits_scaled_b)+
+  geom_segment(aes(x=0, y=0, xend=RDA1_species, yend=RDA2_species), 
+        arrow = arrow(),data = e_vectors_traits_scaled_b)+
+  ggtitle(label = "Taxonomy corrected")+
+  
+    my_theme
+```
+
+
+Ascos and Basidios
+```{r, echo=FALSE, fig.height=10,fig.width=15}
+
+#Adding the two RDA axis to the dataframe
+temporal<-as.data.frame(scores(Model_Ascos_Zygos,display = "sites",scaling = "species",choices=c(1,2)))
+
+Ascos_zygos1<-cbind(Ascos_zygos,temporal);rm(temporal)
+
+#Extracting the "site" or variable scores.
+e_vectors_traits_scaled_a<-as.data.frame(
+  scores(Model_Ascos_Zygos,display = "species",choices = c(1,2),scaling = "species"));
+e_vectors_traits_scaled_a$traits<-rownames(e_vectors_traits_scaled_a)
+
+names(e_vectors_traits_scaled_a)[1]<-"RDA1_species"
+names(e_vectors_traits_scaled_a)[2]<-"RDA2_species"
+
+Ascos_zygos1%>% 
+  ggplot()+
+  aes(x=RDA1,y=RDA2) +
+  #geom_point(size=2)+
+    geom_text(aes(color=phylum,label=Species)) +
+    labs(y="RDA2 7%",x="RDA1 76%")+
+  
+  geom_text(size=2,aes(x=RDA1_species,y=RDA2_species,label=traits,fontface="bold"),
+            hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
+            data = e_vectors_traits_scaled_b)+
+  geom_segment(aes(x=0, y=0, xend=RDA1_species, yend=RDA2_species), 
+        arrow = arrow(),data = e_vectors_traits_scaled_a)+
+  ggtitle(label = "Taxonomy corrected")+
+  
+    my_theme
+```
+
+All fungi
+```{r, echo=FALSE, fig.height=10,fig.width=15}
+
+#Adding the two RDA axis to the dataframe
+temporal<-as.data.frame(scores(Model_network_traits_sps_scaled,display = "sites",scaling = "species",choices=c(1,2)))
+
+all_data_scaled1<-cbind(all_data_scaled,temporal);rm(temporal)
+
+#Extracting the "site" or variable scores.
+e_vectors_traits_scaled<-as.data.frame(
+  scores(Model_network_traits_sps_scaled,display = "species",choices = c(1,2),scaling = "species"));
+e_vectors_traits_scaled$traits<-rownames(e_vectors_traits_scaled)
+
+names(e_vectors_traits_scaled)[1]<-"RDA1_species"
+names(e_vectors_traits_scaled)[2]<-"RDA2_species"
 
 #
 all_data_scaled1%>% 
@@ -298,45 +414,71 @@ all_data_scaled1%>%
     my_theme
 ```
 
-```{r, echo=FALSE}
 
-#Adding the two RDA axis to the dataframe
-temporal<-as.data.frame(scores(Model_network_traits_sps_scaled_2,display = "sites",scaling = "species",choices=c(1,2)))
+Figure 3. Constrained (RDA) ordination based on mycelial trait. Each name corresponds to one colony and colors refers to phylum. Upper pannel shows constrained ordation for the basidiomycota. Middle and lower panel shows ordination based on mycelial traits after taking into account phylogeny affiliation (i.e. correcting for taxonomy) for asocmycetous and zygomycetous groups (middle) and when all fungi are included (bottom).
 
-all_data_scaled2<-cbind(all_data_scaled,temporal);rm(temporal)
+In addition, the constrained ordination was partly correlated with taxonomy. That is, when looking at the ascomycota and zygomycetous fungi having phylum as a conditional explained around a quarter of the variation which increases to almost half of the variation when including the basidiomycota (Table 2).
 
-#Extracting the "site" or variable scores.
-e_vectors_traits_scaled<-as.data.frame(
-  scores(Model_network_traits_sps_scaled_2,display = "species",choices = c(1,2),scaling = "species"));
-e_vectors_traits_scaled$traits<-rownames(e_vectors_traits_scaled)
+Finally, the ordination was largely driven by network-traits contribution and not only by hyphal traits. For example, in all cases the loadings of the alpha coefficient, beta coefficient, scaled Global efficiency, and the scaled mycelial length had some of the highest loadings (scaled eigenvectors) for the first RDA axis, while both root-tip and root efficiency had large loadings for the second axis.
 
-names(e_vectors_traits_scaled)[1]<-"RDA1_species"
-names(e_vectors_traits_scaled)[2]<-"RDA2_species"
+Basidiomycetes
+```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
+e_vectors_traits_scaled_b$type<-NA
+e_vectors_traits_scaled_b$type[grep("Hyphal",e_vectors_traits_scaled_b$traits)]<-"Descriptive"
+e_vectors_traits_scaled_b$type[which(e_vectors_traits_scaled_b$traits=="Mycelial_area")]<-"Descriptive"
+e_vectors_traits_scaled_b$type[which(is.na(e_vectors_traits_scaled_b$type))]<-"Network"
 
-#
-all_data_scaled2 %>% 
+pivot_longer(e_vectors_traits_scaled_b,RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
   ggplot()+
-  aes(x=RDA1,y=RDA2) +
-  #geom_point(size=2)+
-    geom_text(aes(color=phylum,label=Species)) +
-    labs(y="RDA2 27%",x="RDA1 45%")+
-  
-  geom_text(size=2,aes(x=RDA1_species,y=RDA2_species,label=traits,fontface="bold"),
-            hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
-            data = e_vectors_traits_scaled)+
-  geom_segment(aes(x=0, y=0, xend=RDA1_species, yend=RDA2_species), 
-        arrow = arrow(),data = e_vectors_traits_scaled)+
-  ggtitle(label = "No taxonomy correction")+
-  
-    my_theme
+  aes(x=traits,y=abs(loading),fill=type)+
+  geom_bar(stat="identity",position = "dodge")+
+  facet_wrap(.~Axis)+
+  labs(y="Loadings")+
+  theme(title = element_text(size = 18),
+        axis.title.x=element_text(size=20),
+        panel.background = element_blank(),
+        panel.grid.major.y = element_line(size=0.25,linetype = "longdash",colour = "gray"),
+        panel.grid.major.x = element_blank(),
+        axis.text.x = element_text(size = 15,angle = 45,hjust = 1),
+        #axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        strip.text.x = element_text(size = 20),
+        strip.text.y = element_text(size = 25),
+        legend.position = "bottom"
+  )
 ```
 
-Figure 3. Constrained (RDA) ordination based on mycelial trait. Each name corresponds to one colony and colors refers to phylum. Upper panel shows ordination based on mycelial traits after taking into account phylogeny affiliation (i.e. correcting for taxonomy), while the bottom panel shows uncorrected ordination.
 
-We also found that the species ordination was partly correlated with taxonomy (half of the variation explained in constrained ordination can be attributed to taxonomic affiliation) (Table 2).
-Finally, the ordination was largely driven by network-traits contribution and not only by hyphal traits. For example, the loadings of the alpha coefficient, beta coefficient, scaled Global efficiency, and the scaled mycelial length had some of the highest loadings (scaled eigenvectors) for the first RDA axis, while both root-tip and root efficiency had large loadings for the second axis.
- 
-```{r,echo=FALSE,message=FALSE,warning=FALSE}
+Ascomycetes & Zygomycetous fungi
+```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
+e_vectors_traits_scaled_a$type<-NA
+e_vectors_traits_scaled_a$type[grep("Hyphal",e_vectors_traits_scaled_a$traits)]<-"Descriptive"
+e_vectors_traits_scaled_a$type[which(e_vectors_traits_scaled_a$traits=="Mycelial_area")]<-"Descriptive"
+e_vectors_traits_scaled_a$type[which(is.na(e_vectors_traits_scaled_a$type))]<-"Network"
+
+pivot_longer(e_vectors_traits_scaled_a,RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
+  ggplot()+
+  aes(x=traits,y=abs(loading),fill=type)+
+  geom_bar(stat="identity",position = "dodge")+
+  facet_wrap(.~Axis)+
+  labs(y="Loadings")+
+  theme(title = element_text(size = 18),
+        axis.title.x=element_text(size=20),
+        panel.background = element_blank(),
+        panel.grid.major.y = element_line(size=0.25,linetype = "longdash",colour = "gray"),
+        panel.grid.major.x = element_blank(),
+        axis.text.x = element_text(size = 15,angle = 45,hjust = 1),
+        #axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        strip.text.x = element_text(size = 20),
+        strip.text.y = element_text(size = 25),
+        legend.position = "bottom"
+  )
+```
+
+
+All fungi
+```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
 e_vectors_traits_scaled$type<-NA
 e_vectors_traits_scaled$type[grep("Hyphal",e_vectors_traits_scaled$traits)]<-"Descriptive"
 e_vectors_traits_scaled$type[which(e_vectors_traits_scaled$traits=="Mycelial_area")]<-"Descriptive"
@@ -362,7 +504,7 @@ pivot_longer(e_vectors_traits_scaled,RDA1_species:RDA2_species,names_to = "Axis"
         )
 ```
 
-Figure 4. Loadings (eigenvectors) of different mycelial traits for the first two mains RDA axis (that jointly explain up to 75% of the data)-
+Figure 4. Absolute loadings (eigenvectors) of different mycelial traits for the first two mains RDA axis. Upper pannel: loadings Basidiomycetes; middle pannel: Ascomycetes and Zygomecetous fungi, lower pannel: all fungi included.
 
 
 *Archetype identification*
@@ -417,6 +559,43 @@ As these two fronts are expanded, a scalable pipeline can emerge that would enab
 
 
 ## Supplementary material
+
+RDA for all species not including phylum as a conditional
+```{r, echo=FALSE}
+
+#Adding the two RDA axis to the dataframe
+temporal<-as.data.frame(scores(Model_network_traits_sps_scaled_2,display = "sites",scaling = "species",choices=c(1,2)))
+
+all_data_scaled2<-cbind(all_data_scaled,temporal);rm(temporal)
+
+#Extracting the "site" or variable scores.
+e_vectors_traits_scaled2<-as.data.frame(
+  scores(Model_network_traits_sps_scaled_2,display = "species",choices = c(1,2),scaling = "species"));
+e_vectors_traits_scaled2$traits<-rownames(e_vectors_traits_scaled2)
+
+names(e_vectors_traits_scaled2)[1]<-"RDA1_species"
+names(e_vectors_traits_scaled2)[2]<-"RDA2_species"
+
+#
+all_data_scaled2 %>% 
+  ggplot()+
+  aes(x=RDA1,y=RDA2) +
+  #geom_point(size=2)+
+    geom_text(aes(color=phylum,label=Species)) +
+    labs(y="RDA2 27%",x="RDA1 45%")+
+  
+  geom_text(size=2,aes(x=RDA1_species,y=RDA2_species,label=traits,fontface="bold"),
+            hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
+            data = e_vectors_traits_scaled)+
+  geom_segment(aes(x=0, y=0, xend=RDA1_species, yend=RDA2_species), 
+        arrow = arrow(),data = e_vectors_traits_scaled)+
+  ggtitle(label = "No taxonomy correction")+
+  
+    my_theme
+```
+
+
+
 
 Previous models
 
