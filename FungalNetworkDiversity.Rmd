@@ -187,6 +187,128 @@ Finally, we also identified mycelial archetypes as described in Alon et al. (200
 
 ## Results
 
+*Translation of mycelial images to a graph object*
+
+
+For this images I am using dimension 961 x 703 save as png images
+```{r}
+#1. C34 C34(1)_t11 Mortierella elongata
+par(mar=c(0,0,0,0))
+ecol<-cscale(E(colonies_ntwk[[1]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
+ecol<-cscale(E(colonies_ntwk[[1]])$width,palette = seq_gradient_pal(low = "yellow",high = "red"))
+ecol[E(colonies_ntwk[[1]])[type=="Inoculum"]]<-"bisque2"
+plot(colonies_ntwk[[1]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=spatial.data[[1]]*1,main="Mortierella elongata")
+
+#2.C35 C35(4)_t30 Umbelopsis isabellina
+ecol<-cscale(E(colonies_ntwk[[4]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
+#ecol<-cscale(E(colonies_ntwk[[4]])$width,palette = seq_gradient_pal(low = "yellow",high = "red"))
+ecol[E(colonies_ntwk[[4]])[type=="Inoculum"]]<-"bisque2"
+plot(colonies_ntwk[[4]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=spatial.data[[4]]*1,main="Umbelopsis isabellina")
+
+#3. C41 Fusarium redolens "C41(1)_t25_c
+ecol<-cscale(E(colonies_ntwk[[5]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
+#ecol<-cscale(E(colonies_ntwk[[5]])$width,palette = seq_gradient_pal(low = "yellow",high = "red"))
+ecol[E(colonies_ntwk[[5]])[type=="Inoculum"]]<-"bisque2"
+plot(colonies_ntwk[[5]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=spatial.data[[5]]*1,main="Fusarium redolens")
+
+#4. DF19 "Mortierella alpina DF19(1)_t11
+ecol<-cscale(E(colonies_ntwk[[8]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
+ecol[E(colonies_ntwk[[8]])[type=="Inoculum"]]<-"bisque2"
+plot(colonies_ntwk[[8]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=spatial.data[[8]]*1,main="Mortierella alpina")
+
+#5. DF25 Mortierella elongata2 DF25(6)_t11
+ecol<-cscale(E(colonies_ntwk[[11]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
+ecol[E(colonies_ntwk[[11]])[type=="Inoculum"]]<-"bisque2"
+plot(colonies_ntwk[[11]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=spatial.data[[11]]*1,main="Mortierella sp")
+
+#6. DF56 Mucor fragilis "DF56(6)_t09 
+ecol<-cscale(E(colonies_ntwk[[16]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
+ecol[E(colonies_ntwk[[16]])[type=="Inoculum"]]<-"bisque2"
+plot(colonies_ntwk[[16]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="Mucor fragilis")
+
+#7. DF9 Alternaria sp "DF9(5)_t25_c
+ecol<-cscale(E(colonies_ntwk[[19]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
+ecol[E(colonies_ntwk[[19]])[type=="Inoculum"]]<-"bisque2"
+plot(colonies_ntwk[[19]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=spatial.data[[19]]*1,main="Alternaria sp")
+
+#8. FOX Fusarium oxysporum FOX(1)_t24_c
+ecol<-cscale(E(colonies_ntwk[[20]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
+ecol[E(colonies_ntwk[[20]])[type=="Inoculum"]]<-"bisque2"
+plot(colonies_ntwk[[20]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=spatial.data[[20]]*1,main="Fusarium oxysporum")
+
+#9. M  Mortierella alpina2 M(5)_t13_c
+ecol<-cscale(E(colonies_ntwk[[22]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
+ecol[E(colonies_ntwk[[22]])[type=="Inoculum"]]<-"bisque2"
+plot(colonies_ntwk[[22]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=spatial.data[[22]]*1,main="Mortierella alpina2")
+
+#10.Pi Phallus impudicus Pi_ctrl1_d8_1
+ecol<-cscale(E(colonies_ntwk[[25]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
+ecol[E(colonies_ntwk[[25]])[type=="Inoculum"]]<-"bisque2"
+plot(colonies_ntwk[[25]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=spatial.data[[25]]*1,main="Phallus impudicus")
+
+#11. Pv Phanerochaete velutina Pv_ctrl1_d8_1
+ecol<-cscale(E(colonies_ntwk[[27]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
+ecol[E(colonies_ntwk[[27]])[type=="Inoculum"]]<-"bisque2"
+plot(colonies_ntwk[[27]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=spatial.data[[27]]*1,main="Phanerochaete velutina")
+
+#12.Rb Resinicium bicolor, "Rb_ctrl1_d8_1
+ecol<-cscale(E(colonies_ntwk[[30]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
+ecol[E(colonies_ntwk[[30]])[type=="Inoculum"]]<-"bisque2"
+plot(colonies_ntwk[[30]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=spatial.data[[30]]*1,main="Resinicium bicolor")
+
+
+```
+
+
+
 *Separation of species based on mycelial traits*
 
 We found support for the hypotheses that species differ in their mycelial traits at  macro ad micro scales as well as when analyzing both types together. For example, in all cases  constrained ordination, which includes species identity as explanatory variable, always explained more variation than unconstrained one and it also significantly deviated from a permutation-based random distribution (9999 randomizations) (table 2).
