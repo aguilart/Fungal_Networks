@@ -5,59 +5,122 @@ output: html_notebook
 
 Loading data (Here I add data from the csv tables stores in the folder). This takes time so I save the result.
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 library(tidyverse)
 #These lines will load all files saved as .csv in the folder "processedData" and then merging them ("row bind")
 temp = list.files(path="processedData\\",pattern="*-Edge.csv")
 temp<-paste("processedData\\",temp,sep = "")
 Edge_Traits_AZ = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
-#myfiles[[4]]<-myfiles[[4]][,c(1:42)]
 
-# Edge_Traits<-do.call(rbind,myfiles)
-# 
-# Edge_Traits$Species<-NA
-# Edge_Traits$Species[grep("C34",Edge_Traits$name)]<-"Mortierella elongata"
-# Edge_Traits$Species[grep("C35",Edge_Traits$name)]<-"Umbelopsis isabellina"
-# Edge_Traits$Species[grep("DF19",Edge_Traits$name)]<-"Mortierella alpina"
-# Edge_Traits$Species[grep("DF25",Edge_Traits$name)]<-"Mortierella elongata2"
-# Edge_Traits$Species[grep("DF56",Edge_Traits$name)]<-"Mucor fragilis"
-# Edge_Traits$Species[grep("M",Edge_Traits$name)]<-"Mortierella alpina2"
 
 #Node positions
 temp = list.files(path="processedData\\",pattern="*-Node.csv")
 temp<-paste("processedData\\",temp,sep = "")
 Node_Traits_AZ = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
-#myfiles[[4]]<-myfiles[[4]][,c(1:42)]
-# Node_Traits<-do.call(rbind,myfiles)
-# 
-# Node_Traits$node_name_ID<-paste(Node_Traits$name,Node_Traits$node_ID,sep = "_")
+
 
 #Adding Basidiomycete data
-temp = list.files(path="FreyasData\\",pattern="*-Edge.csv")
-temp<-paste("FreyasData\\",temp,sep = "")
+temp = list.files(path="BasidiomyceteData_calibrated2\\",pattern="*-Edge.csv")
+temp<-paste("BasidiomyceteData_calibrated2\\",temp,sep = "")
 Edge_Traits_B = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
 
 #Node positions
-temp = list.files(path="FreyasData\\",pattern="*-Node.csv")
-temp<-paste("FreyasData\\",temp,sep = "")
+temp = list.files(path="BasidiomyceteData_calibrated2\\",pattern="*-Node.csv")
+temp<-paste("BasidiomyceteData_calibrated2\\",temp,sep = "")
 Node_Traits_B = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+
+
 
 #Putting them all together
 Edge_Traits<-do.call(c, list(Edge_Traits_AZ, Edge_Traits_B))
 Node_Traits<-do.call(c, list(Node_Traits_AZ, Node_Traits_B))
 
+saveRDS(Edge_Traits,"Edge_Traits.RDS")
+saveRDS(Node_Traits,"Node_Traits.RDS")
 ```
 
-Loading data (stored from the chunck above)
+Loading data (stored from the chunck above, only if it is necessary)
 ```{r}
-rm(list=ls())
-
-Edge_Traits<-readRDS("List_Edge_Traits.RDS")
-
-Node_Traits<-readRDS("List_Node_Traits.RDS")
+# rm(list=ls())
+# 
+# Edge_Traits<-readRDS("List_Edge_Traits.RDS")
+# 
+# Node_Traits<-readRDS("List_Node_Traits.RDS")
 
 ```
+
+Loading summary tables. From these tables I only need area (from a shrunk convex hull) and (thus) hyphal density. All other variables I can calculate them myself (see chuncks below)
+
+```{r,echo=FALSE, message=FALSE, warning=FALSE}
+
+#Ascos & basidios
+temp = list.files(path="processedData\\",pattern="*-summaryTable.csv")
+temp<-paste("processedData\\",temp,sep = "")
+summary_Traits_AZ = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+
+
+summary_Traits_AZ<-bind_rows(summary_Traits_AZ)
+summary_Traits_AZ$name_col<-gsub("processedData\\\\+","",temp)
+summary_Traits_AZ$name_col<-gsub("\\-summaryTable\\.csv","",summary_Traits_AZ$name)
+
+
+#Basidiomycetes
+temp = list.files(path="BasidiomyceteData_calibrated2\\",pattern="*-summaryTable.csv")
+temp<-paste("BasidiomyceteData_calibrated2\\",temp,sep = "")
+summary_Traits_B = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+
+summary_Traits_B<-bind_rows(summary_Traits_B)
+summary_Traits_B$name_col<-gsub("BasidiomyceteData_calibrated2\\\\+","",temp)
+summary_Traits_B$name_col<-gsub("\\-summaryTable\\.csv","",summary_Traits_B$name)
+
+
+#These values were sent by Mark via email on september 2020
+# Pi_ctrl1_d8_1
+# 217604
+# 
+# Pi_ctrl1_d8_2
+# 329047
+# 
+# Pi_ctrl1_d8_3
+# 217391
+# 
+# Pv_ctrl1_d8_1
+# 3411537
+# 
+# Pv_ctrl1_d8_2
+# 4061079
+# 
+# Pv_ctrl1_d8_3
+# 4437051
+# 
+# Rb_ctrl1_d8_1
+# 833413
+# 
+# Rb_ctrl1_d8_2
+# 2358936
+# 
+# Rb_ctrl1_d8_3
+# 2401926
+
+rm(temp)
+
+summary_Traits_AZ<-summary_Traits_AZ[,c("name_col","summary_mean_area","summary_mean_Geff")]
+summary_Traits_B<-summary_Traits_B[,c("name_col","summary_mycelial_area","summary_Geff")]
+
+names(summary_Traits_B)<-c("name_col","summary_mean_area","summary_mean_Geff")
+
+summary_Traits_table_AZB<-bind_rows(summary_Traits_AZ,summary_Traits_B)
+
+# colony_sum<-left_join(colony_sum,summary_Traits[,c("name_col","summary_mean_area",
+#                                                     "summary_mean_edge_density",
+#                                                     "summary_mean_Geff",#It´s computing demanding, I will do implement it later
+#                                                     "summary_mean_Reff",
+#                                                     "summary_mean_alpha",
+#                                                     "summary_mean_beta")])
+```
+
+
 
 Transforming it into igraph object
 
@@ -94,6 +157,7 @@ mapply(function(x,z){
     y
     },Edge_Traits,Node_Traits,SIMPLIFY = F)
 
+saveRDS(colonies_ntwk,"colonies_ntwk.RDS")
 ```
 
 
@@ -109,7 +173,7 @@ spatial.data<-lapply(spatial.data,function(l){norm_coords(l, ymin=-1, ymax=1, xm
 # 
 # l <- as.matrix(spatial.data[,c(2,3)])
 # l <- norm_coords(l, ymin=-1, ymax=1, xmin=-1, xmax=1)
-
+saveRDS(spatial.data,"spatial.data.RDS")
 ```
 
 
@@ -172,86 +236,6 @@ colonies_ntwk,function(x){
 # mean(Node_Traits$node_Omin_Omid[which(Node_Traits$node_Omin_Omid>0&Node_Traits$name=="C34(1)_t11")])
 ```
 
-Loading summary tables. From these tables I only need area (from a shrunk convex hull) and (thus) hyphal density. All other variables I can calculate them myself (see chuncks below)
-
-```{r,echo=FALSE, message=FALSE, warning=FALSE}
-
-#This does not work at the moment!
-
-#Adding the other variables coming from Mark´s App
-
-temp = list.files(path="processedData\\",pattern="*-summaryTable.csv")
-temp<-paste("processedData\\",temp,sep = "")
-summary_Traits_AZ = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
-
-# summary_Traits_AZ = lapply(summary_Traits_AZ,function(x){x[,c("summary_mean_area",
-#                                                               "summary_mean_Geff",
-#                                                         "summary_mean_edge_density","summary_mean_Reff",
-#                                                         "summary_mean_alpha","summary_mean_beta")]} )
-
-#Note: it seems the names have changed in some cases for the summary-table output in the august version of the
-#Mark´s app
-#summary_Traits_AZ<-do.call(rbind,summary_Traits_AZ)
-summary_Traits_AZ<-bind_rows(summary_Traits_AZ)
-summary_Traits_AZ$name_col<-gsub("processedData\\\\+","",temp)
-summary_Traits_AZ$name_col<-gsub("\\-summaryTable\\.csv","",summary_Traits_AZ$name)
-
-
-
-#For the moment I am nos using any data from the basidiomycetes data (Freya´s data) because area is not included.
-temp = list.files(path="FreyasData\\",pattern="*-summaryTable.csv")
-temp<-paste("FreyasData\\",temp,sep = "")
-summary_Traits_B = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
-
-# summary_Traits_B = lapply(summary_Traits_B,function(x){x[,c(#"summary_mean_area",For the moment i do not have it for the basidiomycota
-#                                                             "summary_mean_Geff",
-#                                                         #"summary_mean_edge_density",
-#                                                         "summary_mean_Reff",
-#                                                         "summary_mean_alpha","summary_mean_beta")]} )
-
-summary_Traits_B<-do.call(rbind,summary_Traits_B)
-summary_Traits_B$name_col<-gsub("FreyasData\\\\+","",temp)
-summary_Traits_B$name_col<-gsub("\\-summaryTable\\.csv","",summary_Traits_B$name)
-summary_Traits_B$summary_mean_area<-c(217604,329047,217391,3411537,4061079,4437051,833413,2358936,2401926)
-
-#These values were sent by Mark via email on september 2020
-# Pi_ctrl1_d8_1
-# 217604
-# 
-# Pi_ctrl1_d8_2
-# 329047
-# 
-# Pi_ctrl1_d8_3
-# 217391
-# 
-# Pv_ctrl1_d8_1
-# 3411537
-# 
-# Pv_ctrl1_d8_2
-# 4061079
-# 
-# Pv_ctrl1_d8_3
-# 4437051
-# 
-# Rb_ctrl1_d8_1
-# 833413
-# 
-# Rb_ctrl1_d8_2
-# 2358936
-# 
-# Rb_ctrl1_d8_3
-# 2401926
-
-rm(temp)
-summary_Traits_table_AZB<-bind_rows(summary_Traits_AZ,summary_Traits_B)
-
-# colony_sum<-left_join(colony_sum,summary_Traits[,c("name_col","summary_mean_area",
-#                                                     "summary_mean_edge_density",
-#                                                     "summary_mean_Geff",#It´s computing demanding, I will do implement it later
-#                                                     "summary_mean_Reff",
-#                                                     "summary_mean_alpha",
-#                                                     "summary_mean_beta")])
-```
 
 Calculating summary network traits (coefficients and efficiencies)
 
@@ -272,7 +256,7 @@ lapply(colonies_ntwk,function(net_ed){
 )
 ```
 
-For the global efficiency of the Basidiomycetes. A bit time consuming so I save the results
+For the global efficiency of the Basidiomycetes. A bit time consuming so I save the results: I did this because the original Freyas did not have global efficiency. Later in Mark´s batches, he added this variables so it is not necessary to do this anymore.
 
 ```{r,echo=FALSE, eval=FALSE}
 
@@ -287,18 +271,19 @@ lapply(colonies_ntwk[24:32],function(net_ed){
 )
 })
 );saveRDS(summary_Geff,"summary_Geff.RDS")
+summary_Geff<-readRDS("summary_Geff.RDS")
 ```
 
 
 Here I am loading the results from the global efficiency and merging them with the other summary parameters
 ```{r}
-summary_Geff<-readRDS("summary_Geff.RDS")
 
-summary_Traits<-left_join(summary_Traits,summary_Traits_AZ[,c("name_col","summary_mean_Geff")])
 
-summary_Traits$summary_mean_Geff[summary_Traits$name_col%in%summary_Geff$name_col]<-
-  
-  summary_Geff$summary_mean_Geff[summary_Geff$name_col%in%summary_Traits$name_col]
+summary_Traits<-left_join(summary_Traits,summary_Traits_table_AZB[,c("name_col","summary_mean_Geff")])
+
+# summary_Traits$summary_mean_Geff[summary_Traits$name_col%in%summary_Geff$name_col]<-
+#   
+#   summary_Geff$summary_mean_Geff[summary_Geff$name_col%in%summary_Traits$name_col]
 
 
 ```
@@ -417,6 +402,8 @@ Calculating (weighted) Minimum spanning trees based on the dimesnions of each of
 Access_mst<-
         lapply(colonies_ntwk,
                mst)
+
+saveRDS(Access_mst,"Access_mst.RDS")
 ```
 
 I calculated also other networks but in the end they are not so useful
@@ -517,10 +504,10 @@ MST_summary_Geff11<-efficiency(Access_mst[[11]],type = "global");saveRDS(MST_sum
 MST_summary_Geff12<-efficiency(Access_mst[[12]],type = "global");saveRDS(MST_summary_Geff12,"MST_summary_Geff12.RDS")
 MST_summary_Geff13<-efficiency(Access_mst[[13]],type = "global");saveRDS(MST_summary_Geff13,"MST_summary_Geff13.RDS")
 
-MST_summary_Geff14_32<-sapply(Access_mst[14:32],function(net_ed){
+MST_summary_Geff14_35<-sapply(Access_mst[14:35],function(net_ed){
       a<-efficiency(net_ed,type = "global")
 
-});saveRDS(MST_summary_Geff14_32,"MST_summary_Geff14_32.RDS")
+});saveRDS(MST_summary_Geff14_35,"MST_summary_Geff14_35.RDS")
 
 
 
@@ -570,7 +557,7 @@ c(readRDS("MST_summary_Geff1.RDS"),
   readRDS("MST_summary_Geff11.RDS"),
   readRDS("MST_summary_Geff12.RDS"),
   readRDS("MST_summary_Geff13.RDS"),
-  readRDS("MST_summary_Geff14_32.RDS")
+  readRDS("MST_summary_Geff14_35.RDS")
   )
 
 ```
@@ -750,7 +737,7 @@ summary_Traits_table_AZB[,c("name_col","summary_mean_area")])
 ```
 
 
-```{r, echo=FALSE, message=FALSE, warning=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE,eval=FALSE}
 #Checking edge density:
 summary_Traits_table_AZB$summary_mean_edge_density
 #This is calculated as;
@@ -782,15 +769,15 @@ names(all_data)[16]<-"Mycelial_area"
 
 
 ```{r}
-all_data_scaled<-all_data[c(1:32),]
+all_data_scaled<-all_data[c(1:35),]
 
-all_data_scaled$Mycelia_length_scaled<-all_data[c(1:32),]$Mycelia_length/all_data[c(33:64),]$Mycelia_length
+all_data_scaled$Mycelia_length_scaled<-all_data[c(1:35),]$Mycelia_length/all_data[c(36:70),]$Mycelia_length
 
 #all_data_scaled$alpha_coeff_scaled<-all_data[c(1:32),]$alpha_coeff/all_data[c(33:64),]$alpha_coeff
 #all_data_scaled$beta_coeff_scaled<-all_data[c(1:32),]$beta_coeff/all_data[c(33:64),]$beta_coeff
-all_data_scaled$Root_eff_scaled<-all_data[c(1:32),]$Root_eff/all_data[c(33:64),]$Root_eff
-all_data_scaled$Reff_tip_scaled<-all_data[c(1:32),]$Reff_tip/all_data[c(33:64),]$Reff_tip
-all_data_scaled$Geff_scaled<-all_data[c(1:32),]$Geff/all_data[c(33:64),]$Geff
+all_data_scaled$Root_eff_scaled<-all_data[c(1:35),]$Root_eff/all_data[c(36:70),]$Root_eff
+all_data_scaled$Reff_tip_scaled<-all_data[c(1:35),]$Reff_tip/all_data[c(36:70),]$Reff_tip
+all_data_scaled$Geff_scaled<-all_data[c(1:35),]$Geff/all_data[c(36:70),]$Geff
 
 ```
 
@@ -808,5 +795,221 @@ all_data_scaled$phylum<-NA
 all_data_scaled$phylum[grep("DF9|C41|FOX|DF32",all_data_scaled$name_col)]<-"Ascomycota"
 all_data_scaled$phylum[grep("C34|C35|DF19|DF25|DF56|M",all_data_scaled$name_col)]<-"Zygomycetous"
 all_data_scaled$phylum[grep("Pi|Pv|Rb",all_data_scaled$name_col)]<-"Basidiomycota"
+
+saveRDS(all_data_scaled,"all_data_scaled.RDS")
 ```
+
+Adding robustness measures (For ascos and zygos)
+```{r}
+############# ORDERED ROBUSTNESS ###################
+
+temp = list.files(path="processedData\\",pattern="*-Ordered.csv")
+temp<-paste("processedData\\",temp,sep = "")
+Ordered_robustness = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+
+Joint_tables<-Ordered_robustness[[8]]
+Ordered_robustness[8]<-NULL
+
+Joint_tables$name<-rep(
+  c("C34(1)_t11","C34(2)_t23","C34(3)_t23","C35(4)_t30",
+    "DF19(1)_t11","DF19(2)_t11","DF19(3)_t11",
+    "DF25(4)_t08","DF25(5)_t11","DF25(6)_t11",
+    "DF56(4)_t11","DF56(5)_t09","DF56(6)_t09",
+    "M(4)_t13","M(5)_t13_c","M(6)_t13"),each=168)
+
+Joint_tables<-split(Joint_tables,Joint_tables$name)
+
+#Basidiomycota
+temp = list.files(path="BasidiomyceteData_calibrated2\\",pattern="*-Ordered.csv")
+temp<-paste("BasidiomyceteData_calibrated2\\",temp,sep = "")
+Ordered_robustness_b = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+
+names(Ordered_robustness_b)<-sapply(Ordered_robustness_b,function(x){unique(x$name)})
+
+#Merging all
+Ordered_robustness<-do.call(c, list(Ordered_robustness, Joint_tables,Ordered_robustness_b))
+
+Ordered_robustness<-
+lapply(
+Ordered_robustness,function(x){
+  x$dir_method<-paste(x$direction,x$method,sep = "_")
+  x
+})
+names(Ordered_robustness)[1:7]<-sapply(Ordered_robustness[1:7],function(x){unique(x$name)})
+
+# 1. Fifty percent cut-off
+Ordered_50<-do.call("rbind",
+                   sapply(Ordered_robustness,function(datos){
+                     lapply(split(datos,datos$dir_method),
+                            function(x){y<-data.frame(name=unique(x$name),
+                                                      dir_method=unique(x$dir_method),
+                                                      Fifty_mark= approx(x$robustness,x$removed_percent,xout=50)$y)
+                            })
+                   })
+)
+
+Ordered_50<-
+Ordered_50 %>% 
+pivot_wider(values_from = Fifty_mark,names_from=dir_method)
+
+names(Ordered_50)[-1]<-paste(names(Ordered_50)[-1],"robustness",sep = "_")
+
+############# SPATIAL ROBUSTNESS ###################
+
+temp = list.files(path="processedData\\",pattern="*-Spatial.csv")
+temp<-paste("processedData\\",temp,sep = "")
+Spatial_robustness = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+
+#Basidiomycota
+temp = list.files(path="BasidiomyceteData_calibrated2\\",pattern="*-Spatial.csv")
+temp<-paste("BasidiomyceteData_calibrated2\\",temp,sep = "")
+Spatial_robustness_b = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+
+#merging them
+Spatial_robustness<-do.call(c, list(Spatial_robustness, Spatial_robustness_b))
+
+names(Spatial_robustness)<-sapply(Spatial_robustness,function(x){unique(x$name)})
+
+# 1. Fifty percent cut-off
+
+Spatial_50<-do.call("rbind",
+                    #sapply(Random_robustness,function(datos){
+                    lapply(Spatial_robustness,function(x){
+                      #x<-aggregate(robustness~name*removed_percent,datos,mean)
+                      z<-data.frame(name=unique(x$name),
+                                    Fifty_mark= approx(x$robustness,x$removed_percent,xout=50)$y)
+                      
+                      z}
+                    ))
+
+Spatial_50$Fifty_mark[which(is.na(Spatial_50$Fifty_mark))]<-99
+rownames(Spatial_50)<-NULL
+names(Spatial_50)[2]<-"spatial_robustness"
+
+############# RANDOM ROBUSTNESS ###################
+
+temp = list.files(path="processedData\\",pattern="*-Random.csv")
+temp<-paste("processedData\\",temp,sep = "")
+Random_robustness = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+
+#Basidiomycota
+temp = list.files(path="BasidiomyceteData_calibrated2\\",pattern="*-Random.csv")
+temp<-paste("BasidiomyceteData_calibrated2\\",temp,sep = "")
+Random_robustness_b = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
+
+#merging them
+Random_robustness<-do.call(c, list(Random_robustness, Random_robustness_b))
+
+names(Random_robustness)<-sapply(Random_robustness,function(x){unique(x$name)})
+
+# 1- Fifty percent mark
+Random_50<-do.call("rbind",
+                   sapply(Random_robustness,function(datos){
+                     lapply(split(datos,as.factor(datos$rep)),
+                            function(x){y<-data.frame(name=unique(x$name),
+                                                      rep=unique(x$rep),
+                                                      Fifty_mark= approx(x$robustness,x$removed_percent,xout=50)$y)
+                            })
+                   })
+);Random_50<-do.call("rbind",Random_50)
+
+Random_50 <-aggregate(Fifty_mark~name,Random_50,mean)
+names(Random_50)[2]<-"random_robustness"
+
+#Just standardizing the name column because it is what will be used to left_join
+names(Ordered_50)[1]<-"name_col"
+names(Random_50)[1]<-"name_col"
+names(Spatial_50)[1]<-"name_col"
+
+#Now merging them
+robustness<-
+left_join(Ordered_50,Random_50,by="name_col")
+
+robustness<-
+left_join(robustness,Spatial_50,by="name_col")
+
+robustness$asc_width_robustness[which(is.na(robustness$asc_width_robustness))]<-99
+
+saveRDS(robustness,"robustness.RDS")
+```
+
+This would need be cut and paste in the FungalNetworkDiversity.Rmd
+```{r, eval=FALSE}
+
+Ordered_robustness[[8]] %>% 
+  filter(method=="width") %>% 
+  filter(direction=="asc") %>% 
+    ggplot()+
+  aes(removed_percent,robustness)+
+  geom_point()+
+  geom_line()+
+  geom_vline(aes(xintercept=Ordered_50$asc_width_robustness[8]),color="red",linetype="longdash")+
+  #facet_wrap(method~direction)+
+  labs(x="Volume removed (%)", y="Ordered Robustness (asc_width")+
+  theme(title = element_text(size = 18),
+        axis.title.x=element_text(size=20),
+        panel.background = element_blank(),
+        panel.grid.major.y = element_line(size=0.25,linetype = "longdash",colour = "gray"),
+        panel.grid.major.x = element_blank(),
+        axis.text.x = element_text(size = 15),
+        #axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        strip.text.x = element_text(size = 20),
+        strip.text.y = element_text(size = 25),
+        legend.position = "bottom"
+  )
+  
+sp_funct1<-
+#approxfun(Spatial_robustness[[1]]$robustness,Spatial_robustness[[1]]$removed_percent)
+approxfun(Spatial_robustness[[1]]$removed_percent,Spatial_robustness[[1]]$robustness)
+
+sp_example<-data.frame(removed_percent=seq(0,100),
+                       robustness=sp_funct1(seq(0,100)))
+
+Spatial_robustness[[1]] %>%
+  group_by(removed_percent) %>% 
+  summarise_at(c("robustness"),mean,na.rm=T) %>% 
+  ggplot()+
+  aes(removed_percent,robustness)+
+  geom_point()+
+  geom_line()+
+  geom_vline(aes(xintercept=95),color="red",linetype="longdash")+
+  #facet_wrap(method~direction)+
+  labs(x="Volume removed (%)", y="Spatial Robustness")+
+  theme(title = element_text(size = 18),
+        axis.title.x=element_text(size=20),
+        panel.background = element_blank(),
+        panel.grid.major.y = element_line(size=0.25,linetype = "longdash",colour = "gray"),
+        panel.grid.major.x = element_blank(),
+        axis.text.x = element_text(size = 15),
+        #axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        strip.text.x = element_text(size = 20),
+        strip.text.y = element_text(size = 25),
+        legend.position = "bottom"
+  )
+
+
+Random_robustness[[1]] %>%
+  group_by(removed_percent) %>% 
+  summarise_at(c("robustness"),mean,na.rm=T) %>% 
+  ggplot()+
+  aes(removed_percent,robustness)+
+  geom_point()+
+  geom_line()+
+  geom_vline(aes(xintercept=Random_50$random_robustness[1]),color="red",linetype="longdash")+
+  #facet_wrap(method~direction)+
+  labs(x="Volume removed (%)", y="Random Robustness")+
+  theme(title = element_text(size = 18),
+        axis.title.x=element_text(size=20),
+        panel.background = element_blank(),
+        panel.grid.major.y = element_line(size=0.25,linetype = "longdash",colour = "gray"),
+        panel.grid.major.x = element_blank(),
+        axis.text.x = element_text(size = 15),
+        #axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        strip.text.x = element_text(size = 20),
+        strip.text.y = element_text(size = 25),
+        legend.position = "bottom"
+  )
 
