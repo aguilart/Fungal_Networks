@@ -130,6 +130,37 @@ all_data_scaled<-readRDS("all_data_scaled.RDS")
 robustness<-readRDS("robustness.RDS")
 spatial.data<-readRDS("spatial.data.RDS")
 
+#summary values from Mark
+summaryTraits_Mark_AZ<-readRDS("summaryTraits_Mark_AZ.RDS")
+summaryTraits_Mark_B<-readRDS("summaryTraits_Mark_B.RDS")
+
+# grid.arrange(
+# all_data_scaled %>% 
+#   ggplot()+
+#   aes(x="a",y=Root_eff/Mycelial_area)+
+#   geom_jitter()+
+#   #geom_boxplot()+
+#   geom_text_repel(aes(label=name_col)),
+# 
+# 
+# all_data_scaled[c(1:23),] %>% 
+#   ggplot()+
+#   aes(x="a",y=Root_eff)+
+#   geom_jitter()+
+#   #geom_boxplot()+
+#   geom_text_repel(aes(label=name_col)),
+#   
+# ncol=2)
+# 
+# 
+# 
+# all_data_scaled[c(1:23),] %>% 
+#   ggplot()+
+#   aes(x="a",y=Hyphal_main_width)+
+#   geom_jitter()+
+#   #geom_boxplot()+
+#   geom_text_repel(aes(label=name_col))
+
 ```
 
 
@@ -137,7 +168,7 @@ spatial.data<-readRDS("spatial.data.RDS")
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
 library(igraph)
-par(mfrow=c(2,4), mar=c(0,0,0,0)) 
+par(mfrow=c(1,1), mar=c(0,0,0,0)) 
 
 plot(colonies_ntwk[[1]],
      edge.arrow.size=1,edge.curved=0,edge.width=2,
@@ -361,6 +392,22 @@ plot(colonies_ntwk[[31]],
 
 ```
 
+Making a colorbar (scalebar) for the network graph figures
+
+```{r}
+library(scales)
+escala<-
+data.frame(z=colorRampPalette(c("#FDE725FF","#1F968BFF","#440154FF"))(100),
+           y=c(1:100),
+           x=rep(1,100))
+
+plot(escala$x,escala$y,col=escala$z)
+
+show_col(viridis_pal()(100),labels = FALSE,ncol = 1,borders = NA)
+
+```
+
+
 *Distribution of hyphal morphological traits*
 
 ```{r}
@@ -447,10 +494,10 @@ Edge_Traits<-trial;rm(trial)
 
 #example: 155 micrometer/pixel
 
-#This is not necessary because the data has been already scaled in Mark´s dataset. Actually only my dataset needs to be scaled
+#This is not necessary because the data has been already scaled in Mark´s dataset. For my fungi I scaled in Assembling_Network_Trait_Data.Rmd
 
 
-Edge_Traits$Length_scaled<-Edge_Traits$Length
+#Edge_Traits$Length_scaled<-Edge_Traits$Length
 # Edge_Traits$Length_scaled[grep("Pi_ctrl1_d8_1",Edge_Traits$name)]<-Edge_Traits$Length[grep("Pi_ctrl1_d8_1",Edge_Traits$name)]*155
 # Edge_Traits$Length_scaled[grep("Pi_ctrl1_d8_2",Edge_Traits$name)]<-Edge_Traits$Length[grep("Pi_ctrl1_d8_2",Edge_Traits$name)]*152
 # Edge_Traits$Length_scaled[grep("Pi_ctrl1_d8_3",Edge_Traits$name)]<-Edge_Traits$Length[grep("Pi_ctrl1_d8_3",Edge_Traits$name)]*146
@@ -460,22 +507,6 @@ Edge_Traits$Length_scaled<-Edge_Traits$Length
 # Edge_Traits$Length_scaled[grep("Rb_ctrl1_d8_1",Edge_Traits$name)]<-Edge_Traits$Length[grep("Rb_ctrl1_d8_1",Edge_Traits$name)]*88
 # Edge_Traits$Length_scaled[grep("Rb_ctrl1_d8_2",Edge_Traits$name)]<-Edge_Traits$Length[grep("Rb_ctrl1_d8_2",Edge_Traits$name)]*91
 # Edge_Traits$Length_scaled[grep("Rb_ctrl1_d8_3",Edge_Traits$name)]<-Edge_Traits$Length[grep("Rb_ctrl1_d8_3",Edge_Traits$name)]*89
-
-Edge_Traits$Length_scaled[-grep("Pi|Pv|Rb",Edge_Traits$name)]<-Edge_Traits$Length[-grep("Pi|Pv|Rb",Edge_Traits$name)]*0.8
-
-
-Edge_Traits$Width_scaled<-Edge_Traits$Width
-# Edge_Traits$Width_scaled[grep("Pi_ctrl1_d8_1",Edge_Traits$name)]<-Edge_Traits$Width[grep("Pi_ctrl1_d8_1",Edge_Traits$name)]*155
-# Edge_Traits$Width_scaled[grep("Pi_ctrl1_d8_2",Edge_Traits$name)]<-Edge_Traits$Width[grep("Pi_ctrl1_d8_2",Edge_Traits$name)]*152
-# Edge_Traits$Width_scaled[grep("Pi_ctrl1_d8_3",Edge_Traits$name)]<-Edge_Traits$Width[grep("Pi_ctrl1_d8_3",Edge_Traits$name)]*146
-# Edge_Traits$Width_scaled[grep("Pv_ctrl1_d8_1",Edge_Traits$name)]<-Edge_Traits$Width[grep("Pv_ctrl1_d8_1",Edge_Traits$name)]*80
-# Edge_Traits$Width_scaled[grep("Pv_ctrl1_d8_2",Edge_Traits$name)]<-Edge_Traits$Width[grep("Pv_ctrl1_d8_2",Edge_Traits$name)]*84
-# Edge_Traits$Width_scaled[grep("Pv_ctrl1_d8_3",Edge_Traits$name)]<-Edge_Traits$Width[grep("Pv_ctrl1_d8_3",Edge_Traits$name)]*86
-# Edge_Traits$Width_scaled[grep("Rb_ctrl1_d8_1",Edge_Traits$name)]<-Edge_Traits$Width[grep("Rb_ctrl1_d8_1",Edge_Traits$name)]*88
-# Edge_Traits$Width_scaled[grep("Rb_ctrl1_d8_2",Edge_Traits$name)]<-Edge_Traits$Width[grep("Rb_ctrl1_d8_2",Edge_Traits$name)]*91
-# Edge_Traits$Width_scaled[grep("Rb_ctrl1_d8_3",Edge_Traits$name)]<-Edge_Traits$Width[grep("Rb_ctrl1_d8_3",Edge_Traits$name)]*89
-
-Edge_Traits$Width_scaled[-grep("Pi|Pv|Rb",Edge_Traits$name)]<-Edge_Traits$Width[-grep("Pi|Pv|Rb",Edge_Traits$name)]*0.8
 
 
 Edge_Traits$phylum<-NA
@@ -492,19 +523,26 @@ library(scales)
 
 To_plot<-bind_rows(
 Edge_Traits%>%
-      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>% select(c("name","Species","Width_scaled","phylum")) %>% rename(variable=Width_scaled) %>% 
+      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>% select(c("name","Species","Width","phylum")) %>% rename(variable=Width) %>% 
   mutate(variable_name="width_tip"),
 
 Edge_Traits%>%
-      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% filter(EndNodes_1_Degree==3|EndNodes_2_Degree==3)%>% select(c("name","Species","Width_scaled","phylum")) %>% rename(variable=Width_scaled) %>% 
+      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% filter(EndNodes_1_Degree==3|EndNodes_2_Degree==3)%>% select(c("name","Species","Width","phylum")) %>% rename(variable=Width) %>% 
   mutate(variable_name="width_main"),
 
 Edge_Traits%>%
-      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% select(c("name","Species","Length_scaled","phylum"))%>% rename(variable=Length_scaled) %>% 
+      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% select(c("name","Species","Length","phylum"))%>% rename(variable=Length) %>% 
   mutate(variable_name="length")
 )
 
 To_plot$phylum<-factor(To_plot$phylum,levels=c("Zygomycetous","Ascomycota", "Basidiomycota"))
+```
+
+
+```{r}
+pdf("Updated_Figures\\histogram_example_zab.pdf",
+    width = 14,
+    height = 8.5)
 
 To_plot %>% 
         ggplot()+
@@ -518,6 +556,8 @@ To_plot %>%
         theme(legend.position = "none",
               strip.background = element_blank(),
   strip.text.x = element_blank())
+
+dev.off()
 ```
 
 
@@ -550,7 +590,11 @@ all_data_scaled$easy_code[all_data_scaled$Species=="Phallus impudicus"]<-"Phal.i
 
 all_data_scaled<-left_join(all_data_scaled,robustness,by="name_col")
 
+#all_data_scaled$Root_eff_area_scaled<-all_data_scaled$Root_eff/all_data_scaled$Mycelial_area
+#all_data_scaled$Reff_tip_area_scaled<-all_data_scaled$Reff_tip/all_data_scaled$Mycelial_area
+
 Ascos_zygos<-all_data_scaled[-which(all_data_scaled$phylum=="Basidiomycota"),]
+
 ```
 
 
@@ -564,13 +608,14 @@ Model_Ascos_Zygos<-rda(Ascos_zygos[,c("Hyphal_length",
                                                      "Hyphal_density",
                                                      
                                                      "alpha_coeff",
-                                                     "beta_coeff",
+                                                     #"beta_coeff",
+                                                     #"gamma_coeff",
                                                      
                                                      "Root_eff",
                                                      "Reff_tip",
                                                      
-                                                     "Mycelia_length_scaled",
-                                                     "Geff_scaled",
+                                                     "Mycelia_length_MST",
+                                                     "Geff_MST",
                                                      
                                                      #"asc_length_robustness",
                                                      "des_length_robustness",
@@ -597,13 +642,14 @@ Model_Basidios<-rda(Basidios[,c("Hyphal_length",
                                                      "Hyphal_density",
                                                      
                                                      "alpha_coeff",
-                                                     "beta_coeff",
+                                                     #"beta_coeff",
+                                                     #"gamma_coeff",
                                                      
                                                      "Root_eff",
                                                      "Reff_tip",
                                                      
-                                                     "Mycelia_length_scaled",
-                                                     "Geff_scaled",
+                                                     "Mycelia_length_MST",
+                                                     "Geff_MST",
                                                      
                                                      #"asc_length_robustness",
                                                      "des_length_robustness",
@@ -620,34 +666,30 @@ Model_Basidios<-rda(Basidios[,c("Hyphal_length",
                                                      "spatial_robustness")]~Species ,scale = TRUE,data = Basidios)
 
 #All data
-Model_network_traits_sps_scaled<-rda(all_data_scaled[,c("Hyphal_length",
+#Here I decided to use only the traits that are scaled (this came actually later, after I checked that the triangularity would not make sense if I had variables that depedended on total size)
+Model_network_traits_sps_scaled<-rda(all_data_scaled[,c(#"Hyphal_length",
                                                      "Hyphal_number",
-                                                     "Hyphal_tip_width",
-                                                     "Hyphal_main_width",
-                                                     "Hyphal_angle",                                                                              "Mycelial_area",
+                                                     #"Hyphal_tip_width",
+                                                     #"Hyphal_main_width",
+                                                     "Hyphal_angle",                                                                              #"Mycelial_area",
                                                      "Hyphal_density",
                                                      
                                                      "alpha_coeff",
-                                                     "beta_coeff",
+                                                     #"beta_coeff",
+                                                     #"gamma_coeff",
                                                      
-                                                     "Root_eff",
-                                                     "Reff_tip",
+                                                     "Root_eff_l_scaled",
+                                                     "Reff_tip_l_scaled",
                                                      
-                                                     "Mycelia_length_scaled",
-                                                     "Geff_scaled",
+                                                     "Mycelia_length_MST",
+                                                     "Geff_MST",
                                                      
-                                                     #"asc_length_robustness",
-                                                     #chances of being found
+                                                     
                                                      "des_length_robustness",
                                                      
-                                                     #"asc_resistance_robustness",
-                                                     #"des_resistance_robustness",
-                                                     
-                                                     #"asc_volume_robustness",
-                                                     #"des_volume_robustness",
                                                      
                                                      "asc_width_robustness",
-                                                     #mouth parts
+                                                     
                                                      "des_width_robustness",
                                                      
                                                      "random_robustness",
@@ -731,108 +773,203 @@ axes
 
 Basidios
 ```{r, echo=FALSE, fig.height=10,fig.width=15}
-
 #Adding the two RDA axis to the dataframe
-temporal<-as.data.frame(scores(Model_Basidios,display = "sites",scaling = "species",choices=c(1,2)))
+temporal<-as.data.frame(scores(Model_Basidios,display = "sites",scaling = "sites",choices=c(1,2)))
 
 Basidios1<-cbind(Basidios,temporal);rm(temporal)
 
 #Extracting the "site" or variable scores.
 e_vectors_traits_scaled_b<-as.data.frame(
-  scores(Model_Basidios, display = "species",choices = c(1,2),scaling = "species"));
+  scores(Model_Basidios, display = "species",choices = c(1,2),scaling = "sites"));
 e_vectors_traits_scaled_b$traits<-rownames(e_vectors_traits_scaled_b)
 
 names(e_vectors_traits_scaled_b)[1]<-"RDA1_species"
 names(e_vectors_traits_scaled_b)[2]<-"RDA2_species"
+```
+
+
+```{r, echo=FALSE, fig.height=10,fig.width=15}
+pdf("Updated_Figures\\basidio_rda.pdf",
+    width = 14,
+    height = 8.5)
 
 Basidios1%>% 
   ggplot()+
   aes(x=RDA1,y=RDA2) +
   #geom_point(size=2)+
-    geom_text(aes(label=easy_code,fontface="bold.italic"),size=5,color="#0C2C84") +
+  
+  geom_segment(aes(x=0, y=0, xend=RDA1_species/2, yend=RDA2_species/2), 
+        arrow = arrow(), color="gray",data = e_vectors_traits_scaled_b)+  
+  
+  geom_text(aes(label=easy_code,fontface="bold.italic"),size=1,color="#0C2C84") +
     labs(y="RDA2",x="RDA1")+
   
-  geom_text(size=5,aes(x=RDA1_species,y=RDA2_species,label=traits,fontface="bold"),
+  geom_text(size=1,aes(x=RDA1_species/2,y=RDA2_species/2,label=traits,fontface="bold"),
             #hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
             data = e_vectors_traits_scaled_b)+
-  geom_segment(aes(x=0, y=0, xend=RDA1_species, yend=RDA2_species), 
-        arrow = arrow(),data = e_vectors_traits_scaled_b)+
-  #scale_color_brewer(palette = "Dark2")+
-  ggtitle(label = "Taxonomy corrected")+
+  
+  
+  ggtitle(label = "Site scaling")+
   
     my_theme
 
+dev.off()
+```
+
+
+```{r, echo=FALSE, fig.height=10,fig.width=15}
 #"#1D91C0","#7FCDBB","#0C2C84"
+#Just the species scaling to check correlation among variables
+relacion_var_basidio<-as.data.frame(scores(Model_Basidios,display = "species",scaling = "species",choices=c(1,2)))
+
+relacion_var_basidio$traits<-rownames(relacion_var_basidio)
+
+pdf("Updated_Figures\\var_relationship_basidio.pdf",
+    width = 14,
+    height = 8.5)
+
+relacion_var_basidio %>% 
+  ggplot()+
+  geom_segment(aes(x=0,y=0,xend=RDA1,yend=RDA2),arrow=arrow())+
+  geom_text(aes(RDA1,RDA2,label=traits,fontface="bold"),size=2)+
+  #xlim(c(-0.8,1.2))+
+  ggtitle(label="From RDA for basidios")
+
+dev.off()
 ```
 
 
 Ascos and zygos
 ```{r, echo=FALSE, fig.height=10,fig.width=15}
 #Adding the two RDA axis to the dataframe
-temporal<-as.data.frame(scores(Model_Ascos_Zygos,display = "sites",scaling = "species",choices=c(1,2)))
+temporal<-as.data.frame(scores(Model_Ascos_Zygos,display = "sites",scaling = "sites",choices=c(1,2)))
 
 Ascos_zygos1<-cbind(Ascos_zygos,temporal);rm(temporal)
 
 #Extracting the "site" or variable scores.
 e_vectors_traits_scaled_a<-as.data.frame(
-  scores(Model_Ascos_Zygos,display = "species",choices = c(1,2),scaling = "species"));
+  scores(Model_Ascos_Zygos,display = "species",choices = c(1,2),scaling = "sites"));
 e_vectors_traits_scaled_a$traits<-rownames(e_vectors_traits_scaled_a)
 
 names(e_vectors_traits_scaled_a)[1]<-"RDA1_species"
 names(e_vectors_traits_scaled_a)[2]<-"RDA2_species"
+```
+
+
+```{r, echo=FALSE, fig.height=10,fig.width=15}
+pdf("Updated_Figures\\ascos_zygos_rda.pdf",
+    width = 14,
+    height = 8.5)
 
 Ascos_zygos1%>% 
   ggplot()+
   aes(x=RDA1,y=RDA2) +
   #geom_point(size=2)+
-    geom_text(aes(color=phylum,label=Species),size=5) +
+  geom_segment(aes(x=0, y=0, xend=RDA1_species, yend=RDA2_species), 
+        arrow = arrow(),color="gray",data = e_vectors_traits_scaled_a)+
+    
+  geom_text(aes(color=phylum,label=easy_code),size=1) +
     labs(y="RDA2",x="RDA1")+
   
-  geom_text(size=5,aes(x=RDA1_species,y=RDA2_species,label=traits,fontface="bold"),
+  geom_text(size=1,aes(x=RDA1_species,y=RDA2_species,label=traits,fontface="bold"),
             hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
             data = e_vectors_traits_scaled_a)+
-  geom_segment(aes(x=0, y=0, xend=RDA1_species, yend=RDA2_species), 
-        arrow = arrow(),data = e_vectors_traits_scaled_a)+
-  ggtitle(label = "Taxonomy corrected")+
+  
+  ggtitle(label = "Site scaled")+
   scale_color_manual(values=c("yellowgreen","#7FCDBB"))+
   
     my_theme
+
+dev.off()
+```
+
+
+```{r, echo=FALSE, fig.height=10,fig.width=15}
+#Just the species scaling to check correlation among variables
+
+relacion_var_az<-as.data.frame(scores(Model_Ascos_Zygos,display = "species",scaling = "species",choices=c(1,2)))
+
+relacion_var_az$traits<-rownames(relacion_var_az)
+
+pdf("Updated_Figures\\var_relationship_ascos&zygos.pdf",
+    width = 14,
+    height = 8.5)
+
+relacion_var_az %>% 
+  ggplot()+
+  geom_segment(aes(x=0,y=0,xend=RDA1,yend=RDA2),arrow=arrow())+
+  geom_text(aes(RDA1,RDA2,label=traits,fontface="bold"),size=2)+
+  #xlim(c(-0.8,1.2))+
+  ggtitle(label="From RDA for acos & zygos")
+
+
+dev.off()
 ```
 
 
 All fungi
 ```{r, echo=FALSE, fig.height=10,fig.width=15}
-
 #Adding the two RDA axis to the dataframe
-temporal<-as.data.frame(scores(Model_network_traits_sps_scaled,display = "sites",scaling = "species",choices=c(1,2)))
+temporal<-as.data.frame(scores(Model_network_traits_sps_scaled,display = "sites",scaling = "sites",choices=c(1,2)))
 
 all_data_scaled1<-cbind(all_data_scaled,temporal);rm(temporal)
 
 #Extracting the "site" or variable scores.
 e_vectors_traits_scaled<-as.data.frame(
-  scores(Model_network_traits_sps_scaled,display = "species",choices = c(1,2),scaling = "species"));
+  scores(Model_network_traits_sps_scaled,display = "species",choices = c(1,2),scaling = "sites"));
 e_vectors_traits_scaled$traits<-rownames(e_vectors_traits_scaled)
 
 names(e_vectors_traits_scaled)[1]<-"RDA1_species"
 names(e_vectors_traits_scaled)[2]<-"RDA2_species"
+```
 
-#
+
+```{r, echo=FALSE, fig.height=10,fig.width=15}
+pdf("Updated_Figures\\all_fungi_rda.pdf",
+    width = 14,
+    height = 8.5)
+
 all_data_scaled1%>% 
   ggplot()+
   aes(x=RDA1,y=RDA2) +
   #geom_point(size=2)+
-    geom_text(aes(label=easy_code,fontface="bold.italic",color=phylum),size=5) +
+    geom_text(aes(label=easy_code,fontface="bold.italic",color=phylum),size=1) +
     labs(y="RDA2",x="RDA1")+
   
-  geom_text(size=5,aes(x=RDA1_species,y=RDA2_species,label=traits,fontface="bold"),
+  geom_text(size=1,aes(x=RDA1_species/2,y=RDA2_species/2,label=traits,fontface="bold"),
             #hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
             data = e_vectors_traits_scaled)+
-  geom_segment(aes(x=0, y=0, xend=RDA1_species, yend=RDA2_species), 
-        arrow = arrow(),data = e_vectors_traits_scaled)+
+  geom_segment(aes(x=0, y=0, xend=RDA1_species/2, yend=RDA2_species/2), 
+        arrow = arrow(),color="gray",data = e_vectors_traits_scaled)+
   ggtitle(label = "Taxonomy corrected")+
   scale_color_manual(values=c("#1D91C0","#0C2C84","#7FCDBB"))+
   
     my_theme
+
+dev.off()
+```
+
+
+```{r, echo=FALSE, fig.height=10,fig.width=15}
+#Just the species scaling to check correlation among variables
+
+relacion_var_all<-as.data.frame(scores(Model_network_traits_sps_scaled,display = "species",scaling = "species",choices=c(1,2)))
+
+relacion_var_all$traits<-rownames(relacion_var_all)
+
+pdf("Updated_Figures\\var_relationship_rda_all.pdf",
+    width = 14,
+    height = 8.5)
+
+relacion_var_all %>% 
+  ggplot()+
+  geom_segment(aes(x=0,y=0,xend=RDA1,yend=RDA2),arrow=arrow())+
+  geom_text(aes(RDA1,RDA2,label=traits,fontface="bold"),size=2)+
+  xlim(c(-0.8,1.2))+
+  ggtitle(label="From RDA for all fungi")
+  
+dev.off()
+
 ```
 
 
@@ -848,6 +985,13 @@ e_vectors_traits_scaled_b$type<-NA
 e_vectors_traits_scaled_b$type[grep("Hyphal",e_vectors_traits_scaled_b$traits)]<-"Descriptive"
 e_vectors_traits_scaled_b$type[which(e_vectors_traits_scaled_b$traits=="Mycelial_area")]<-"Descriptive"
 e_vectors_traits_scaled_b$type[which(is.na(e_vectors_traits_scaled_b$type))]<-"Network"
+```
+
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
+pdf("Updated_Figures\\basidio_loadings.pdf",
+    width = 14,
+    height = 8.5)
 
 pivot_longer(e_vectors_traits_scaled_b,RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
   ggplot()+
@@ -868,23 +1012,24 @@ pivot_longer(e_vectors_traits_scaled_b,RDA1_species:RDA2_species,names_to = "Axi
         strip.text.y = element_text(size = 25),
         legend.position = "bottom"
   )
+
+dev.off()
 ```
 
 
 Ascomycetes & Zygomycetous fungi
 ```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
-# e_vectors_traits_scaled_a<-as.data.frame(
-#   scores(Model_Ascos_Zygos,display = "species",choices = c(1,2),scaling = "species"));
-# e_vectors_traits_scaled_a$traits<-rownames(e_vectors_traits_scaled_a)
-# 
-# names(e_vectors_traits_scaled_a)[1]<-"RDA1_species"
-# names(e_vectors_traits_scaled_a)[2]<-"RDA2_species"
-
-
 e_vectors_traits_scaled_a$type<-NA
 e_vectors_traits_scaled_a$type[grep("Hyphal",e_vectors_traits_scaled_a$traits)]<-"Descriptive"
 e_vectors_traits_scaled_a$type[which(e_vectors_traits_scaled_a$traits=="Mycelial_area")]<-"Descriptive"
 e_vectors_traits_scaled_a$type[which(is.na(e_vectors_traits_scaled_a$type))]<-"Network"
+```
+
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
+pdf("Updated_Figures\\ascos_zygos_loadings.pdf",
+    width = 14,
+    height = 8.5)
 
 pivot_longer(e_vectors_traits_scaled_a,RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
   ggplot()+
@@ -905,6 +1050,8 @@ pivot_longer(e_vectors_traits_scaled_a,RDA1_species:RDA2_species,names_to = "Axi
         strip.text.y = element_text(size = 25),
         legend.position = "bottom"
   )
+
+dev.off()
 ```
 
 
@@ -914,6 +1061,13 @@ e_vectors_traits_scaled$type<-NA
 e_vectors_traits_scaled$type[grep("Hyphal",e_vectors_traits_scaled$traits)]<-"Descriptive"
 e_vectors_traits_scaled$type[which(e_vectors_traits_scaled$traits=="Mycelial_area")]<-"Descriptive"
 e_vectors_traits_scaled$type[which(is.na(e_vectors_traits_scaled$type))]<-"Network"
+```
+
+
+```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
+pdf("Updated_Figures\\all_fungi_loadings.pdf",
+    width = 14,
+    height = 8.5)
 
 pivot_longer(e_vectors_traits_scaled,RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
     ggplot()+
@@ -934,6 +1088,8 @@ pivot_longer(e_vectors_traits_scaled,RDA1_species:RDA2_species,names_to = "Axis"
         strip.text.y = element_text(size = 25),
         legend.position = "bottom"
         )
+
+dev.off()
 ```
 
 Figure 4. Absolute loadings (eigenvectors) of different mycelial traits for the first two mains RDA axis. Upper panel: loadings Basidiomycetes; middle panel: Ascomycetes and Zygomecetous fungi, lower panel: all fungi included.
@@ -948,15 +1104,216 @@ Based on the species included, we found three archetypes in the mycelial trait m
 
 ```{r, eval=FALSE,echo=FALSE,warning=FALSE,message=FALSE}
 #This is done thrrough the Uri Alon´s softawer, thus I need to export the data and then use the software
-all_data_t<-all_data[which(all_data$Network=="Real"),
-                     c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
-                       "Hyphal_main_width","alpha_coeff","beta_coeff","Root_eff","Reff_tip","Geff","Hyphal_density","Mycelial_area")]
+#Note: Orginally all variables listed were included. However I commented one variables on Feb 21 because they still reflect differences in total size (this include root efficiencies that are not scaled to area). An alternative solution would have been to z scale the original variables, but that sounds a bit weird. In any case, here I left all the variables that are scalled and they should be irrespective of size. Beta coeff was left out because it has almost the same value as the alpha one.
 
-all_data_t<-sapply(all_data_t,function(x){(x-mean(x))/sd(x)})
+all_data_t<-
+all_data_scaled[,c(#"Hyphal_length",
+                                                     "Hyphal_number",
+                                                     #"Hyphal_tip_width",
+                                                     #"Hyphal_main_width",
+                                                     "Hyphal_angle",                                                                              #"Mycelial_area",
+                                                     "Hyphal_density",
+                                                     
+                                                     "alpha_coeff",
+                                                     #"beta_coeff",
+                                                     
+                                                     "Root_eff_l_scaled",
+                                                     "Reff_tip_l_scaled",
+                                                     
+                                                     "Mycelia_length_MST",
+                                                     "Geff_MST",
+                                                     
+                                                     
+                                                     "des_length_robustness",
+                                                     
+                                                     
+                                                     "asc_width_robustness",
+                                                     
+                                                     "des_width_robustness",
+                                                     
+                                                     "random_robustness",
+                                                     "spatial_robustness")]
 
-write.csv2(all_data_t,"alldata_forTriangularity0.csv",row.names = F, col.names = F)
-write.csv(all_data_t,"alldata_forTriangularity.csv",row.names = F, col.names = F)#This one can be read in my laptop
-rm(all_data_t)
+all_data_t_centered<-sapply(all_data_t,function(x){(x-mean(x))/sd(x)})
+
+write.csv2(all_data_t_centered,"alldata_forTriangularity0.csv",row.names = F)#This one can ber read from the hp desktop at Uni
+
+write.csv(all_data_t_centered,"alldata_forTriangularity.csv",row.names = F)#This one can be read in my laptop
+rm(all_data_t_centered)
+
+model_triangle<-rda(all_data_t,scale=T)
+#Adding the two RDA axis to the dataframe
+temporal<-as.data.frame(scores(model_triangle,display = "sites",scaling = "sites",choices=c(1,2)))
+
+write.csv(temporal,"axes_triangularity.csv",row.names = F)
+
+```
+
+However, I can do the pca myself and draw a triangle on top of the pca based on the Uri Alon´s program. THus the only reasons to use the Uri Alon´s program is to see the triangle and then obtain a p value for it
+
+```{r}
+
+
+all_data_scaled_t<-cbind(all_data_scaled,temporal)#;rm(temporal)
+
+e_vectors_triangle<-as.data.frame(
+  scores(model_triangle,display = "species",choices = c(1,2),scaling = "sites"));
+e_vectors_triangle$traits<-rownames(e_vectors_triangle)
+names(e_vectors_triangle)[1]<-"PC1_s"
+names(e_vectors_triangle)[2]<-"PC2_s"
+
+summary(model_triangle)[["cont"]][["importance"]][,c(1:2)]
+```
+
+
+```{r}
+#triangle points
+
+#archetypes based on scaled data only
+d<-data.frame(x=c(-0.881,0.839,0.592),y=c(0.057,1.043,-0.914))
+
+library(ggrepel)
+all_data_scaled_t%>% 
+  ggplot()+
+  aes(x=PC1,y=PC2) +
+  geom_point(size=2)+
+  geom_polygon(data=d,aes(x=x,y=y),alpha=0.50,fill="#21908CFF")+
+  # geom_text_repel(size=5,aes(x=PC1_s,y=PC2_s,label=traits,fontface="bold"),
+  #                       data = e_vectors_triangle)+
+  # geom_segment(aes(x=0, y=0, xend=PC1_s, yend=PC2_s), 
+  #       arrow = arrow(),data = e_vectors_triangle)+
+  xlim(-1.2,1)+
+  ylim(-1.2,1.5)+
+  #geom_text_repel(aes(label=name_col,fontface="bold.italic",color=phylum),size=3) +
+      labs(x="PCA 1 (37.92%)",y="PCA 2 (25.85%)")+
+      my_theme
+
+```
+
+Identifying the colonies that are closer to the archetypes predicted by Uri Alon´s program
+
+As for figure 3 (above), For this images I am using dimension 961 x 703 save as png images
+```{r}
+#4. DF19 "Mortierella sp1 DF19(3)_t11 (In figure 3 I used DF19(1)_t11)
+par(mar=c(0,0,0,0))
+ecol<-E(colonies_ntwk[[10]])$width
+ecol[E(colonies_ntwk[[10]])[type=="Inoculum"]]<-(quantile(ecol[E(colonies_ntwk[[10]])[type!="Inoculum"]])[2])/2
+#ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
+ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
+ecol2[E(colonies_ntwk[[10]])[type=="Inoculum"]]<-"gray30"
+
+plot(colonies_ntwk[[10]],
+     edge.arrow.size=1,edge.curved=0,
+     #edge.width=2,
+     edge.width=ecol/3,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol2,
+     edge.size=150,vertex.size=0,layout=spatial.data[[10]]*1,main="DF19(3)_t11")
+
+#6. DF56 Mucor fragilis "DF56(6)_t09 (the actual point is (5), however, it is not that nice looking to plot)
+par(mar=c(0,0,0,0))
+ecol<-E(colonies_ntwk[[16]])$width
+ecol[E(colonies_ntwk[[16]])[type=="Inoculum"]]<-(quantile(ecol[E(colonies_ntwk[[16]])[type!="Inoculum"]])[2])/2
+#ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
+
+ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
+
+ecol2[E(colonies_ntwk[[16]])[type=="Inoculum"]]<-"gray30"
+
+plot(colonies_ntwk[[16]],
+     edge.arrow.size=1,edge.curved=0,
+     #edge.width=2,
+     edge.width=ecol/3,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol2,
+     edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="DF56(6)_t09")
+
+#10.Pi Phallus impudicus Pi_ctrl1_d8_1
+par(mar=c(0,0,0,0))
+ecol<-E(colonies_ntwk[[29]])$width
+ecol[E(colonies_ntwk[[29]])[type=="Inoculum"]]<-(quantile(ecol[E(colonies_ntwk[[29]])[type!="Inoculum"]])[2])/2
+#ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
+ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
+ecol2[E(colonies_ntwk[[29]])[type=="Inoculum"]]<-"gray30"
+
+plot(colonies_ntwk[[29]],
+     edge.arrow.size=1,edge.curved=0,
+     edge.width=2,
+     #edge.width=ecol/100,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol2,
+     edge.size=150,vertex.size=0,layout=spatial.data[[29]]*1,main="Pi_ctrl_d8_3")
+```
+
+Checking the values of the archetypes
+```{r}
+
+archetypes<-which(all_data_scaled$name_col=="DF19(3)_t11"|
+                    all_data_scaled$name_col=="DF56(6)_t09"|
+                    all_data_scaled$name_col=="Pi_ctrl1_d8_1")
+
+selected_variables<-c(#"Hyphal_length",
+  "name_col",
+                                                     "Hyphal_number",
+                                                     #"Hyphal_tip_width",
+                                                     #"Hyphal_main_width",
+                                                     "Hyphal_angle",                                                                              #"Mycelial_area",
+                                                     "Hyphal_density",
+                                                     
+                                                     "alpha_coeff",
+                                                     #"beta_coeff",
+                                                     
+                                                     "Root_eff_area_scaled",
+                                                     "Reff_tip_area_scaled",
+                                                     
+                                                     "Mycelia_length_scaled",
+                                                     "Geff_scaled",
+                                                     
+                                                     
+                                                     "des_length_robustness",
+                                                     
+                                                     
+                                                     "asc_width_robustness",
+                                                     
+                                                     "des_width_robustness",
+                                                     
+                                                     "random_robustness",
+                                                     "spatial_robustness")
+
+all_data_t<-all_data_scaled[,selected_variables]
+#all_data_t[,c(2:14)]<-sapply(all_data_t[,c(2:14)],function(x){(x-mean(x))/sd(x)})
+
+#all_data_t[archetypes,] %>% 
+  all_data_scaled[archetypes,selected_variables] %>% 
+  pivot_longer(Hyphal_number:spatial_robustness) %>%
+  ggplot()+
+  geom_point(aes(x=name_col,value))+
+  facet_wrap(.~name,scales = "free")
+
+
+
+pivot_longer(e_vectors_triangle,PC1_s:PC2_s,names_to = "Axis",values_to="loading") %>% 
+  ggplot()+
+  aes(x=traits,y=loading)+
+  geom_bar(stat="identity",position = "dodge")+
+  facet_wrap(.~Axis)+
+  labs(y="Loadings")+
+  #scale_fill_manual(values = c("#7FCDBB","#0C2C84"))+
+  theme(title = element_text(size = 18),
+        axis.title.x=element_text(size=20),
+        panel.background = element_blank(),
+        panel.grid.major.y = element_line(size=0.25,linetype = "longdash",colour = "gray"),
+        panel.grid.major.x = element_blank(),
+        axis.text.x = element_text(size = 15,angle = 45,hjust = 1),
+        #axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        strip.text.x = element_text(size = 20),
+        strip.text.y = element_text(size = 25),
+        legend.position = "bottom"
+  )
+
+
+
 ```
 
 

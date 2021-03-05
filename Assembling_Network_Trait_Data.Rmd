@@ -30,9 +30,66 @@ temp = list.files(path="BasidiomyceteData_calibrated2\\",pattern="*-Node.csv")
 temp<-paste("BasidiomyceteData_calibrated2\\",temp,sep = "")
 Node_Traits_B = lapply(temp,function(x){read.csv2(x,header = TRUE,stringsAsFactors = FALSE)} )
 
+#Scalings:
+#All fungi need to be rescaled. Most of them have to be multiplied by 0.79 except for
+#the fungi in position 5:7,17:20.
+
+Edge_Traits_AZ[-c(5:7,17:20)]<-
+lapply(Edge_Traits_AZ[-c(5:7,17:20)],function(x){
+  x$Length<-x$Length*0.79
+  x$Width<-x$Width*0.79
+  x$Resistance_2ave<-((x$Resistance_2ave)/(8/pi))*(1/0.79)
+  return(x)
+})
 
 
-#Putting them all together
+#For the fungi with dfferent callibration, these are:
+#"C41(1)_t25_c"#2.587  unique(Edge_Traits_AZ[[5]]$name)
+#"C41(2)_t25_c"#2.599  unique(Edge_Traits_AZ[[6]]$name)
+#"C41(3)_t25_c"#2.580  unique(Edge_Traits_AZ[[7]]$name)
+#"DF9(4)_t25_c"#2.536  unique(Edge_Traits_AZ[[17]]$name)
+#"DF9(5)_t25_c"#2.60   unique(Edge_Traits_AZ[[18]]$name)
+#"DF9(6)_t25_c"#2.589  unique(Edge_Traits_AZ[[19]]$name)
+#"FOX(1)_t24_c"#2.598  unique(Edge_Traits_AZ[[20]]$name)
+
+#"C41(1)_t25_c"#[[5]]
+c<-2.587
+Edge_Traits_AZ[[5]]$Length<-            Edge_Traits_AZ[[5]]$Length*c
+Edge_Traits_AZ[[5]]$Width<-             Edge_Traits_AZ[[5]]$Width*c
+Edge_Traits_AZ[[5]]$Resistance_2ave<- ((Edge_Traits_AZ[[5]]$Resistance_2ave)/(8/pi))*(1/c)
+
+c<-2.599
+Edge_Traits_AZ[[6]]$Length<-            Edge_Traits_AZ[[6]]$Length*c
+Edge_Traits_AZ[[6]]$Width<-             Edge_Traits_AZ[[6]]$Width*c
+Edge_Traits_AZ[[6]]$Resistance_2ave<- ((Edge_Traits_AZ[[6]]$Resistance_2ave)/(8/pi))*(1/c)
+
+c<-2.580
+Edge_Traits_AZ[[7]]$Length<-            Edge_Traits_AZ[[7]]$Length*c
+Edge_Traits_AZ[[7]]$Width<-             Edge_Traits_AZ[[7]]$Width*c
+Edge_Traits_AZ[[7]]$Resistance_2ave<- ((Edge_Traits_AZ[[7]]$Resistance_2ave)/(8/pi))*(1/c)
+
+c<-2.536
+Edge_Traits_AZ[[17]]$Length<-            Edge_Traits_AZ[[17]]$Length*c
+Edge_Traits_AZ[[17]]$Width<-             Edge_Traits_AZ[[17]]$Width*c
+Edge_Traits_AZ[[17]]$Resistance_2ave<- ((Edge_Traits_AZ[[17]]$Resistance_2ave)/(8/pi))*(1/c)
+
+c<-2.60
+Edge_Traits_AZ[[18]]$Length<-            Edge_Traits_AZ[[18]]$Length*c
+Edge_Traits_AZ[[18]]$Width<-             Edge_Traits_AZ[[18]]$Width*c
+Edge_Traits_AZ[[18]]$Resistance_2ave<- ((Edge_Traits_AZ[[18]]$Resistance_2ave)/(8/pi))*(1/c)
+
+c<-2.589
+Edge_Traits_AZ[[19]]$Length<-            Edge_Traits_AZ[[19]]$Length*c
+Edge_Traits_AZ[[19]]$Width<-             Edge_Traits_AZ[[19]]$Width*c
+Edge_Traits_AZ[[19]]$Resistance_2ave<- ((Edge_Traits_AZ[[19]]$Resistance_2ave)/(8/pi))*(1/c)
+
+c<-2.598
+Edge_Traits_AZ[[20]]$Length<-            Edge_Traits_AZ[[20]]$Length*c
+Edge_Traits_AZ[[20]]$Width<-             Edge_Traits_AZ[[20]]$Width*c
+Edge_Traits_AZ[[20]]$Resistance_2ave<- ((Edge_Traits_AZ[[20]]$Resistance_2ave)/(8/pi))*(1/c)
+rm(c)
+
+#Putting them all together (for basidios there is no need to re callibrate)
 Edge_Traits<-do.call(c, list(Edge_Traits_AZ, Edge_Traits_B))
 Node_Traits<-do.call(c, list(Node_Traits_AZ, Node_Traits_B))
 
@@ -64,6 +121,18 @@ summary_Traits_AZ<-bind_rows(summary_Traits_AZ)
 summary_Traits_AZ$name_col<-gsub("processedData\\\\+","",temp)
 summary_Traits_AZ$name_col<-gsub("\\-summaryTable\\.csv","",summary_Traits_AZ$name)
 
+#Recalibrating some of the fungi that are not scaled to 0.79 um/pixel
+summary_Traits_AZ[c(5:7,17:20),95]
+
+summary_Traits_AZ$summary_mean_area[5]<-((2.587^2)*(summary_Traits_AZ$summary_mean_area[5]/(0.6241)))
+summary_Traits_AZ$summary_mean_area[6]<-((2.599^2)*(summary_Traits_AZ$summary_mean_area[6]/(0.6241)))
+summary_Traits_AZ$summary_mean_area[7]<-((2.580^2)*(summary_Traits_AZ$summary_mean_area[7]/(0.6241)))
+summary_Traits_AZ$summary_mean_area[17]<-((2.536^2)*(summary_Traits_AZ$summary_mean_area[17]/(0.6241)))
+summary_Traits_AZ$summary_mean_area[18]<-((2.60^2)*(summary_Traits_AZ$summary_mean_area[18]/(0.6241)))
+summary_Traits_AZ$summary_mean_area[19]<-((2.589^2)*(summary_Traits_AZ$summary_mean_area[19]/(0.6241)))
+summary_Traits_AZ$summary_mean_area[20]<-((2.598^2)*(summary_Traits_AZ$summary_mean_area[20]/(0.6241)))
+
+saveRDS(summary_Traits_AZ,"summaryTraits_Mark_AZ.RDS")
 
 #Basidiomycetes
 temp = list.files(path="BasidiomyceteData_calibrated2\\",pattern="*-summaryTable.csv")
@@ -74,6 +143,7 @@ summary_Traits_B<-bind_rows(summary_Traits_B)
 summary_Traits_B$name_col<-gsub("BasidiomyceteData_calibrated2\\\\+","",temp)
 summary_Traits_B$name_col<-gsub("\\-summaryTable\\.csv","",summary_Traits_B$name)
 
+saveRDS(summary_Traits_B,"summaryTraits_Mark_B.RDS")
 
 #These values were sent by Mark via email on september 2020
 # Pi_ctrl1_d8_1
@@ -134,7 +204,7 @@ colonies_ntwk<-
 mapply(function(x,z){
     y<-graph_from_edgelist(as.matrix(x[,c("EndNodes_1","EndNodes_2")]),directed = F)
     E(y)$name<-x$name
-    E(y)$weight<-x$Resistance_2
+    E(y)$weight<-x$Resistance_2ave
     E(y)$length<-x$Length
     E(y)$width<-x$Width
     
@@ -250,17 +320,16 @@ lapply(colonies_ntwk,function(net_ed){
     name_col=unique(E(net_ed)$name),
     summary_mean_alpha=(ecount(net_ed)-vcount(net_ed)+1)/(2*vcount(net_ed)-5),
     summary_mean_beta=ecount(net_ed)/vcount(net_ed),
+    summary_mean_gamma=ecount(net_ed)/(3*vcount(net_ed)-6),
     summary_mean_Reff=mean(1/V(net_ed)[Accessibility>0]$Accessibility),
     summary_mean_Reff_tip=mean(1/V(net_ed)[Degrees==1&Accessibility>0]$Accessibility))
 })
 )
 ```
 
-For the global efficiency of the Basidiomycetes. A bit time consuming so I save the results: I did this because the original Freyas did not have global efficiency. Later in Mark´s batches, he added this variables so it is not necessary to do this anymore.
-
+This chuncks here shows how one can calculate by hand global efficiency according to the formula in Mark´s manual however I found this to be really time consuming. Then later I found that one can obtain the same result using the
+function efficiency from the package brainGraph (as shown below by specifying the type=global)
 ```{r,echo=FALSE, eval=FALSE}
-
-library(brainGraph)
 
 summary_Geff<-do.call(rbind,
 lapply(colonies_ntwk[24:32],function(net_ed){
@@ -274,12 +343,85 @@ lapply(colonies_ntwk[24:32],function(net_ed){
 summary_Geff<-readRDS("summary_Geff.RDS")
 ```
 
+For the global efficiency. A bit time consuming so I save the results: I did this because the original calculated global efficiency using Resistance_2 instead of Resistance_2ave. These two variables should be correlated, but the App version I used had a bug and the they were completely uncorrelated. As a consequence I had to calculate manually all efficiency varaibles.
+
+```{r,eval=FALSE}
+library(brainGraph)
+Real_summary_Geff1<-#do.call(rbind,
+  sapply(colonies_ntwk[1:5],function(net_ed){
+    a<-efficiency(net_ed,type = "global")
+    
+  })
+#);
+
+saveRDS(Real_summary_Geff1,"Real_summary_Geff1.RDS")
+
+
+Real_summary_Geff6<-efficiency(colonies_ntwk[[6]],type = "global");saveRDS(Real_summary_Geff6,"Real_summary_Geff6.RDS")
+Real_summary_Geff7<-efficiency(colonies_ntwk[[7]],type = "global");saveRDS(Real_summary_Geff7,"Real_summary_Geff7.RDS")
+Real_summary_Geff8<-efficiency(colonies_ntwk[[8]],type = "global");saveRDS(Real_summary_Geff8,"Real_summary_Geff8.RDS")
+
+#9 and 10 are in the chunck below because they are so big it crashes the way "efficiency" works
+
+Real_summary_Geff11<-efficiency(colonies_ntwk[[11]],type = "global");saveRDS(Real_summary_Geff11,"Real_summary_Geff11.RDS")
+Real_summary_Geff12<-efficiency(colonies_ntwk[[12]],type = "global");saveRDS(Real_summary_Geff12,"Real_summary_Geff12.RDS")
+Real_summary_Geff13<-efficiency(colonies_ntwk[[13]],type = "global");saveRDS(Real_summary_Geff13,"Real_summary_Geff13.RDS")
+
+Real_summary_Geff14_35<-sapply(colonies_ntwk[14:35],function(net_ed){
+  a<-efficiency(net_ed,type = "global")
+  
+});saveRDS(Real_summary_Geff14_35,"Real_summary_Geff14_35.RDS")
+```
+
+```{r, eval=FALSE}
+library(parallel)
+library(doParallel)
+
+g<-colonies_ntwk[[9]]
+
+
+get_eff <- function(i){return((1/(length(V(g)) - 1))*sum(1/distances(g, V(g)[i])[-i]))}
+no_cores <- detectCores() - 1 
+cl       <- makeCluster(no_cores)
+registerDoParallel(cl)  
+result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
+stopCluster(cl)
+rm(cl)
+Real_summary_Geff9 <- mean(result);saveRDS(Real_summary_Geff9,"Real_summary_Geff9.RDS")
+result9<-result
+
+g<-colonies_ntwk[[10]]
+
+get_eff <- function(i){return((1/(length(V(g)) - 1))*sum(1/distances(g, V(g)[i])[-i]))}
+no_cores <- detectCores() - 1 
+cl       <- makeCluster(no_cores)
+registerDoParallel(cl)  
+result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
+stopCluster(cl)
+rm(cl)
+Real_summary_Geff10 <- mean(result)
+result10<-result; saveRDS(Real_summary_Geff10,"Real_summary_Geff10.RDS")
+rm(result)
+```
+
 
 Here I am loading the results from the global efficiency and merging them with the other summary parameters
-```{r}
+```{r, echo=FALSE}
 
+summary_Traits$summary_mean_Geff<-
+  c(readRDS("Real_summary_Geff1.RDS"),
+  readRDS("Real_summary_Geff6.RDS"),
+  readRDS("Real_summary_Geff7.RDS"),
+  readRDS("Real_summary_Geff8.RDS"),
+  readRDS("Real_summary_Geff9.RDS"),
+  readRDS("Real_summary_Geff10.RDS"),
+  readRDS("Real_summary_Geff11.RDS"),
+  readRDS("Real_summary_Geff12.RDS"),
+  readRDS("Real_summary_Geff13.RDS"),
+  readRDS("Real_summary_Geff14_35.RDS")
+  )
 
-summary_Traits<-left_join(summary_Traits,summary_Traits_table_AZB[,c("name_col","summary_mean_Geff")])
+# summary_Traits<-left_join(summary_Traits,summary_Traits_table_AZB[,c("name_col","summary_mean_Geff")])
 
 # summary_Traits$summary_mean_Geff[summary_Traits$name_col%in%summary_Geff$name_col]<-
 #   
@@ -471,6 +613,7 @@ Access_mst_sum<-do.call("rbind",
             #Now the indexes and efficiencies
             alpha_coeff=(ecount(x)-vcount(x)+1)/(2*vcount(x)-5),
             beta_coeff=ecount(x)/vcount(x),
+            gamma_coeff=ecount(x)/(3*vcount(x)-6),
             Route_eff=mean(1/V(x)[Accessibility>0]$Accessibility),
             Reff_tip=mean(1/V(x)[Degrees==1&Accessibility>0]$Accessibility)
         )
@@ -563,7 +706,7 @@ c(readRDS("MST_summary_Geff1.RDS"),
 ```
 
 
-This are calculations for the other toy networks that in the end are not goning to be used
+These are calculations for the other toy networks that in the end are not goning to be used
 
 ```{r,echo=FALSE, message=FALSE, warning=FALSE, eval=FALSE}
 unweighted_mst_sum<-do.call("rbind",
@@ -632,14 +775,15 @@ edistance_mst_sum<-do.call("rbind",
 
 #Placing all data together:
 names(colony_sum)<-gsub("summary_mean_","",names(colony_sum))
-names(colony_sum)[11]<-"Root_eff"
-names(colony_sum)[9]<-"alpha_coeff"
-names(colony_sum)[10]<-"beta_coeff"
+names(colony_sum)[grep("Reff\\b",names(colony_sum))]<-"Root_eff"
+names(colony_sum)[grep("alpha",names(colony_sum))]<-"alpha_coeff"
+names(colony_sum)[grep("beta",names(colony_sum))]<-"beta_coeff"
+names(colony_sum)[grep("gamma",names(colony_sum))]<-"gamma_coeff"
 # colony_sum<-colony_sum[,c("name_col","Hyphal_length","Hyphal_number","Hyphal_tip_width", 
 # "Hyphal_main_width","Hyphal_tip_access","alpha_coeff","beta_coeff","Route_eff"#,"edge_density"
 # )]
 
-names(Access_mst_sum)[11]<-"Root_eff"
+names(Access_mst_sum)[grep("Route_eff",names(Access_mst_sum))]<-"Root_eff"
 
 colony_sum$Network<-"Real"
 Access_mst_sum$Network<-"Resistance_MST"
@@ -762,7 +906,7 @@ summary_Traits_table_AZB$summary_mean_edge_density)
 all_data$Hyphal_density<-all_data$Hyphal_number/all_data$summary_mean_area
 
 #Changin the name of the area so it make more sense
-names(all_data)[16]<-"Mycelial_area"
+names(all_data)[which(names(all_data)=="summary_mean_area")]<-"Mycelial_area"
 
 ```
 
@@ -771,13 +915,13 @@ names(all_data)[16]<-"Mycelial_area"
 ```{r}
 all_data_scaled<-all_data[c(1:35),]
 
-all_data_scaled$Mycelia_length_scaled<-all_data[c(1:35),]$Mycelia_length/all_data[c(36:70),]$Mycelia_length
+all_data_scaled$Mycelia_length_MST<-all_data[c(1:35),]$Mycelia_length/all_data[c(36:70),]$Mycelia_length
 
 #all_data_scaled$alpha_coeff_scaled<-all_data[c(1:32),]$alpha_coeff/all_data[c(33:64),]$alpha_coeff
 #all_data_scaled$beta_coeff_scaled<-all_data[c(1:32),]$beta_coeff/all_data[c(33:64),]$beta_coeff
-all_data_scaled$Root_eff_scaled<-all_data[c(1:35),]$Root_eff/all_data[c(36:70),]$Root_eff
-all_data_scaled$Reff_tip_scaled<-all_data[c(1:35),]$Reff_tip/all_data[c(36:70),]$Reff_tip
-all_data_scaled$Geff_scaled<-all_data[c(1:35),]$Geff/all_data[c(36:70),]$Geff
+all_data_scaled$Root_eff_l_scaled<-all_data[c(1:35),]$Root_eff/sqrt(all_data[c(1:35),]$Mycelial_area)
+all_data_scaled$Reff_tip_l_scaled<-all_data[c(1:35),]$Reff_tip/sqrt(all_data[c(1:35),]$Mycelial_area)
+all_data_scaled$Geff_MST<-all_data[c(1:35),]$Geff/all_data[c(36:70),]$Geff
 
 ```
 
