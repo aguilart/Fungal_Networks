@@ -147,7 +147,121 @@ Temporal fixes
 ```{r,echo=FALSE}
 #upadted mycelial area makes no sense
 old_data_scaled<-readRDS("old_data/all_data_scaled.RDS")
-all_data_scaled$Mycelial_area[3]<-old_data_scaled$Mycelial_area[3]
+#all_data_scaled$Mycelial_area[3]<-old_data_scaled$Mycelial_area[3]
+
+all_data_scaled$Mycelial_area[3]<-mean(30.56246,29.87179)
+```
+
+Checking
+
+```{r}
+library(igraph)
+plot(colonies_ntwk[[33]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     edge.color="#7570B3",
+     edge.size=150,vertex.size=0,layout=spatial.data[[33]]*1,main="Pv_ctrl1_d8_1")
+
+##
+ecol<-rep("black",ecount(colonies_ntwk[[1]]))
+ecol[(which(E(colonies_ntwk[[1]])$width>10))]<-"darkred"
+
+##
+ecol<-cscale(E(colonies_ntwk[[1]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
+#ecol<-cscale(E(colonies_ntwk[[4]])$width,palette = seq_gradient_pal(low = "yellow",high = "red"))
+ecol[E(colonies_ntwk[[1]])[type=="Inoculum"]]<-"bisque2"
+
+##
+ecol<-E(colonies_ntwk[[1]])$width
+ecol[E(colonies_ntwk[[1]])[type=="Inoculum"]]<-(quantile(ecol[E(colonies_ntwk[[1]])[type!="Inoculum"]])[2])/2
+#ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
+ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
+ecol2[E(colonies_ntwk[[1]])[type=="Inoculum"]]<-"gray30"
+
+
+plot(colonies_ntwk[[20]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     #edge.color="#7570B3",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=spatial.data[[20]]*1,
+     main=unique(E(colonies_ntwk[[1]])$name) )
+
+hist(((Edge_Traits_F[[3]]$Width[Edge_Traits_F[[3]]$Type=="E"])),
+     main=unique(Edge_Traits_F[[3]]$name))
+
+hist((log10(Edge_Traits[[3]]$Length[Edge_Traits[[3]]$Type=="E"])),
+     main=unique(Edge_Traits[[3]]$name))
+
+
+hist(((Edge_Traits_F[[2]]$Width[Edge_Traits_F[[2]]$Type=="E"])),
+     main=unique(Edge_Traits_F[[2]]$name))
+
+
+hist(((Edge_Traits[[20]]$Length)),main=unique(Edge_Traits[[20]]$name))
+
+boxplot((Edge_Traits[[36]]$Width/1000))
+
+lapply(Edge_Traits,function(x)summary(x$Width[x$Type=="E"]))
+```
+
+continue checking
+
+```{r}
+par(mfrow=c(3,3))
+ 
+lapply(Edge_Traits,function(x){
+  
+  hist(((x$Width[x$Type=="E"])),
+     main=unique(x$name))
+  
+})
+
+
+par(mfrow=c(3,3),mar=c(0,0,0,0))
+mapply(function(x,z){
+
+  ecol<-rep("darkblue",ecount(x))
+ecol[(which(E(x)$width>
+  quantile(E(x)$width)[3]))]<-"red"
+ecol[E(x)[type=="Inoculum"]]<-"gray30"  
+
+plot(x,
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     #edge.color="#7570B3",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=z*1,
+     main=unique(E(x)$name) )
+
+  
+},colonies_ntwk,spatial.data)
+
+
+trial<-colonies_ntwk[[8]]
+
+ecol<-rep("darkblue",ecount(trial))
+ecol[(which(E(trial)$width>
+  quantile(E(trial)$width)[3]))]<-"red"
+ecol[E(trial)[type=="Inoculum"]]<-"gray30"
+
+plot(colonies_ntwk[[8]],
+     edge.arrow.size=1,edge.curved=0,edge.width=2,
+     vertex.label=NA,vertex.shape="none",
+     #edge.color="#7570B3",
+     edge.color=ecol,
+     edge.size=150,vertex.size=0,layout=spatial.data[[8]]*1,
+     main=unique(E(colonies_ntwk[[8]])$name) )
+
+
+# ecol<-E(colonies_ntwk[[1]])$width
+# ecol[E(colonies_ntwk[[1]])[type=="Inoculum"]]<-(quantile(ecol[E(colonies_ntwk[[1]])[type!="Inoculum"]])[2])/2
+# #ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
+# ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
+# ecol[E(colonies_ntwk[[1]])[type=="Inoculum"]]<-"gray30"
+
+
+
 ```
 
 
@@ -182,7 +296,7 @@ Edge_Traits$Or_ij[which(Edge_Traits$Or_ij<0)]<-(Edge_Traits$Or_ij[which(Edge_Tra
 Edge_Traits<-Edge_Traits[which(Edge_Traits$Type=="E"),]
 
 #I am removing seven values with Width=0
-Edge_Traits<-Edge_Traits[-which(Edge_Traits$Width==0),]
+#Edge_Traits<-Edge_Traits[-which(Edge_Traits$Width==0),]
 
 Node_Traits<-bind_rows(Node_Traits)
 
@@ -250,14 +364,14 @@ Edge_Traits<-trial;rm(trial)
 
 
 Edge_Traits$phylum<-NA
-Edge_Traits$phylum[grep("Pi|Pv|Rb",Edge_Traits$name)]<-"Basidiomycota"
+Edge_Traits$phylum[grep("Pi|Pv|Rb|Hf",Edge_Traits$name)]<-"Basidiomycota"
 Edge_Traits$phylum[grep("Mortierella|Mucor|Umbelopsis",Edge_Traits$Species)]<-"Ascomycota"
 Edge_Traits$phylum[grep("Fusarium|Alternaria",Edge_Traits$Species)]<-"Zygomycetous"
 
 ```
 
 
-
+Checking root efficiency scalings
 
 ```{r,echo=FALSE,warning=FALSE, eval=FALSE}
 
@@ -299,7 +413,7 @@ ncol=2,nrow=2)
 
 
 
-
+Outdated figure 2 (no longer necessary)
 ```{r, echo=FALSE, warning=FALSE, message=FALSE,eval=FALSE}
 library(igraph)
 par(mfrow=c(1,1), mar=c(0,0,0,0)) 
@@ -389,16 +503,6 @@ plot(Access_mst[[30]],
      edge.size=150,vertex.size=0,layout=spatial.data[[30]]*1,main="Resinisium bicolor MST")
 
 ```
-
-```{r}
-library(igraph)
-plot(colonies_ntwk[[16]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     edge.color="#7570B3",
-     edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="Mucor sp Real Network")
-```
-
 Figure 2. Examples of representation of fungal mycelium as network graphs. Top: Graph based on the observed mycelium. Bottom: Graph based on baseline model for each corresponding colony. Cyan: Mortierellomycota; Magenta: Mucor; Orange: Ascomycete; Green: Basidiomycota.
 
 ### Statistical analysis
@@ -414,7 +518,7 @@ Finally, we also identified mycelial archetypes as described in Alon et al. (200
 *Translation of mycelial images to a graph object*
 
 
-
+As for 14. May this figure would need to be updated. But this should be done just before submission because it is time consuming
 ```{r, eval=FALSE}
 #For this images I am using dimension 961 x 703 save as png images
 cet_pal(3,name = "cbl2")
@@ -554,7 +658,7 @@ plot(colonies_ntwk[[31]],
 
 ```
 
-Making a colorbar (scalebar) for the network graph figures
+Making a colorbar (scalebar) for the network graph figures above
 
 ```{r,eval=FALSE}
 library(scales)
@@ -595,11 +699,12 @@ To_plot$phylum<-factor(To_plot$phylum,levels=c("Zygomycetous","Ascomycota", "Bas
 
 
 ```{r,eval=FALSE}
-# pdf("Updated_Figures\\histogram_example_zab.pdf",
-#     width = 14,
-#     height = 8.5)
+pdf("Updated_Figures\\histogram_example_zab.pdf",
+    width = 14,
+    height = 8.5)
 
 To_plot %>% 
+  filter(variable>0) %>% 
         ggplot()+
         aes(variable,fill=phylum)+
         geom_histogram()+
@@ -609,12 +714,22 @@ To_plot %>%
   #facet_grid(variable_name~Species, scales = "free")+
   scale_fill_manual(values=c("#1D91C0","#7FCDBB","#0C2C84"))+
         theme(legend.position = "none",
-              strip.background = element_blank(),
-  strip.text.x = element_blank())
+              strip.background = element_blank()#,
+  #strip.text.x = element_blank()
+  )
 
-#dev.off()
+dev.off()
 ```
 
+just checking the size of basidiomycetes
+```{r}
+Edge_Traits %>% 
+  filter(phylum=="Basidiomycota") %>% 
+  ggplot()+
+  aes(Width,fill=Species)+
+  geom_density()#+
+  #facet_wrap(.~Species,scales = "free")
+```
 
 
 *Separation of species based on mycelial traits*
@@ -870,31 +985,36 @@ names(e_vectors_traits_scaled_b)[2]<-"RDA2_species"
 
 
 ```{r, echo=FALSE, fig.height=10,fig.width=15}
-# pdf("Updated_Figures\\basidio_rda.pdf",
-#     width = 14,
-#     height = 8.5)
+e1<-round(summary(Model_Basidios)[["cont"]][["importance"]][2,1],2)*100
+e2<-round(summary(Model_Basidios)[["cont"]][["importance"]][2,2],2)*100
+
+pdf("Updated_Figures\\basidio_rda.pdf",
+    width = 14,
+    height = 8.5)
 
 Basidios1%>% 
   ggplot()+
   aes(x=RDA1,y=RDA2) +
   #geom_point(size=2)+
   
-  geom_segment(aes(x=0, y=0, xend=RDA1_species/2, yend=RDA2_species/2), 
+  geom_segment(aes(x=0, y=0, xend=RDA1_species, yend=RDA2_species), 
         arrow = arrow(), color="gray",data = e_vectors_traits_scaled_b)+  
   
   geom_text(aes(label=easy_code,fontface="bold.italic"),size=5,color="darkgreen") +
-    labs(y="RDA2",x="RDA1")+
+  labs(y=paste("RDA2",e2,"%",sep = " "),
+         x=paste("RDA1",e1,"%",sep = " "))+
   
-  geom_text(size=5,aes(x=RDA1_species/2,y=RDA2_species/2,label=traits,fontface="bold"),
+  geom_text(size=3,aes(x=RDA1_species,y=RDA2_species,
+                       label=traits,fontface="bold"),
             #hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
             data = e_vectors_traits_scaled_b)+
   
   
-  ggtitle(label = "Site scaling")+
+ # ggtitle(label = "Site scaling")+
   
     my_theme
 
-#dev.off()
+dev.off()
 ```
 
 
@@ -938,32 +1058,61 @@ names(e_vectors_traits_scaled_a)[2]<-"RDA2_species"
 
 
 ```{r, echo=FALSE, fig.height=10,fig.width=15}
-# pdf("Updated_Figures\\ascos_zygos_rda.pdf",
-#     width = 14,
-#     height = 8.5)
+pdf("Updated_Figures\\ascos_zygos_rda.pdf",
+    width = 14,
+    height = 8.5)
+m<-1
+e1<-round(summary(Model_Ascos_Zygos)[["cont"]][["importance"]][2,1],2)*100
+e2<-round(summary(Model_Ascos_Zygos)[["cont"]][["importance"]][2,2],2)*100
 
 Ascos_zygos1%>% 
   ggplot()+
   aes(x=RDA1,y=RDA2) +
   #geom_point(size=2)+
-  geom_segment(aes(x=0, y=0, xend=RDA1_species/2.5, yend=RDA2_species/2.5), 
-        arrow = arrow(),color="gray",data = e_vectors_traits_scaled_a)+
-  
   geom_text(aes(label=easy_code,fontface="bold.italic",color=phylum),size=5) +  
   
-    labs(y="RDA2",x="RDA1")+
+  labs(y=paste("RDA2",e2,"%",sep = " "),
+         x=paste("RDA1",e1,"%",sep = " "))+
   
-  geom_text(size=5,aes(x=RDA1_species/2.5,y=RDA2_species/2.5,label=traits,fontface="bold"),
+  geom_segment(aes(x=0, y=0, xend=RDA1_species/m, yend=RDA2_species/m),
+        arrow = arrow(),color="gray",data = e_vectors_traits_scaled_a)+
+  geom_text(size=3,aes(x=RDA1_species/m,y=RDA2_species/m,label=traits,fontface="bold"),
             hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
             data = e_vectors_traits_scaled_a)+
   
-  ggtitle(label = "Site scaled")+
+  #ggtitle(label = "Site scaled")+
   scale_color_manual(values=c("red","blue"))+
   
     my_theme
 
-#dev.off()
+dev.off()
 ```
+
+
+Checking distributions and relationships among variables
+```{r}
+all_data_scaled %>% 
+  filter(!phylum=="Basidiomycota") %>% 
+  pivot_longer(cols=c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
+                      "Hyphal_main_width","Hyphal_angle","Mycelial_area",
+                      "Hyphal_density","alpha_coeff","Root_eff",                                           "Reff_tip","Mycelia_Vol_MST","Geff_MST",
+                      "des_length_robustness","asc_width_robustness",
+                      "des_width_robustness","random_robustness",                                          "spatial_robustness")) %>% 
+  
+  ggplot()+
+  aes(x="a",y=value)+
+  geom_text(aes(label=name_col))+
+  facet_wrap(.~name,scales="free")
+
+all_data_scaled %>% 
+  filter(!phylum=="Basidiomycota") %>% 
+  ggplot()+
+  aes(x="a",y=Mycelia_Vol_MST)+
+  geom_text(aes(label=name_col))
+
+```
+
+
 
 
 ```{r, echo=FALSE, fig.height=10,fig.width=15,eval=FALSE}
@@ -1007,28 +1156,34 @@ names(e_vectors_traits_scaled)[2]<-"RDA2_species"
 
 
 ```{r, echo=FALSE, fig.height=10,fig.width=15}
-# pdf("Updated_Figures\\all_fungi_rda.pdf",
-#     width = 14,
-#     height = 8.5)
+pdf("Updated_Figures\\all_fungi_rda.pdf",
+    width = 14,
+    height = 8.5)
+
+e1<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,1],2)*100
+e2<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,2],2)*100
+
+m<-2.5
 
 all_data_scaled1%>% 
   ggplot()+
   aes(x=RDA1,y=RDA2) +
   #geom_point(size=2)+
     geom_text(aes(label=easy_code,fontface="bold.italic",color=phylum),size=5) +
-    labs(y="RDA2",x="RDA1")+
+   labs(y=paste("RDA2",e2,"%",sep = " "),
+         x=paste("RDA1",e1,"%",sep = " "))+
   
-  geom_text(size=5,aes(x=RDA1_species/2,y=RDA2_species/2,label=traits,fontface="bold"),
+  geom_text(size=3,aes(x=RDA1_species/m,y=RDA2_species/m,label=traits,fontface="bold"),
             #hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
             data = e_vectors_traits_scaled)+
-  geom_segment(aes(x=0, y=0, xend=RDA1_species/2, yend=RDA2_species/2), 
+  geom_segment(aes(x=0, y=0, xend=RDA1_species/m, yend=RDA2_species/m), 
         arrow = arrow(),color="gray",data = e_vectors_traits_scaled)+
-  ggtitle(label = "Taxonomy corrected")+
+  #ggtitle(label = "Taxonomy corrected")+
   scale_color_manual(values=c("red","darkgreen","blue"))+
   
     my_theme
 
-#dev.off()
+dev.off()
 ```
 
 
@@ -1061,25 +1216,21 @@ In addition, the constrained ordination was partly correlated with taxonomy. Tha
 
 Finally, the ordination was largely driven by network-traits contribution and not only by hyphal traits. For example, in all cases the loadings of the alpha coefficient, beta coefficient, scaled Global efficiency, and the scaled mycelial length had some of the highest loadings (scaled eigenvectors) for the first RDA axis, while both root-tip and root efficiency had large loadings for the second axis.
 
-```{r}
-library(tidytext)
-```
-
 
 Basidiomycetes
 ```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
 e_vectors_traits_scaled_b$type<-NA
-e_vectors_traits_scaled_b$type[grep("Hyphal",e_vectors_traits_scaled_b$traits)]<-"Descriptive"
-e_vectors_traits_scaled_b$type[which(e_vectors_traits_scaled_b$traits=="Mycelial_area")]<-"Descriptive"
+e_vectors_traits_scaled_b$type[grep("Hyphal",e_vectors_traits_scaled_b$traits)]<-"Morphological"
+e_vectors_traits_scaled_b$type[which(e_vectors_traits_scaled_b$traits=="Mycelial_area")]<-"Morphological"
 e_vectors_traits_scaled_b$type[which(is.na(e_vectors_traits_scaled_b$type))]<-"Network"
 ```
 
 
 ```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
-
-# pdf("Updated_Figures\\basidio_loadings.pdf",
-#     width = 14,
-#     height = 8.5)
+library(tidytext)
+pdf("Updated_Figures\\basidio_loadings.pdf",
+    width = 14,
+    height = 8.5)
 
 pivot_longer(e_vectors_traits_scaled_b,RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
   ggplot()+
@@ -1102,23 +1253,23 @@ pivot_longer(e_vectors_traits_scaled_b,RDA1_species:RDA2_species,names_to = "Axi
         legend.position = "bottom"
   )
 
-#dev.off()
+dev.off()
 ```
 
 
 Ascomycetes & Zygomycetous fungi
 ```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
 e_vectors_traits_scaled_a$type<-NA
-e_vectors_traits_scaled_a$type[grep("Hyphal",e_vectors_traits_scaled_a$traits)]<-"Descriptive"
-e_vectors_traits_scaled_a$type[which(e_vectors_traits_scaled_a$traits=="Mycelial_area")]<-"Descriptive"
+e_vectors_traits_scaled_a$type[grep("Hyphal",e_vectors_traits_scaled_a$traits)]<-"Morphological"
+e_vectors_traits_scaled_a$type[which(e_vectors_traits_scaled_a$traits=="Mycelial_area")]<-"Morphological"
 e_vectors_traits_scaled_a$type[which(is.na(e_vectors_traits_scaled_a$type))]<-"Network"
 ```
 
 
 ```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
-# pdf("Updated_Figures\\ascos_zygos_loadings.pdf",
-#     width = 14,
-#     height = 8.5)
+pdf("Updated_Figures\\ascos_zygos_loadings.pdf",
+    width = 14,
+    height = 8.5)
 
 pivot_longer(e_vectors_traits_scaled_a,RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
   ggplot()+
@@ -1141,23 +1292,23 @@ pivot_longer(e_vectors_traits_scaled_a,RDA1_species:RDA2_species,names_to = "Axi
         legend.position = "bottom"
   )
 
-#dev.off()
+dev.off()
 ```
 
 
 All fungi
 ```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
 e_vectors_traits_scaled$type<-NA
-e_vectors_traits_scaled$type[grep("Hyphal",e_vectors_traits_scaled$traits)]<-"Descriptive"
-e_vectors_traits_scaled$type[which(e_vectors_traits_scaled$traits=="Mycelial_area")]<-"Descriptive"
+e_vectors_traits_scaled$type[grep("Hyphal",e_vectors_traits_scaled$traits)]<-"Morphological"
+e_vectors_traits_scaled$type[which(e_vectors_traits_scaled$traits=="Mycelial_area")]<-"Morphological"
 e_vectors_traits_scaled$type[which(is.na(e_vectors_traits_scaled$type))]<-"Network"
 ```
 
 
 ```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
-# pdf("Updated_Figures\\all_fungi_loadings.pdf",
-#     width = 14,
-#     height = 8.5)
+pdf("Updated_Figures\\all_fungi_loadings.pdf",
+    width = 14,
+    height = 8.5)
 
 pivot_longer(e_vectors_traits_scaled,RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
     ggplot()+
@@ -1180,7 +1331,7 @@ pivot_longer(e_vectors_traits_scaled,RDA1_species:RDA2_species,names_to = "Axis"
         legend.position = "bottom"
   )
 
-#dev.off()
+dev.off()
 ```
 
 Figure 4. Absolute loadings (eigenvectors) of different mycelial traits for the first two mains RDA axis. Upper panel: loadings Basidiomycetes; middle panel: Ascomycetes and Zygomecetous fungi, lower panel: all fungi included.
@@ -1189,14 +1340,10 @@ Figure 4. Absolute loadings (eigenvectors) of different mycelial traits for the 
 *Archetype identification*
 
 Based on the species included, we found three archetypes in the mycelial trait morphospace [Expand more]. 
-
-![Figure 4. Archetype identification as vertices of the best-fitting convex hull. Each point represents a colony in ordination space.](Updated_Figures/trial2_triangle.png)
-
+This is done thrrough the Uri Alon´s softawer, thus I need to export the data and then use the software
+Note: Orginally all variables were included. However I commented one variables on Feb 21 because they still reflect differences in total size (this include root efficiencies that are not scaled to area). An alternative solution would have been to z scale the original variables, but that sounds a bit weird. In any case, here I left all the variables that are scalled and they should be irrespective of size. Beta coeff was left out because it has almost the same value as the alpha one.
 
 ```{r, eval=FALSE,echo=FALSE,warning=FALSE,message=FALSE,eval=FALSE}
-#This is done thrrough the Uri Alon´s softawer, thus I need to export the data and then use the software
-#Note: Orginally all variables listed were included. However I commented one variables on Feb 21 because they still reflect differences in total size (this include root efficiencies that are not scaled to area). An alternative solution would have been to z scale the original variables, but that sounds a bit weird. In any case, here I left all the variables that are scalled and they should be irrespective of size. Beta coeff was left out because it has almost the same value as the alpha one.
-
 all_data_t<-#This one here is the same set of tratis used on Model_network_traits_sps_scaled
 all_data_scaled_c[,c("Hyphal_number","Hyphal_angle","Hyphal_density","alpha_coeff",
                      "Root_eff_a_scaled","Reff_tip_a_scaled","Mycelia_Vol_MST",
@@ -1211,13 +1358,24 @@ all_data_t_centered1<-sapply(all_data_t,function(x){(x-mean(x))/sd(x)})
 #write.csv2(all_data_t_centered,"Triangularity0.csv",row.names = F)#This one can ber read from the hp desktop at Uni
 
 write.csv(all_data_t_centered1,"Triangularity_Reff_Area.csv",row.names = F)#This one can be read in my laptop
-#write.csv(all_data_t_centered2,"Triangularity_Reff_sqArea.csv",row.names = F)#This one can be read in my laptop
-#rm(all_data_t_centered1,all_data_t_centered2)
+```
 
+
+The PCA plot of Uri Alon´s software is pretty ugly and it exports it as jpeg that cannot be modified. Thus, what I planed is to do the PCA myself, then I draw the triangle myself using the archetypes coordinates from Uril Alon´s software. 
+
+However, the PCA that Alon´s software perform uses some standardarization different from vegan. The result is a mirror image. Thus is the same info but it is tricky to locate accurately the archetypes. For that reason what I ended up doing was saving the first two PCA axes from the ordination and using this info to calcuate the archetypes, this works because it is exactly how Alon´s software work, it makes a PCA and then it takes the first two axis to calculate the archetypes and draw the triangle.
+
+In summary, I use Uri Alon´s software to: 1) identify the archetypes and 2) obtained a p value associated to them. The display item (PCA, archetypes and traingle I do it myself in ggplot).
+
+```{r, eval=FALSE,echo=FALSE,warning=FALSE,message=FALSE,eval=FALSE}
+#Peforming the PCA
 model_triangle1<-rda(all_data_t,scale=T)
 #model_triangle2<-rda(all_data_t2,scale=T)
-#Adding the two RDA axis to the dataframe
+
+#Extracting the two RDA axis to the dataframe
 temporal1<-as.data.frame(scores(model_triangle1,display = "sites",scaling = "sites",choices=c(1,2)))
+temporal1<-cbind(temporal1,all_data_scaled[,c("name_col")])
+names(temporal1)[3]<-"name_col"
 
 #temporal2<-as.data.frame(scores(model_triangle2,display = "sites",scaling = "sites",choices=c(1,2)))
 
@@ -1226,25 +1384,30 @@ write.csv(temporal1,"axes_triangularity_Reff_Area.csv",row.names = F)
 
 ```
 
-However, I can do the pca myself and draw a triangle on top of the pca based on the Uri Alon´s program. THus the only reasons to use the Uri Alon´s program is to see the triangle and then obtain a p value for it
-
+Getting the importance of the axes
 ```{r,eval=FALSE}
 
 
 #all_data_scaled_t<-cbind(all_data_scaled,temporal1)#;rm(temporal)
 
 
-summary(model_triangle1)[["cont"]][["importance"]][,c(1:2)]
+summary(model_triangle1)[["cont"]][["importance"]][,c(1:3)]
 ```
 
 
+Saving the location of the archetypes as obtained through Uri Alon´s software
 ```{r,eval=FALSE}
 #triangle points
 
 #archetypes based on scaled data only
-d1<-data.frame(x=c(-0.879,0.614,0.912),y=c(-0.114,0.99,-0.994))
-d2<-data.frame(x=c(0.290,-0.776,1.386),y=c(-1.286,0.321,0.859))
+d1<-data.frame(x=c(5.686,-7.451,0.118),y=c(-3.476,-2.545,5.321))
+d1<-d1/4.7 #I divided by this number because the scaling of the Uri Alon´s software PCA is different from the one PCA scaling of vegan
 
+```
+
+
+Plotting the PCA with the archetypes and triangle
+```{r,eval=FALSE}
 #Here I have to decide whether to plot temporal1 or temporal2
 
 pdf("Updated_Figures\\triangle_root_wArea.pdf",
@@ -1255,34 +1418,20 @@ temporal1%>%
   ggplot()+
   aes(x=PC1,y=PC2) +
   geom_point(size=2)+
+  #geom_text(aes(label=name_col))+
   geom_polygon(data=d1,aes(x=x,y=y),alpha=0.50,fill="#21908CFF")+
-  labs(x="PCA 1 (39.20%)",y="PCA 2 (25.55%)")+
-  xlim(-1.1,1)+
-  ylim(-1.2,1.3)+
-  my_theme+
-  ggtitle(label = "root_area")
+  labs(x="PCA 1 (33.38%)",y="PCA 2 (26.78%)")+
+  #xlim(-1.1,1)+
+  #ylim(-1.2,1.3)+
+  my_theme#+
+  # ggtitle(label = "root_area")
 
 dev.off()
 ```
 
 
-```{r,eval=FALSE}
-
-pdf("Updated_Figures\\triangle_root_wSqArea.pdf",
-    width = 14,
-    height = 8.5)
-
-temporal2%>% 
-  ggplot()+
-  aes(x=PC1,y=PC2) +
-  geom_point(size=2)+
-  geom_polygon(data=d2,aes(x=x,y=y),alpha=0.50,fill="#21908CFF")+
-  labs(x="PCA 1 (42.82%)",y="PCA 2 (30.98%)")+
-  my_theme+
-  ggtitle(label = "root-SqArea")
-
-dev.off()
-```
+Which is exactly the same as the one produced in the Uri Alon´software (produced on May 1st 2021 in my Hp laptop):
+![](triangle_2May.png)
 
 
 ```{r,eval=FALSE}
@@ -1321,7 +1470,12 @@ dev.off()
 ```
 
 
-THe p value of the test made by the pareto analysis is lowe than 0.001, it did not give an exact p value (the output I mean). This test was based on 10,000 permutations.
+The issue is that wtih the new data from Mark on basidiomycetes and mine coming from the most updated app (the last one of April 2021), this triangle is not significant. This test was based on 10,000 permutations. The output I get for the triangle above: 
+
+How many repetitions would you like to perform? 10000
+Checking P-Value with 10000 tries
+Pvalue is:  0.163183681632
+
 
 
 ```{r, eval=FALSE}
@@ -1362,24 +1516,25 @@ Identifying the colonies that are closer to the archetypes predicted by Uri Alon
 
 As for figure 3 (above), For this images I am using dimension 961 x 703 save as png images
 ```{r,eval=FALSE}
-#4. DF19 "Mortierella sp1 DF19(3)_t11 (In figure 3 I used DF19(1)_t11)
-par(mar=c(0,0,0,0))
-ecol<-E(colonies_ntwk[[10]])$width
-ecol[E(colonies_ntwk[[10]])[type=="Inoculum"]]<-(quantile(ecol[E(colonies_ntwk[[10]])[type!="Inoculum"]])[2])/2
+#Rb_ctrl1_d8_1
+ecol<-E(colonies_ntwk[[36]])$width
+ecol[E(colonies_ntwk[[36]])[type=="Inoculum"]]<-(quantile(ecol[E(colonies_ntwk[[36]])[type!="Inoculum"]])[2])/2
 #ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
 ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
-ecol2[E(colonies_ntwk[[10]])[type=="Inoculum"]]<-"gray30"
+ecol2[E(colonies_ntwk[[36]])[type=="Inoculum"]]<-"gray30"
 
-plot(colonies_ntwk[[10]],
+jpeg("Updated_Figures\\Rb_ctrl1_d8_1_for_triangle.jpg",width = 961,height = 703)
+par(mar=c(0,0,0,0))
+plot(colonies_ntwk[[36]],
      edge.arrow.size=1,edge.curved=0,
-     #edge.width=2,
-     edge.width=ecol/3,
+     edge.width=2,
+     #edge.width=ecol/3,
      vertex.label=NA,vertex.shape="none",
      edge.color=ecol2,
-     edge.size=150,vertex.size=0,layout=spatial.data[[10]]*1,main="DF19(3)_t11")
+     edge.size=150,vertex.size=0,layout=spatial.data[[36]]*1,main="Rb_ctrl1_d8_1")
+dev.off()
 
-#6. DF56 Mucor fragilis "DF56(6)_t09 (the actual point is (5), however, it is not that nice looking to plot)
-par(mar=c(0,0,0,0))
+#DF56 Mucor fragilis "DF56(6)_t09 (the actual point is (5), however, it is not that nice looking to plot)
 ecol<-E(colonies_ntwk[[16]])$width
 ecol[E(colonies_ntwk[[16]])[type=="Inoculum"]]<-(quantile(ecol[E(colonies_ntwk[[16]])[type!="Inoculum"]])[2])/2
 #ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
@@ -1388,6 +1543,8 @@ ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF
 
 ecol2[E(colonies_ntwk[[16]])[type=="Inoculum"]]<-"gray30"
 
+jpeg("Updated_Figures\\DF56(6)_t09_for_triangle.jpg",width = 961,height = 703)
+par(mar=c(0,0,0,0))
 plot(colonies_ntwk[[16]],
      edge.arrow.size=1,edge.curved=0,
      #edge.width=2,
@@ -1396,21 +1553,24 @@ plot(colonies_ntwk[[16]],
      edge.color=ecol2,
      edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="DF56(6)_t09")
 
+dev.off()
+
 #10.Pi Phallus impudicus Pi_ctrl1_d8_1
-par(mar=c(0,0,0,0))
-ecol<-E(colonies_ntwk[[29]])$width
-ecol[E(colonies_ntwk[[29]])[type=="Inoculum"]]<-(quantile(ecol[E(colonies_ntwk[[29]])[type!="Inoculum"]])[2])/2
+ecol<-E(colonies_ntwk[[33]])$width
+ecol[E(colonies_ntwk[[33]])[type=="Inoculum"]]<-(quantile(ecol[E(colonies_ntwk[[33]])[type!="Inoculum"]])[2])/2
 #ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
 ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
-ecol2[E(colonies_ntwk[[29]])[type=="Inoculum"]]<-"gray30"
+ecol2[E(colonies_ntwk[[33]])[type=="Inoculum"]]<-"gray30"
 
-plot(colonies_ntwk[[29]],
+jpeg("Updated_Figures\\Pv_ctrl1_d8_1_for_triangle.jpg",width = 961,height = 703)
+par(mar=c(0,0,0,0))
+plot(colonies_ntwk[[33]],
      edge.arrow.size=1,edge.curved=0,
      edge.width=2,
      #edge.width=ecol/100,
      vertex.label=NA,vertex.shape="none",
      edge.color=ecol2,
-     edge.size=150,vertex.size=0,layout=spatial.data[[29]]*1,main="Pi_ctrl_d8_3")
+     edge.size=150,vertex.size=0,layout=spatial.data[[33]]*1,main="Pv_ctrl1_d8_1")
 ```
 
 Checking the values of the archetypes

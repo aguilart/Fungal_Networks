@@ -11,11 +11,15 @@ In principle this is the only thing that need to be changed. Then the rest shoul
 data_location<-"D:/Carlos_PicsToNetw/processed data/results/"#This is the latest data as it comes from the most updated app version Add version here:
 
 data_location_B<-"results_20210414/"#This is new basidiomycete data from Mark sent on 14 April 2020
+
+#random datasets for testing the behavior of particular parameters
+data_location<-"D:/Carlos_miscelaneous/processed data/results/"
 ```
 
 # Loading the data
 ```{r}
 library(readxl)
+library(tidyverse)
 #Locating the name of the new datafile
 temp = list.files(path=data_location,pattern="*-results.xlsx")
 temp<-paste(data_location,temp,sep = "")
