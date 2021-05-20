@@ -368,6 +368,12 @@ Edge_Traits$phylum[grep("Pi|Pv|Rb|Hf",Edge_Traits$name)]<-"Basidiomycota"
 Edge_Traits$phylum[grep("Mortierella|Mucor|Umbelopsis",Edge_Traits$Species)]<-"Ascomycota"
 Edge_Traits$phylum[grep("Fusarium|Alternaria",Edge_Traits$Species)]<-"Zygomycetous"
 
+
+Node_Traits$phylum<-NA
+Node_Traits$phylum[grep("Pi|Pv|Rb|Hf",Node_Traits$name)]<-"Basidiomycota"
+Node_Traits$phylum[grep("Mortierella|Mucor|Umbelopsis",Node_Traits$Species)]<-"Ascomycota"
+Node_Traits$phylum[grep("Fusarium|Alternaria",Node_Traits$Species)]<-"Zygomycetous"
+
 ```
 
 
@@ -680,6 +686,7 @@ show_col(viridis_pal()(100),labels = FALSE,ncol = 1,borders = NA)
 #Plotting
 library(scales)
 
+
 To_plot<-bind_rows(
 Edge_Traits%>%
       filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>% select(c("name","Species","Width","phylum")) %>% rename(variable=Width) %>% 
@@ -691,7 +698,11 @@ Edge_Traits%>%
 
 Edge_Traits%>%
       filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% select(c("name","Species","Length","phylum"))%>% rename(variable=Length) %>% 
-  mutate(variable_name="length")
+  mutate(variable_name="length"),
+
+Node_Traits%>%
+      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% select(c("name","Species","node_Omin_Omid","phylum"))%>% rename(variable=node_Omin_Omid) %>% 
+  mutate(variable_name="branching_angle")
 )
 
 To_plot$phylum<-factor(To_plot$phylum,levels=c("Zygomycetous","Ascomycota", "Basidiomycota"))
@@ -702,21 +713,36 @@ To_plot$phylum<-factor(To_plot$phylum,levels=c("Zygomycetous","Ascomycota", "Bas
 pdf("Updated_Figures\\histogram_example_zab.pdf",
     width = 14,
     height = 8.5)
+library(gridExtra)
 
+cowplot::plot_grid(
 To_plot %>% 
   filter(variable>0) %>% 
+  filter(!variable_name=="branching_angle")%>% 
         ggplot()+
         aes(variable,fill=phylum)+
         geom_histogram()+
-  #labs(x="Hyphal length (log scales)")+
   scale_x_log10(labels=trans_format("log10",math_format(10^.x)))+
-        facet_wrap(variable_name~Species, scales = "free",nrow = 3,ncol = 4)+
-  #facet_grid(variable_name~Species, scales = "free")+
+        facet_wrap(variable_name~Species, scales = "free",nrow = 4,ncol = 4)+
   scale_fill_manual(values=c("#1D91C0","#7FCDBB","#0C2C84"))+
         theme(legend.position = "none",
-              strip.background = element_blank()#,
-  #strip.text.x = element_blank()
-  )
+              axis.title.x = element_blank(),
+              strip.background = element_blank()
+  ),
+
+To_plot %>% 
+  filter(variable>0) %>% 
+  filter(variable_name=="branching_angle")%>% 
+        ggplot()+
+        aes(variable,fill=phylum)+
+        geom_histogram()+
+  #scale_x_log10(labels=trans_format("log10",math_format(10^.x)))+
+        facet_wrap(variable_name~Species, scales = "free",nrow = 4,ncol = 4)+
+  scale_fill_manual(values=c("#1D91C0","#7FCDBB","#0C2C84"))+
+        theme(legend.position = "none",
+              strip.background = element_blank(),
+              axis.title.x = element_blank()
+  ),align = "v",nrow = 2,rel_heights = c(1,1/3))
 
 dev.off()
 ```
@@ -779,24 +805,16 @@ Model_Ascos_Zygos<-rda(Ascos_zygos[,c("Hyphal_length",
                                                      "Hyphal_density",
                                                      
                                                      "alpha_coeff",
-                                                     #"beta_coeff",
-                                                     #"gamma_coeff",
-                                                     
+                                                    
                                                      "Root_eff",
                                                      "Reff_tip",
                                                      
                                                      "Mycelia_Vol_MST",
                                                      "Geff_MST",
                                                      
-                                                     #"asc_length_robustness",
                                                      "des_length_robustness",
                                                      
-                                                     #"asc_resistance_robustness",
-                                                     #"des_resistance_robustness",
-                                                     
-                                                     #"asc_volume_robustness",
-                                                     #"des_volume_robustness",
-                                                     
+                                                    
                                                      "asc_width_robustness",                                                                      "des_width_robustness",
                                                      
                                                      "random_robustness",
@@ -804,8 +822,10 @@ Model_Ascos_Zygos<-rda(Ascos_zygos[,c("Hyphal_length",
 
 #Basidios
 Basidios<-all_data_scaled[which(all_data_scaled$phylum=="Basidiomycota"),]
+#On 19 May, Mark suggested not to include hypholoma anymore
+hfb<-grep("hf",Basidios$name_col,ignore.case = T)
 
-Model_Basidios<-rda(Basidios[,c("Hyphal_length",
+Model_Basidios<-rda(Basidios[-hfb,c("Hyphal_length",
                                                      "Hyphal_number",
                                                      "Hyphal_tip_width",
                                                      "Hyphal_main_width",
@@ -813,28 +833,19 @@ Model_Basidios<-rda(Basidios[,c("Hyphal_length",
                                                      "Hyphal_density",
                                                      
                                                      "alpha_coeff",
-                                                     #"beta_coeff",
-                                                     #"gamma_coeff",
-                                                     
+                                             
                                                      "Root_eff",
                                                      "Reff_tip",
                                                      
                                                      "Mycelia_Vol_MST",
                                                      "Geff_MST",
-                                                     
-                                                     #"asc_length_robustness",
+                                                   
                                                      "des_length_robustness",
-                                                     
-                                                     #"asc_resistance_robustness",
-                                                     #"des_resistance_robustness",
-                                                     
-                                                     #"asc_volume_robustness",
-                                                     #"des_volume_robustness",
-                                                     
+                                            
                                                      "asc_width_robustness",                                                                      "des_width_robustness",
                                                      
                                                      "random_robustness",
-                                                     "spatial_robustness")]~Species ,scale = TRUE,data = Basidios)
+                                                     "spatial_robustness")]~Species ,scale = TRUE,data = Basidios[-hfb,])
 
 #All data
 #Here I decided to use only the traits that are scaled (this came actually later, after I checked that the triangularity would not make sense if I had variables that depedended on total size)
@@ -842,18 +853,15 @@ Model_Basidios<-rda(Basidios[,c("Hyphal_length",
 all_data_scaled_c<-all_data_scaled
 all_data_scaled_c$Root_eff_a_scaled<-all_data_scaled_c$Root_eff/all_data_scaled_c$Mycelial_area
 all_data_scaled_c$Reff_tip_a_scaled<-all_data_scaled_c$Reff_tip/all_data_scaled_c$Mycelial_area
+#On 19 May, Mark suggested not to include hypholoma anymore
+hf<-grep("hf",all_data_scaled_c$name_col,ignore.case = T)
 
-Model_network_traits_sps_scaled<-rda(all_data_scaled_c[,c(#"Hyphal_length",
-                                                     "Hyphal_number",
-                                                     #"Hyphal_tip_width",
-                                                     #"Hyphal_main_width",
-                                                     "Hyphal_angle",                                                                              #"Mycelial_area",
+Model_network_traits_sps_scaled<-rda(all_data_scaled_c[-hf,c(
+                                                     "Hyphal_angle",                                                                            
                                                      "Hyphal_density",
                                                      
                                                      "alpha_coeff",
-                                                     #"beta_coeff",
-                                                     #"gamma_coeff",
-                                                     
+                                                    
                                                      "Root_eff_a_scaled",
                                                      "Reff_tip_a_scaled",
                                                      
@@ -863,13 +871,12 @@ Model_network_traits_sps_scaled<-rda(all_data_scaled_c[,c(#"Hyphal_length",
                                                      
                                                      "des_length_robustness",
                                                      
-                                                     
                                                      "asc_width_robustness",
                                                      
                                                      "des_width_robustness",
                                                      
                                                      "random_robustness",
-                                                     "spatial_robustness")]~Species + Condition(phylum),scale = TRUE,data = all_data_scaled_c)
+                                                     "spatial_robustness")]~Species + Condition(phylum),scale = TRUE,data = all_data_scaled_c[-hf,])
 
 #rm(all_data_scaled_c)
 
@@ -972,7 +979,7 @@ Basidios
 #Adding the two RDA axis to the dataframe
 temporal<-as.data.frame(scores(Model_Basidios,display = "sites",scaling = "sites",choices=c(1,2)))
 
-Basidios1<-cbind(Basidios,temporal);rm(temporal)
+Basidios1<-cbind(Basidios[-hfb,],temporal);rm(temporal)
 
 #Extracting the "site" or variable scores.
 e_vectors_traits_scaled_b<-as.data.frame(
@@ -981,12 +988,13 @@ e_vectors_traits_scaled_b$traits<-rownames(e_vectors_traits_scaled_b)
 
 names(e_vectors_traits_scaled_b)[1]<-"RDA1_species"
 names(e_vectors_traits_scaled_b)[2]<-"RDA2_species"
+
+e1<-round(summary(Model_Basidios)[["cont"]][["importance"]][2,1],2)*100
+e2<-round(summary(Model_Basidios)[["cont"]][["importance"]][2,2],2)*100
 ```
 
 
 ```{r, echo=FALSE, fig.height=10,fig.width=15}
-e1<-round(summary(Model_Basidios)[["cont"]][["importance"]][2,1],2)*100
-e2<-round(summary(Model_Basidios)[["cont"]][["importance"]][2,2],2)*100
 
 pdf("Updated_Figures\\basidio_rda.pdf",
     width = 14,
@@ -1033,6 +1041,8 @@ relacion_var_basidio %>%
   ggplot()+
   geom_segment(aes(x=0,y=0,xend=RDA1,yend=RDA2),arrow=arrow())+
   geom_text(aes(RDA1,RDA2,label=traits,fontface="bold"),size=4)+
+  labs(y=paste("RDA2",e2,"%",sep = " "),
+         x=paste("RDA1",e1,"%",sep = " "))+
   #xlim(c(-0.8,1.2))+
   ggtitle(label="From RDA for basidios")
 
@@ -1054,6 +1064,9 @@ e_vectors_traits_scaled_a$traits<-rownames(e_vectors_traits_scaled_a)
 
 names(e_vectors_traits_scaled_a)[1]<-"RDA1_species"
 names(e_vectors_traits_scaled_a)[2]<-"RDA2_species"
+
+e1<-round(summary(Model_Ascos_Zygos)[["cont"]][["importance"]][2,1],2)*100
+e2<-round(summary(Model_Ascos_Zygos)[["cont"]][["importance"]][2,2],2)*100
 ```
 
 
@@ -1062,8 +1075,7 @@ pdf("Updated_Figures\\ascos_zygos_rda.pdf",
     width = 14,
     height = 8.5)
 m<-1
-e1<-round(summary(Model_Ascos_Zygos)[["cont"]][["importance"]][2,1],2)*100
-e2<-round(summary(Model_Ascos_Zygos)[["cont"]][["importance"]][2,2],2)*100
+
 
 Ascos_zygos1%>% 
   ggplot()+
@@ -1105,10 +1117,21 @@ all_data_scaled %>%
   facet_wrap(.~name,scales="free")
 
 all_data_scaled %>% 
-  filter(!phylum=="Basidiomycota") %>% 
+  filter(phylum=="Basidiomycota") %>% 
   ggplot()+
-  aes(x="a",y=Mycelia_Vol_MST)+
+  aes(x=Geff_MST,y=random_robustness)+
   geom_text(aes(label=name_col))
+
+library(GGally)
+all_data_scaled %>% 
+  filter(phylum=="Basidiomycota") %>% 
+  select(c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
+                      "Hyphal_main_width","Hyphal_angle","Mycelial_area",
+                      "Hyphal_density","alpha_coeff","Root_eff",                                           "Reff_tip","Mycelia_Vol_MST","Geff_MST",
+                      "des_length_robustness","asc_width_robustness",
+                      "des_width_robustness","random_robustness",                                          "spatial_robustness")) %>% 
+  ggpairs(title="All",columns = c("Hyphal_length","random_robustness",
+                                  "des_length_robustness","Geff_MST"))
 
 ```
 
@@ -1130,6 +1153,8 @@ relacion_var_az %>%
   ggplot()+
   geom_segment(aes(x=0,y=0,xend=RDA1,yend=RDA2),arrow=arrow())+
   geom_text(aes(RDA1,RDA2,label=traits,fontface="bold"),size=2)+
+  labs(y=paste("RDA2",e2,"%",sep = " "),
+         x=paste("RDA1",e1,"%",sep = " "))+
   #xlim(c(-0.8,1.2))+
   ggtitle(label="From RDA for acos & zygos")
 
@@ -1143,7 +1168,7 @@ All fungi
 #Adding the two RDA axis to the dataframe
 temporal<-as.data.frame(scores(Model_network_traits_sps_scaled,display = "sites",scaling = "sites",choices=c(1,2)))
 
-all_data_scaled1<-cbind(all_data_scaled,temporal);rm(temporal)
+all_data_scaled1<-cbind(all_data_scaled[-hf,],temporal);rm(temporal)
 
 #Extracting the "site" or variable scores.
 e_vectors_traits_scaled<-as.data.frame(
@@ -1152,16 +1177,20 @@ e_vectors_traits_scaled$traits<-rownames(e_vectors_traits_scaled)
 
 names(e_vectors_traits_scaled)[1]<-"RDA1_species"
 names(e_vectors_traits_scaled)[2]<-"RDA2_species"
+
+e1<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,1],2)*100
+e2<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,2],2)*100
 ```
 
 
 ```{r, echo=FALSE, fig.height=10,fig.width=15}
-pdf("Updated_Figures\\all_fungi_rda.pdf",
-    width = 14,
-    height = 8.5)
 
 e1<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,1],2)*100
 e2<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,2],2)*100
+
+pdf("Updated_Figures\\all_fungi_rda.pdf",
+    width = 14,
+    height = 8.5)
 
 m<-2.5
 
@@ -1202,6 +1231,8 @@ relacion_var_all %>%
   ggplot()+
   geom_segment(aes(x=0,y=0,xend=RDA1,yend=RDA2),arrow=arrow())+
   geom_text(aes(RDA1,RDA2,label=traits,fontface="bold"),size=2)+
+  labs(y=paste("RDA2",e2,"%",sep = " "),
+         x=paste("RDA1",e1,"%",sep = " "))+
   xlim(c(-0.8,1.2))+
   ggtitle(label="From RDA for all fungi")
   
@@ -1345,7 +1376,7 @@ Note: Orginally all variables were included. However I commented one variables o
 
 ```{r, eval=FALSE,echo=FALSE,warning=FALSE,message=FALSE,eval=FALSE}
 all_data_t<-#This one here is the same set of tratis used on Model_network_traits_sps_scaled
-all_data_scaled_c[,c("Hyphal_number","Hyphal_angle","Hyphal_density","alpha_coeff",
+all_data_scaled_c[-hf,c("Hyphal_number","Hyphal_angle","Hyphal_density","alpha_coeff",
                      "Root_eff_a_scaled","Reff_tip_a_scaled","Mycelia_Vol_MST",
                      "Geff_MST","des_length_robustness","asc_width_robustness",
                      "des_width_robustness","random_robustness","spatial_robustness")]
@@ -1374,7 +1405,7 @@ model_triangle1<-rda(all_data_t,scale=T)
 
 #Extracting the two RDA axis to the dataframe
 temporal1<-as.data.frame(scores(model_triangle1,display = "sites",scaling = "sites",choices=c(1,2)))
-temporal1<-cbind(temporal1,all_data_scaled[,c("name_col")])
+temporal1<-cbind(temporal1,all_data_scaled_c[-hf,c("name_col")])
 names(temporal1)[3]<-"name_col"
 
 #temporal2<-as.data.frame(scores(model_triangle2,display = "sites",scaling = "sites",choices=c(1,2)))
@@ -1395,20 +1426,52 @@ summary(model_triangle1)[["cont"]][["importance"]][,c(1:3)]
 ```
 
 
-Saving the location of the archetypes as obtained through Uri Alon´s software
+Plotting the PCA
 ```{r,eval=FALSE}
-#triangle points
+#Here I have to decide whether to plot temporal1 or temporal2
+e1<-round(summary(model_triangle1)[["cont"]][["importance"]][2,1],2)*100
+e2<-round(summary(model_triangle1)[["cont"]][["importance"]][2,2],2)*100
 
-#archetypes based on scaled data only
-d1<-data.frame(x=c(5.686,-7.451,0.118),y=c(-3.476,-2.545,5.321))
-d1<-d1/4.7 #I divided by this number because the scaling of the Uri Alon´s software PCA is different from the one PCA scaling of vegan
+
+temporal1%>% 
+  ggplot()+
+  aes(x=PC1,y=PC2) +
+  geom_point(size=2)+
+  #geom_text(aes(label=name_col))+
+  #geom_polygon(data=d1,aes(x=x,y=y),alpha=0.50,fill="#21908CFF")+
+  labs(y=paste("PC 2",e2,"%",sep = " "),
+         x=paste("PC 1",e1,"%",sep = " "))+
+  #xlim(-1.1,1)+
+  #ylim(-1.2,1.3)+
+  my_theme#+
 
 ```
 
 
-Plotting the PCA with the archetypes and triangle
-```{r,eval=FALSE}
+Which is exactly the same as the one produced in the Uri Alon´software (produced on May 14 2021 in my Hp laptop). Here first the PCA (figure outdated, the new one should be from May 19):
+![](pca_May14_21.png)
+
+And now the triangle
+
+
+Here the location of the archetypes and the p value of the triangle as obtained through Uri Alon´s software. Date: 19 May 2021, Dataset without Hypholoma:
+The archetypes in original coordinates:
+[1.225, 0.755]
+[0.268, -1.238]
+[-1.159, 0.663]
+Please close the plot window to continue
+Would you like to find the p value?
+Please enter Y/N:Y
+How many repetitions would you like to perform?9999
+Checking P-Value with 9999 tries
+Pvalue is:  0.0872
+
+```{r}
 #Here I have to decide whether to plot temporal1 or temporal2
+e1<-round(summary(model_triangle1)[["cont"]][["importance"]][2,1],2)*100
+e2<-round(summary(model_triangle1)[["cont"]][["importance"]][2,2],2)*100
+#archetypes based on scaled data only
+d1<-data.frame(x=c(1.225,0.268,-1.159),y=c(0.755,-1.238,0.663))
 
 pdf("Updated_Figures\\triangle_root_wArea.pdf",
     width = 14,
@@ -1420,41 +1483,41 @@ temporal1%>%
   geom_point(size=2)+
   #geom_text(aes(label=name_col))+
   geom_polygon(data=d1,aes(x=x,y=y),alpha=0.50,fill="#21908CFF")+
-  labs(x="PCA 1 (33.38%)",y="PCA 2 (26.78%)")+
+  labs(y=paste("PC 2",e2,"%",sep = " "),
+         x=paste("PC 1",e1,"%",sep = " "))+
   #xlim(-1.1,1)+
   #ylim(-1.2,1.3)+
   my_theme#+
   # ggtitle(label = "root_area")
 
 dev.off()
+
 ```
 
+Comparing again with the triangle produced by the software
 
-Which is exactly the same as the one produced in the Uri Alon´software (produced on May 1st 2021 in my Hp laptop):
-![](triangle_2May.png)
+![](triangle_19May_21.png)
 
-
-```{r,eval=FALSE}
-
-#Here I need to specify which model I use, either model_triangle1 or model_triangle2 and the corresponding table temporal1 or temporal2
-
+Identifying the colonies at the extremes
+```{r, eval=FALSE}
 e_vectors_triangle<-as.data.frame(
   scores(model_triangle1,display = "species",choices = c(1,2),scaling = "sites"));
 e_vectors_triangle$traits<-rownames(e_vectors_triangle)
 names(e_vectors_triangle)[1]<-"PC1_s"
 names(e_vectors_triangle)[2]<-"PC2_s"
 
-pdf("Updated_Figures\\triangle_all_info_Area.pdf",
+library(ggrepel)
+
+pdf("Updated_Figures\\triangle_all_info.pdf",
     width = 14,
     height = 8.5)
 
-library(ggrepel)
-cbind(all_data_scaled[,c("name_col","phylum")],temporal1)%>% 
+left_join(temporal1,all_data_scaled[,c("name_col","phylum")])%>% 
   ggplot()+
   aes(x=PC1,y=PC2) +
   geom_point(size=2)+
   geom_polygon(data=d1,aes(x=x,y=y),alpha=0.50,fill="#21908CFF")+
-   geom_text_repel(size=5,aes(x=PC1_s,y=PC2_s,label=traits,fontface="bold"),
+   geom_text_repel(size=3,aes(x=PC1_s,y=PC2_s,label=traits,fontface="bold"),
                         data = e_vectors_triangle)+
   geom_segment(aes(x=0, y=0, xend=PC1_s, yend=PC2_s), 
          arrow = arrow(),data = e_vectors_triangle)+
@@ -1462,115 +1525,199 @@ cbind(all_data_scaled[,c("name_col","phylum")],temporal1)%>%
   #ylim(-1.2,1.5)+
   geom_text_repel(aes(label=name_col,fontface="bold.italic",color=phylum),size=3) +
       #labs(x="PCA 1 (39.20%)",y="PCA 2 (25.55%)")+
-      my_theme+
-  ggtitle(label = "root-Area")
+      my_theme
 
 dev.off()
-
 ```
 
 
-The issue is that wtih the new data from Mark on basidiomycetes and mine coming from the most updated app (the last one of April 2021), this triangle is not significant. This test was based on 10,000 permutations. The output I get for the triangle above: 
+TRIANGLE BASED ON RDA AXES
+Note: 19 May 2021
+Interestingly, by removing Hypholoma and not including anymore hyphal number now the triangle is significant. 
 
-How many repetitions would you like to perform? 10000
-Checking P-Value with 10000 tries
-Pvalue is:  0.163183681632
+Now it came the idea to use instead of the PCA the RDA axes, which makes sense to some extent
 
+```{r}
+write.csv(all_data_scaled1[,c("RDA1","RDA2")],row.names = F,"RDA_axes_triangularity_Reff_Area.csv")
+```
 
+The archetypes coming from the triangle using the RDA axes (the data just above) are
+The archetypes in original coordinates:
 
-```{r, eval=FALSE}
-e_vectors_triangle<-as.data.frame(
-  scores(model_triangle2,display = "species",choices = c(1,2),scaling = "sites"));
-e_vectors_triangle$traits<-rownames(e_vectors_triangle)
-names(e_vectors_triangle)[1]<-"PC1_s"
-names(e_vectors_triangle)[2]<-"PC2_s"
+The archetypes in original coordinates:
+[1.185, -0.386]
+[-1.314, -0.566]
+[0.297, 0.917]
+Please close the plot window to continue
+Would you like to find the p value?
+Please enter Y/N:Y
+How many repetitions would you like to perform?9999
+Checking P-Value with 9999 tries
+Pvalue is:  0.0209
 
-library(ggrepel)
+```{r}
+#archetypes based on scaled data only
+d1<-data.frame(x=c(1.185,-1.314,0.297),y=c(-0.386,-0.566,0.917))
 
-pdf("Updated_Figures\\triangle_all_info_sqArea.pdf",
+e1<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,1],2)*100
+e2<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,2],2)*100
+
+m<-1
+
+RDA_triangle<-
+all_data_scaled1%>% 
+  ggplot()+
+  aes(x=RDA1,y=RDA2) +
+  geom_point(size=2,aes(color=phylum))+
+  geom_polygon(data=d1,aes(x=x,y=y),alpha=0.50,fill="#21908CFF")+
+    #geom_text(aes(label=easy_code,fontface="bold.italic",color=phylum),size=5) +
+   labs(y=paste("RDA2",e2,"%",sep = " "),
+         x=paste("RDA1",e1,"%",sep = " "))+
+  
+  # geom_text(size=3,aes(x=RDA1_species/m,y=RDA2_species/m,label=traits,fontface="bold"),
+  #           #hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
+  #           data = e_vectors_traits_scaled)+
+  # geom_segment(aes(x=0, y=0, xend=RDA1_species/m, yend=RDA2_species/m), 
+  #       arrow = arrow(),color="gray",data = e_vectors_traits_scaled)+
+  #ggtitle(label = "Taxonomy corrected")+
+  scale_color_manual(values=c("red","darkgreen","blue"))+
+  
+    my_theme
+
+RDA_triangle
+
+pdf("Updated_Figures\\triangle_rda.pdf",
     width = 14,
     height = 8.5)
 
-cbind(all_data_scaled[,c("name_col","phylum")],temporal2)%>% 
-  ggplot()+
-  aes(x=PC1,y=PC2) +
-  geom_point(size=2)+
-  geom_polygon(data=d2,aes(x=x,y=y),alpha=0.50,fill="#21908CFF")+
-   geom_text_repel(size=5,aes(x=PC1_s,y=PC2_s,label=traits,fontface="bold"),
-                        data = e_vectors_triangle)+
-  geom_segment(aes(x=0, y=0, xend=PC1_s, yend=PC2_s), 
-         arrow = arrow(),data = e_vectors_triangle)+
-  #xlim(-1.2,1)+
-  #ylim(-1.2,1.5)+
-  geom_text_repel(aes(label=name_col,fontface="bold.italic",color=phylum),size=3) +
-      #labs(x="PCA 1 (39.20%)",y="PCA 2 (25.55%)")+
-      my_theme+
-ggtitle(label = "root-sqArea")
+RDA_triangle
 
 dev.off()
 ```
 
+againg, checking this is the same as the one produced by Uri Alon´s
+
+![](triangleRDA_19May21.png)
+Identifiying species at the extremes
 
 
-Identifying the colonies that are closer to the archetypes predicted by Uri Alon´s program
+```{r}
+
+all_data_scaled1%>% 
+  ggplot()+
+  aes(x=RDA1,y=RDA2) +
+  geom_point(size=2,aes(color=phylum))+
+  geom_polygon(data=d1,aes(x=x,y=y),alpha=0.50,fill="#21908CFF")+
+  geom_text(aes(label=name_col,fontface="bold.italic",color=phylum),size=5) +
+   labs(y=paste("RDA2",e2,"%",sep = " "),
+         x=paste("RDA1",e1,"%",sep = " "))+
+  
+  # geom_text(size=3,aes(x=RDA1_species/m,y=RDA2_species/m,label=traits,fontface="bold"),
+  #           #hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
+  #           data = e_vectors_traits_scaled)+
+  # geom_segment(aes(x=0, y=0, xend=RDA1_species/m, yend=RDA2_species/m), 
+  #       arrow = arrow(),color="gray",data = e_vectors_traits_scaled)+
+  #ggtitle(label = "Taxonomy corrected")+
+  scale_color_manual(values=c("red","darkgreen","blue"))+
+  
+    my_theme
+
+```
+
+
+
+
+
+Selecting the colonies that are closer to the archetypes predicted by Uri Alon´s program: Pv_ctrl1_d8_1, DF56, C34(3)_t23, Pi_ctrl1_d8_3
+
 
 As for figure 3 (above), For this images I am using dimension 961 x 703 save as png images
 ```{r,eval=FALSE}
 #Rb_ctrl1_d8_1
-ecol<-E(colonies_ntwk[[36]])$width
-ecol[E(colonies_ntwk[[36]])[type=="Inoculum"]]<-(quantile(ecol[E(colonies_ntwk[[36]])[type!="Inoculum"]])[2])/2
+rb<-colonies_ntwk[[35]]
+ecol<-E(rb)$width
+ecol[E(rb)[type=="Inoculum"]]<-(quantile(ecol[E(rb)[type!="Inoculum"]])[2])/2
 #ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
 ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
-ecol2[E(colonies_ntwk[[36]])[type=="Inoculum"]]<-"gray30"
+ecol2[E(rb)[type=="Inoculum"]]<-"gray30"
 
-jpeg("Updated_Figures\\Rb_ctrl1_d8_1_for_triangle.jpg",width = 961,height = 703)
-par(mar=c(0,0,0,0))
-plot(colonies_ntwk[[36]],
+jpeg("Updated_Figures\\Pv_ctrl1_d8_1_for_triangle.jpg",width = 961,height = 703)
+par(mar=c(0.5,0.5,0.5,0.5))
+plot(rb,
      edge.arrow.size=1,edge.curved=0,
      edge.width=2,
      #edge.width=ecol/3,
      vertex.label=NA,vertex.shape="none",
      edge.color=ecol2,
-     edge.size=150,vertex.size=0,layout=spatial.data[[36]]*1,main="Rb_ctrl1_d8_1")
+     edge.size=150,vertex.size=0,layout=spatial.data[[35]]*1,
+     main=unique(E(rb)$name))
+
 dev.off()
 
 #DF56 Mucor fragilis "DF56(6)_t09 (the actual point is (5), however, it is not that nice looking to plot)
-ecol<-E(colonies_ntwk[[16]])$width
-ecol[E(colonies_ntwk[[16]])[type=="Inoculum"]]<-(quantile(ecol[E(colonies_ntwk[[16]])[type!="Inoculum"]])[2])/2
+
+rb<-colonies_ntwk[[16]]
+ecol<-E(rb)$width
+ecol[E(rb)[type=="Inoculum"]]<-(quantile(ecol[E(rb)[type!="Inoculum"]])[2])/2
 #ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
-
 ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
-
-ecol2[E(colonies_ntwk[[16]])[type=="Inoculum"]]<-"gray30"
+ecol2[E(rb)[type=="Inoculum"]]<-"gray30"
 
 jpeg("Updated_Figures\\DF56(6)_t09_for_triangle.jpg",width = 961,height = 703)
-par(mar=c(0,0,0,0))
-plot(colonies_ntwk[[16]],
+par(mar=c(0.5,0.5,0.5,0.5))
+plot(rb,
      edge.arrow.size=1,edge.curved=0,
-     #edge.width=2,
-     edge.width=ecol/3,
+     edge.width=2,
+     #edge.width=ecol/3,
      vertex.label=NA,vertex.shape="none",
      edge.color=ecol2,
-     edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="DF56(6)_t09")
+     edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,
+     main=unique(E(rb)$name))
 
 dev.off()
 
-#10.Pi Phallus impudicus Pi_ctrl1_d8_1
-ecol<-E(colonies_ntwk[[33]])$width
-ecol[E(colonies_ntwk[[33]])[type=="Inoculum"]]<-(quantile(ecol[E(colonies_ntwk[[33]])[type!="Inoculum"]])[2])/2
+#C34(3)_t23
+rb<-colonies_ntwk[[3]]
+ecol<-E(rb)$width
+ecol[E(rb)[type=="Inoculum"]]<-(quantile(ecol[E(rb)[type!="Inoculum"]])[2])/2
 #ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
 ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
-ecol2[E(colonies_ntwk[[33]])[type=="Inoculum"]]<-"gray30"
+ecol2[E(rb)[type=="Inoculum"]]<-"gray30"
 
-jpeg("Updated_Figures\\Pv_ctrl1_d8_1_for_triangle.jpg",width = 961,height = 703)
-par(mar=c(0,0,0,0))
-plot(colonies_ntwk[[33]],
+jpeg("Updated_Figures\\DF19(3)_t11_for_triangle.jpg",width = 961,height = 703)
+par(mar=c(0.5,0.5,0.5,0.5))
+plot(rb,
      edge.arrow.size=1,edge.curved=0,
      edge.width=2,
-     #edge.width=ecol/100,
+     #edge.width=ecol/3,
      vertex.label=NA,vertex.shape="none",
      edge.color=ecol2,
-     edge.size=150,vertex.size=0,layout=spatial.data[[33]]*1,main="Pv_ctrl1_d8_1")
+     edge.size=150,vertex.size=0,layout=spatial.data[[3]]*1,
+     main=unique(E(rb)$name))
+
+dev.off()
+
+
+#Pi_ctrl1_d8_3
+rb<-colonies_ntwk[[34]]
+ecol<-E(rb)$width
+ecol[E(rb)[type=="Inoculum"]]<-(quantile(ecol[E(rb)[type!="Inoculum"]])[2])/2
+#ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
+ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
+ecol2[E(rb)[type=="Inoculum"]]<-"gray30"
+
+jpeg("Updated_Figures\\Pi_ctrl1_d8_3_for_triangle.jpg",width = 961,height = 703)
+par(mar=c(0.5,0.5,0.5,0.5))
+plot(rb,
+     edge.arrow.size=1,edge.curved=0,
+     edge.width=2,
+     #edge.width=ecol/3,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol2,
+     edge.size=150,vertex.size=0,layout=spatial.data[[34]]*1,
+     main=unique(E(rb)$name))
+
+dev.off()
 ```
 
 Checking the values of the archetypes
@@ -1644,6 +1791,28 @@ pivot_longer(e_vectors_triangle,PC1_s:PC2_s,names_to = "Axis",values_to="loading
 
 ```
 
+Other stuff
+```{r}
+rb<-colonies_ntwk[[34]]
+ecol<-E(rb)$width
+ecol[E(rb)[type=="Inoculum"]]<-(quantile(ecol[E(rb)[type!="Inoculum"]])[2])/2
+#ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
+ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
+ecol2[E(rb)[type=="Inoculum"]]<-"gray30"
+
+#jpeg("Updated_Figures\\DF19(3)_t11_for_triangle.jpg",width = 961,height = 703)
+par(mar=c(0.5,0.5,0.5,0.5))
+plot(rb,
+     edge.arrow.size=1,edge.curved=0,
+     edge.width=2,
+     #edge.width=ecol/3,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol2,
+     edge.size=150,vertex.size=0,layout=spatial.data[[34]]*1,
+     main=unique(E(rb)$name))
+```
+
+
 
 ## Discussion
 
@@ -1676,6 +1845,133 @@ As these two fronts are expanded, a scalable pipeline can emerge that would enab
 
 
 ## Supplementary material
+
+
+Examples of robustness
+
+
+```{r}
+
+temas<-
+theme(title = element_text(size = 18),
+        axis.title.x=element_text(size=20),
+        panel.background = element_blank(),
+        panel.grid.major.y = element_line(size=0.25,linetype = "longdash",colour = "gray"),
+        panel.grid.major.x = element_blank(),
+        axis.text.x = element_text(size = 15),
+        #axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        strip.text.x = element_text(size = 20),
+        strip.text.y = element_text(size = 25),
+        legend.position = "bottom"
+  )
+
+m<-sapply(c(26:42),list)
+p<-lapply(m,function(m){
+    Ordered_robustness[[m]] %>% 
+      filter(method=="width") %>% 
+      filter(direction=="des") %>% 
+      ggplot()+
+      aes(removed_percent,robustness)+
+      geom_point()+
+      geom_line()+
+    geom_hline(aes(yintercept=50),color="blue",linetype="longdash")+
+      geom_vline(aes(xintercept=des_width_robustness[m]),
+                 color="red",linetype="longdash",data = robustness)+
+      labs(x="Volume removed (%)", y="asc_width_rob",
+           title = unique(Ordered_robustness[[m]]$name))
+})
+
+do.call("grid.arrange",p)
+
+Ordered_robustness[[m]] %>% 
+  filter(method=="width") %>% 
+  filter(direction=="des") %>% 
+  ggplot()+
+  aes(removed_percent,robustness)+
+  geom_point()+
+  geom_line()+
+  geom_vline(aes(xintercept=des_width_robustness[m]),
+             color="red",linetype="longdash",data = robustness)+
+  labs(x="Volume removed (%)", y="Ordered Robustness (asc_width",
+       title = unique(Ordered_robustness[[m]]$name))+
+  temas
+  
+  
+sp_funct1<-
+#approxfun(Spatial_robustness[[1]]$robustness,Spatial_robustness[[1]]$removed_percent)
+approxfun(Spatial_robustness[[1]]$removed_percent,Spatial_robustness[[1]]$robustness)
+
+sp_example<-data.frame(removed_percent=seq(0,100),
+                       robustness=sp_funct1(seq(0,100)))
+
+Spatial_robustness[[19]] %>%
+  group_by(removed_percent) %>% 
+  summarise_at(c("robustness"),mean,na.rm=T) %>% 
+  ggplot()+
+  aes(removed_percent,robustness)+
+  geom_point()+
+  geom_line()+
+  geom_vline(aes(xintercept=Spatial_50$spatial_robustness[19]),color="red",linetype="longdash")+
+  #facet_wrap(method~direction)+
+  labs(x="Volume removed (%)", y="Spatial Robustness")+
+  theme(title = element_text(size = 18),
+        axis.title.x=element_text(size=20),
+        panel.background = element_blank(),
+        panel.grid.major.y = element_line(size=0.25,linetype = "longdash",colour = "gray"),
+        panel.grid.major.x = element_blank(),
+        axis.text.x = element_text(size = 15),
+        #axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        strip.text.x = element_text(size = 20),
+        strip.text.y = element_text(size = 25),
+        legend.position = "bottom"
+  )
+
+m<-sapply(c(26:42),list)
+p<-lapply(m,function(m){
+    Random_robustness[[m]] %>%
+  group_by(removed_percent) %>% 
+  summarise_at(c("robustness"),mean,na.rm=T) %>% 
+  ggplot()+
+  aes(removed_percent,robustness)+
+  geom_point()+
+  geom_line()+
+  geom_vline(aes(xintercept=random_robustness[m]),
+             color="red",linetype="longdash",data = robustness)+
+  #facet_wrap(method~direction)+
+  labs(x="Volume removed (%)", y="Random Robustness",
+       title = unique(Random_robustness[[m]]$name))
+  
+});do.call("grid.arrange",p)
+
+
+Random_robustness[[1]] %>%
+  group_by(removed_percent) %>% 
+  summarise_at(c("robustness"),mean,na.rm=T) %>% 
+  ggplot()+
+  aes(removed_percent,robustness)+
+  geom_point()+
+  geom_line()+
+  geom_vline(aes(xintercept=Random_50$random_robustness[1]),color="red",linetype="longdash")+
+  #facet_wrap(method~direction)+
+  labs(x="Volume removed (%)", y="Random Robustness")+
+  theme(title = element_text(size = 18),
+        axis.title.x=element_text(size=20),
+        panel.background = element_blank(),
+        panel.grid.major.y = element_line(size=0.25,linetype = "longdash",colour = "gray"),
+        panel.grid.major.x = element_blank(),
+        axis.text.x = element_text(size = 15),
+        #axis.text.x = element_text(size = 15),
+        axis.text.y = element_text(size = 15),
+        strip.text.x = element_text(size = 20),
+        strip.text.y = element_text(size = 25),
+        legend.position = "bottom"
+  )
+
+
+```
+
 
 RDA for all species not including phylum as a conditional
 ```{r, echo=FALSE,eval=FALSE}
