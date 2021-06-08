@@ -12,114 +12,27 @@ output:
 knitr::opts_chunk$set(fig.height = 10, fig.width = 15,echo = F)
 ```
 
-## Highlights
 
-
-
-* We show high interspecfic variation in network parameters of fungi which partly correlates with taxonomy
-* We advocate the use of network properties as functional traits for fungal ecology.
-* We show that network parameters reveal the trait space in mycelium architecture across species
-
-## Introduction
-
-The body of most fungal species consists of an interconnected network of filaments, yet fungal ecologists rarely use features of this network as fungal functional traits. We think not using network properties represents a missed opportunity because it is likely that the ecological success of fungi on land is partly due to such network growth  (Moore, D et al 2011). Indeed, such network body type has become a signature feature through the diversification of this kingdom (already present in basal clades (Stajich, J E et al 2009)) which showcase its versatility in response to ecological interactions. In this paper, we lay the foundation to gain understanding on the ecological significance of network properties in fungi by identifying traits that encapsulate the network-structure of fungi, measure their variation and link them to possible ecological strategies. 
-
-We specifically identify traits that take into account the connection arrangement pattern of filaments once the mycelium is translated into a network graph (i.e. a set of nodes connected through edges Barthelemy et al 20XX). An approach was introduced and applied to fungi by  Fricker et al (20XX). In addition, in the calculation of these traits we use recent biophysical models of transport dynamics of nutrients and information within the mycelia when fungi are exploring for resources (Luke and Mark paper). During such an exploration phase, fungi transport resources located from a source (like a resource patch or spore reserves) to subsidize hyphal tip extension and branching (ref). Because of the extremely patchy distribution of resources in their soil habitat, we think it is very likely that fungi will be in the exploration phase for most of their lifetime. Thus, we consider that the traits we identify have a solid biological basis rooted in fungal anatomy and ecologically relevant scenarios. 
-
-Second, we determine the degree of interspecific variation in network traits and whether it is related to phylogenetic affiliation across a diverse set of soil borne saprotrophic fungi. We included species in the Ascomycota, Basidiomycota and zygomycetous fungi (Mortierellomycota and Mucoromycota) and measured their network traits at both the micrometer and  macro (centimeter) scale. We consider using both scales is important as proof of concept of the usefulness of estimating network traits to describe the wide diversity of mycelial phenotypes found in nature. For example, zygoymecetous and ascomycete soil fungi typically produce mycelial networks composed of interconnected individual hyphae that span micrometer to millimeter scales through the soil (ref). In contrast, wood-decomposing basidiomycetes can produce networks consisting of cords (that results the fusion of several hyphae) that reach several centimeter in scale (ref).
-
-Finally, we use the network traits to identify potential ecological strategies associated with differences in transport through the connected pattern arrangement of mycelia. To do this, we first determine how different the observed network properties are in comparison to a baseline network model that follows simple rules of minimized connectivity while maximizing transport. Thus, fungal networks closer to this model indicate a strategy that maximizes transport efficiency, while networks departing from it indicate fungi that increase the number of connections. Finally, we identify mycelial networks that represent extreme phenotypes (or archetypal phenotypes) in the network trait morphospace (Alon´s paper) based on the differences in network properties. These archetypes represent extreme points in the realized mycelium morphospace.
-
-
-## Material and methods
-
-## Fungal species
-
-We used 13 fungi belogning to zygomycetous groups (Mucor fragilis, Mortierella sp, Mortierella elongata, Mortierella alpina, Mucor fragilis, Umbelopsis isabelina), Ascomycota (Fusarium redolens, Fusarium oxysporum, Fusarium solani, Alternaria sp) and Basidiomycota (Resinicium bicolor, Phanerochaete velutina and Phallus impudicus). The zygomycetous fungi and ascomycete fungi were selected from a pool of 30 fungal species which were all isolated from soil samples collected in semi-natural grassland in northeastern Germany (Diana paper) and maintained in the live culture collection at FU-Berlin. The species used here were selected because they had similar colony margin extension rates (which facilitates having common settings during microscopy, see below) and, although phylogenetically similar, produce distinctive mycelial phenotypes (Fig X [These should be pictures of the mycelia]).
-
-Basidiomycets come from...
-
-
-
-### Microphotography and image processing
-
-For ascomycete, and zygomycetous fungi, we extracted network parameters from pictures of 10-to-14 hours-old, 2mm-diameter fungal mycelium growing on water agar with no resources added (the mycelium was growing out of an agar plug to which 10ul 10% Potato Dextrose Broth were added). Pictures were taken under a stereoscope (AxioZoom, Zeiss) by tiling 7 x 7 frames which were later stitched together using Zen Blue software form Zeiss. For basidiomycete fungi, pictures were taken of 20-cm-diameter fungal mycelium growing on a wooden block on inert sand so that all resources for growth are located in the wooden block[To be added: picture settings, age of the mycelia]. Thus, although the pictures come from different sizes and settings, both conditions reflect the exploration phase of the mycelium. Each fungal species was replicated three times.
-
-Then we used a bundle of image processing algorithms to segment the images, determine the connected patterns among hyphae (i.e. which hypha is connected to which), and estimate hyphal traits such as widths (these algorithms are wrapped in the MatLab App “Fungal Networks” developed by Mark Fricker). This information was then stored in two matrices: an “edge list” containing a list of all pairs of nodes (i.e. hyphae) and the traits of the hyphae. The second matrix contains the position of the nodes in x, y coordinates.
-
-
-### Graph network representation
-
-The outputs from the image-processing step were used to translate each mycelium picture into “spatially explicit weighted graph network” (Fig 1), where:
-
- + Nodes represent hyphal tips, branching points, and anastomosis points. These three node types are distinguished based on the amount of nodes they are connected from/to (that is, the degree of the node). For example, hyphal tips have degree = 1, as they connect only to one other node, while branching points have degree = 2 because they connect to two other “daughter” nodes.
-+ Edges (links) represent the hyphae. These are defined as links connecting two nodes.
-+ Edge attributes represent hyphal traits (such as length and width)
-+ Edge weight represents the transport resistance of the hyphae (see explanation below).
 
 ![Figure 1.  Left: Red hyphal tips, orange branching points. Hyphae connect two nodes on which several attributes are measured (here just depicted length and width).  Right. Translation into a graph object (nodes are numerated, colors do not refer to node types).](Updated_Figures/Explaing_nodes_edges.png)
 
 
-### Calculation of mycelial traits
 
-From the network graph we calculated several traits as means of hyphal attributes (e.g. widths, lengths, accessibility resistances) and network connectivity properties (e.g. degree, centrality metrics) see supplementary table 1). From this complete set, we narrow  our analysis to 12 traits for each fungal colony (see table 1 for details) based on screenings on mathematical relationships between traits, frequency distribution properties and potential biological meaning. Five of those selected traits we classified as “hyphal attributes” representing direct average measurements of hyphal traits that are not directly related to the connected arrangement of hyphae. The other traits, which are directly dependent on the connectedness arrangement, we refer to as “network traits” and include:
-
-+ Normalized coefficients that illustrate deviations of an observed metric (e.g. number of nodes or links) from a (hypothetical) fully connected network (where all nodes are linked to each other). These coefficients are taken from transportation geography (Fricker et al. X);
-
-+ Transport efficiencies, which summarize the efficiency of transporting material throughout the network following the assumptions of the “Hydraulic Hyphal transport Model.” Under this model, connected hyphae are idealized as a series of interconnected cylindrical pipes in which fluids move from the center of the colony (the inoculum agar or wooden plug, in our case) to each tip due to a difference in hydraulic pressure (citation). A fundamental metric of this model and in the “efficiency” metrics is the calculation of “hyphal transport resistance” based on hyphal lengths and widths (where the longer and thinner the hypha is, the higher the resistance) and “path hydraulic accessibility,” which is obtained as the minimal sum of hyphal resistances connecting two nodes . In turn, “efficiencies” represent mycelium-wide means based on such metrics (see table 1 for further details).
-
-+ Minimum Spanning Tree (MST) ratios: These metrics represent deviations of the observed traits (like mean hyphal length) from a baseline network that preserves the number of nodes but reduces the edges to only include the ones that maximize transport efficiencies. The baseline model corresponds to “resistance-weighted minimum spanning tree.” In this model all nodes are connected through hyphal paths with minimal resistance. As a result, this baseline model does not contain any loops (see table 1 and Figure 2 for further details).
-
-Table 1.
-
-1. Mycelium descriptive traits
-
-+ Mean hyphal length. This corresponds to the mean of each hyphal length in the network (defined as the measured distance between two nodes during the image processing). Given that the distribution of these lengths was left-skewed, this mean actually corresponds to log10 transformed lengths.
-
-+ Total number of hyphae. The number of hyphae recorded for each network.
-
-+ Mean tip hyphal width. Tip hyphae are defined as hyphae connecting a hyphal tip node (which is identified as a node degree = 1).Given that the distribution of these lengths was left-skewed, this mean actually corresponds to log10 transformed widths.
-
-+ Mean main hyphal width. Main hyphae were defined as hyphae connecting branching or anastomosis nodes. Given that the distribution of these lengths was left-skewed, this mean actually corresponds to log10 transformed widths.
-
-+ Hyphal density. This corresponds to the number of hyphae in a given area
-
-+ Angle (O_min_mid). Not transformed [MORE EXPLANATION WILL BE ADDED].
-
-2. Mycelium Network traits
-
-+ Alpha coefficient. Proportion of cycles out of the total number of possible cycles given a certain number of nodes.
-
-+ Beta coefficient. The ratio of edges and nodes.
-
-+ Gamma coefficient. The proportion of edges out the total number of possible edges given a certain number of nodes.
-
-+ Root-tip efficiency (R-Teff). The mean transport efficiency from the inoculum to each tip. To calculate this mean, first the paths that result in the lowest summations of resistances connecting the inoculum to each tip node are identified. That is, the paths with the highest hydraulic accessibility are identified (using the Dijkstra algorithm). Root-tip efficiency is then calculated as the mean of the sums of the inverse of resistances for all identified paths.
-
-+ Root efficiency (Reff). The mean transport efficiency from the inoculum to each node is calculated as described above, but includes not only paths from inoculum to tips, but also to each node.
-
-+ Global efficiency (Geff). The mean transport efficiency between any two nodes. It is similar to the root efficiency, but includes all paths connecting two nodes (not only the ones rooted to the inoculum).
-
-+ Length-MST. The ratio of the mean hyphal length of the observed mycelium with respect to a baseline network with the same number of nodes, but that maximizes transport efficiency.
-
-+ Geff-MST. The ratio of the Global efficiency of the observed network to that of the baseline network (as described above, the “resistance weighted minimum spanning tree”).
-
-+ Descriptive traits were calculated during the image processing (using the MatLab App), while network traits were computed using the igraph package for R.
 
 
 ```{r,echo=FALSE,warning=FALSE, eval=FALSE}
-source_rmd <- function(file, local = FALSE, ...){
-  options(knitr.duplicate.label = 'allow')
-  tempR <- tempfile(tmpdir = ".", fileext = ".R")
-  on.exit(unlink(tempR))
-  knitr::purl(file, output=tempR, quiet = TRUE)
-  envir <- globalenv()
-  source(tempR, local = envir, ...)
-}
-
-#This is Rmd where I used igraph to obtain hyphal, network and robustness traits, that I am using in this analysis.
-
-source_rmd("Assembling_Network_Trait_Data.Rmd")
+# source_rmd <- function(file, local = FALSE, ...){
+#   options(knitr.duplicate.label = 'allow')
+#   tempR <- tempfile(tmpdir = ".", fileext = ".R")
+#   on.exit(unlink(tempR))
+#   knitr::purl(file, output=tempR, quiet = TRUE)
+#   envir <- globalenv()
+#   source(tempR, local = envir, ...)
+# }
+# 
+# #This is Rmd where I used igraph to obtain hyphal, network and robustness traits, that I am using in this analysis.
+# 
+# source_rmd("Assembling_Network_Trait_Data.Rmd")
 ```
 
 
@@ -146,7 +59,7 @@ Node_Traits<-readRDS("Node_Traits.RDS")
 Temporal fixes
 ```{r,echo=FALSE}
 #upadted mycelial area makes no sense
-old_data_scaled<-readRDS("old_data/all_data_scaled.RDS")
+#old_data_scaled<-readRDS("old_data/all_data_scaled.RDS")
 #all_data_scaled$Mycelial_area[3]<-old_data_scaled$Mycelial_area[3]
 
 all_data_scaled$Mycelial_area[3]<-mean(30.56246,29.87179)
@@ -154,111 +67,111 @@ all_data_scaled$Mycelial_area[3]<-mean(30.56246,29.87179)
 
 Checking
 
-```{r}
-library(igraph)
-plot(colonies_ntwk[[33]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     edge.color="#7570B3",
-     edge.size=150,vertex.size=0,layout=spatial.data[[33]]*1,main="Pv_ctrl1_d8_1")
-
-##
-ecol<-rep("black",ecount(colonies_ntwk[[1]]))
-ecol[(which(E(colonies_ntwk[[1]])$width>10))]<-"darkred"
-
-##
-ecol<-cscale(E(colonies_ntwk[[1]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
-#ecol<-cscale(E(colonies_ntwk[[4]])$width,palette = seq_gradient_pal(low = "yellow",high = "red"))
-ecol[E(colonies_ntwk[[1]])[type=="Inoculum"]]<-"bisque2"
-
-##
-ecol<-E(colonies_ntwk[[1]])$width
-ecol[E(colonies_ntwk[[1]])[type=="Inoculum"]]<-(quantile(ecol[E(colonies_ntwk[[1]])[type!="Inoculum"]])[2])/2
-#ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
-ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
-ecol2[E(colonies_ntwk[[1]])[type=="Inoculum"]]<-"gray30"
-
-
-plot(colonies_ntwk[[20]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     #edge.color="#7570B3",
-     edge.color=ecol,
-     edge.size=150,vertex.size=0,layout=spatial.data[[20]]*1,
-     main=unique(E(colonies_ntwk[[1]])$name) )
-
-hist(((Edge_Traits_F[[3]]$Width[Edge_Traits_F[[3]]$Type=="E"])),
-     main=unique(Edge_Traits_F[[3]]$name))
-
-hist((log10(Edge_Traits[[3]]$Length[Edge_Traits[[3]]$Type=="E"])),
-     main=unique(Edge_Traits[[3]]$name))
-
-
-hist(((Edge_Traits_F[[2]]$Width[Edge_Traits_F[[2]]$Type=="E"])),
-     main=unique(Edge_Traits_F[[2]]$name))
-
-
-hist(((Edge_Traits[[20]]$Length)),main=unique(Edge_Traits[[20]]$name))
-
-boxplot((Edge_Traits[[36]]$Width/1000))
-
-lapply(Edge_Traits,function(x)summary(x$Width[x$Type=="E"]))
-```
-
-continue checking
-
-```{r}
-par(mfrow=c(3,3))
- 
-lapply(Edge_Traits,function(x){
-  
-  hist(((x$Width[x$Type=="E"])),
-     main=unique(x$name))
-  
-})
-
-
-par(mfrow=c(3,3),mar=c(0,0,0,0))
-mapply(function(x,z){
-
-  ecol<-rep("darkblue",ecount(x))
-ecol[(which(E(x)$width>
-  quantile(E(x)$width)[3]))]<-"red"
-ecol[E(x)[type=="Inoculum"]]<-"gray30"  
-
-plot(x,
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     #edge.color="#7570B3",
-     edge.color=ecol,
-     edge.size=150,vertex.size=0,layout=z*1,
-     main=unique(E(x)$name) )
-
-  
-},colonies_ntwk,spatial.data)
-
-
-trial<-colonies_ntwk[[8]]
-
-ecol<-rep("darkblue",ecount(trial))
-ecol[(which(E(trial)$width>
-  quantile(E(trial)$width)[3]))]<-"red"
-ecol[E(trial)[type=="Inoculum"]]<-"gray30"
-
-plot(colonies_ntwk[[8]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     #edge.color="#7570B3",
-     edge.color=ecol,
-     edge.size=150,vertex.size=0,layout=spatial.data[[8]]*1,
-     main=unique(E(colonies_ntwk[[8]])$name) )
-
-
+```{r, eval=FALSE}
+# library(igraph)
+# plot(colonies_ntwk[[33]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#7570B3",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[33]]*1,main="Pv_ctrl1_d8_1")
+# 
+# ##
+# ecol<-rep("black",ecount(colonies_ntwk[[1]]))
+# ecol[(which(E(colonies_ntwk[[1]])$width>10))]<-"darkred"
+# 
+# ##
+# ecol<-cscale(E(colonies_ntwk[[1]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
+# #ecol<-cscale(E(colonies_ntwk[[4]])$width,palette = seq_gradient_pal(low = "yellow",high = "red"))
+# ecol[E(colonies_ntwk[[1]])[type=="Inoculum"]]<-"bisque2"
+# 
+# ##
 # ecol<-E(colonies_ntwk[[1]])$width
 # ecol[E(colonies_ntwk[[1]])[type=="Inoculum"]]<-(quantile(ecol[E(colonies_ntwk[[1]])[type!="Inoculum"]])[2])/2
 # #ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
 # ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
-# ecol[E(colonies_ntwk[[1]])[type=="Inoculum"]]<-"gray30"
+# ecol2[E(colonies_ntwk[[1]])[type=="Inoculum"]]<-"gray30"
+# 
+# 
+# plot(colonies_ntwk[[20]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      #edge.color="#7570B3",
+#      edge.color=ecol,
+#      edge.size=150,vertex.size=0,layout=spatial.data[[20]]*1,
+#      main=unique(E(colonies_ntwk[[1]])$name) )
+# 
+# hist(((Edge_Traits_F[[3]]$Width[Edge_Traits_F[[3]]$Type=="E"])),
+#      main=unique(Edge_Traits_F[[3]]$name))
+# 
+# hist((log10(Edge_Traits[[3]]$Length[Edge_Traits[[3]]$Type=="E"])),
+#      main=unique(Edge_Traits[[3]]$name))
+# 
+# 
+# hist(((Edge_Traits_F[[2]]$Width[Edge_Traits_F[[2]]$Type=="E"])),
+#      main=unique(Edge_Traits_F[[2]]$name))
+# 
+# 
+# hist(((Edge_Traits[[20]]$Length)),main=unique(Edge_Traits[[20]]$name))
+# 
+# boxplot((Edge_Traits[[36]]$Width/1000))
+# 
+# lapply(Edge_Traits,function(x)summary(x$Width[x$Type=="E"]))
+```
+
+continue checking
+
+```{r, eval=FALSE}
+# par(mfrow=c(3,3))
+#  
+# lapply(Edge_Traits,function(x){
+#   
+#   hist(((x$Width[x$Type=="E"])),
+#      main=unique(x$name))
+#   
+# })
+# 
+# 
+# par(mfrow=c(3,3),mar=c(0,0,0,0))
+# mapply(function(x,z){
+# 
+#   ecol<-rep("darkblue",ecount(x))
+# ecol[(which(E(x)$width>
+#   quantile(E(x)$width)[3]))]<-"red"
+# ecol[E(x)[type=="Inoculum"]]<-"gray30"  
+# 
+# plot(x,
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      #edge.color="#7570B3",
+#      edge.color=ecol,
+#      edge.size=150,vertex.size=0,layout=z*1,
+#      main=unique(E(x)$name) )
+# 
+#   
+# },colonies_ntwk,spatial.data)
+# 
+# 
+# trial<-colonies_ntwk[[8]]
+# 
+# ecol<-rep("darkblue",ecount(trial))
+# ecol[(which(E(trial)$width>
+#   quantile(E(trial)$width)[3]))]<-"red"
+# ecol[E(trial)[type=="Inoculum"]]<-"gray30"
+# 
+# plot(colonies_ntwk[[8]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      #edge.color="#7570B3",
+#      edge.color=ecol,
+#      edge.size=150,vertex.size=0,layout=spatial.data[[8]]*1,
+#      main=unique(E(colonies_ntwk[[8]])$name) )
+# 
+# 
+# # ecol<-E(colonies_ntwk[[1]])$width
+# # ecol[E(colonies_ntwk[[1]])[type=="Inoculum"]]<-(quantile(ecol[E(colonies_ntwk[[1]])[type!="Inoculum"]])[2])/2
+# # #ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
+# # ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
+# # ecol[E(colonies_ntwk[[1]])[type=="Inoculum"]]<-"gray30"
 
 
 
@@ -381,39 +294,39 @@ Checking root efficiency scalings
 
 ```{r,echo=FALSE,warning=FALSE, eval=FALSE}
 
-# all_data_scaled$Root_eff_l_scaled/(all_data_scaled$Root_eff/sqrt(all_data_scaled$Mycelial_area))#They are the same!
-library(ggrepel)
-
-gridExtra::grid.arrange(
-all_data_scaled %>%
-  ggplot()+
-  aes(x="a",y=Root_eff/Mycelial_area)+
-  geom_jitter()+
-  #geom_boxplot()+
-  geom_text_repel(aes(label=name_col)),
-
-all_data_scaled %>%
-  ggplot()+
-  aes(x="a",y=Root_eff_l_scaled)+
-  geom_jitter()+
-  #geom_boxplot()+
-  geom_text_repel(aes(label=name_col)),
-
-all_data_scaled %>%
-  ggplot()+
-  aes(x="a",y=Root_eff)+
-  geom_jitter()+
-  #geom_boxplot()+
-  geom_text_repel(aes(label=name_col)),
-
-all_data_scaled %>%
-  ggplot()+
-  aes(x="a",y=sqrt(Mycelial_area))+
-  geom_jitter()+
-  #geom_boxplot()+
-  geom_text_repel(aes(label=name_col)),
-
-ncol=2,nrow=2)
+# # all_data_scaled$Root_eff_l_scaled/(all_data_scaled$Root_eff/sqrt(all_data_scaled$Mycelial_area))#They are the same!
+# library(ggrepel)
+# 
+# gridExtra::grid.arrange(
+# all_data_scaled %>%
+#   ggplot()+
+#   aes(x="a",y=Root_eff/Mycelial_area)+
+#   geom_jitter()+
+#   #geom_boxplot()+
+#   geom_text_repel(aes(label=name_col)),
+# 
+# all_data_scaled %>%
+#   ggplot()+
+#   aes(x="a",y=Root_eff_l_scaled)+
+#   geom_jitter()+
+#   #geom_boxplot()+
+#   geom_text_repel(aes(label=name_col)),
+# 
+# all_data_scaled %>%
+#   ggplot()+
+#   aes(x="a",y=Root_eff)+
+#   geom_jitter()+
+#   #geom_boxplot()+
+#   geom_text_repel(aes(label=name_col)),
+# 
+# all_data_scaled %>%
+#   ggplot()+
+#   aes(x="a",y=sqrt(Mycelial_area))+
+#   geom_jitter()+
+#   #geom_boxplot()+
+#   geom_text_repel(aes(label=name_col)),
+# 
+# ncol=2,nrow=2)
 
 ```
 
@@ -421,92 +334,92 @@ ncol=2,nrow=2)
 
 Outdated figure 2 (no longer necessary)
 ```{r, echo=FALSE, warning=FALSE, message=FALSE,eval=FALSE}
-library(igraph)
-par(mfrow=c(1,1), mar=c(0,0,0,0)) 
-
-plot(colonies_ntwk[[1]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     edge.color="#7570B3",
-     edge.size=150,vertex.size=0,layout=spatial.data[[1]]*1,main="Mortierella sp.3 Real Network")
-
-plot(colonies_ntwk[[16]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     edge.color="#7570B3",
-     edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="Mucor sp Real Network")
-
-plot(colonies_ntwk[[5]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     edge.color="#1B9E77",
-     edge.size=150,vertex.size=0,layout=spatial.data[[5]]*1,main="Fusarium sp.2 Real network")
-
-plot(colonies_ntwk[[30]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     edge.color="#D95F02",
-     edge.size=150,vertex.size=0,layout=spatial.data[[30]]*1,main="Resinisium bicolor Real network")
-
-
-plot(colonies_ntwk[[24]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     edge.color="#D95F02",
-     edge.size=150,vertex.size=0,layout=spatial.data[[24]]*1,main="Hf 1Real network")
-
-plot(colonies_ntwk[[25]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     edge.color="#D95F02",
-     edge.size=150,vertex.size=0,layout=spatial.data[[25]]*1,main="Hf 2 Real network")
-
-plot(colonies_ntwk[[26]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     edge.color="#D95F02",
-     edge.size=150,vertex.size=0,layout=spatial.data[[26]]*1,main="Hf 3 Real network")
-
-plot(Access_mst[[1]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     edge.color="#7570B3",
-     edge.size=150,vertex.size=0,layout=spatial.data[[1]]*1,main="Mortierella sp.3 MST")
-
-######
-ecol<-E(Access_mst[[16]])$width
-
-ecol[E(Access_mst[[16]])[type=="Inoculum"]]<-1
-
-ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
-
-ecol2[E(Access_mst[[16]])[type=="Inoculum"]]<-"bisque2"
-
-plot(Access_mst[[16]],
-     edge.arrow.size=1,edge.curved=0,
-     #edge.width=2,
-     edge.width=ecol/3,
-     vertex.label=NA,vertex.shape="none",
-     edge.color=ecol2,
-     edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="Mucor sp MST")
-     # edge.arrow.size=1,edge.curved=0,edge.width=2,
-     # vertex.label=NA,vertex.shape="none",
-     # edge.color="#7570B3",
-     # edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="Mucor sp MST")
-
-#########
-plot(Access_mst[[5]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     edge.color="#1B9E77",
-     edge.size=150,vertex.size=0,layout=spatial.data[[5]]*1,main="Fusarium sp.2 MST")
-
-
-plot(Access_mst[[30]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
-     vertex.label=NA,vertex.shape="none",
-     edge.color="#D95F02",
-     edge.size=150,vertex.size=0,layout=spatial.data[[30]]*1,main="Resinisium bicolor MST")
+# library(igraph)
+# par(mfrow=c(1,1), mar=c(0,0,0,0)) 
+# 
+# plot(colonies_ntwk[[1]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#7570B3",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[1]]*1,main="Mortierella sp.3 Real Network")
+# 
+# plot(colonies_ntwk[[16]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#7570B3",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="Mucor sp Real Network")
+# 
+# plot(colonies_ntwk[[5]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#1B9E77",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[5]]*1,main="Fusarium sp.2 Real network")
+# 
+# plot(colonies_ntwk[[30]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#D95F02",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[30]]*1,main="Resinisium bicolor Real network")
+# 
+# 
+# plot(colonies_ntwk[[24]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#D95F02",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[24]]*1,main="Hf 1Real network")
+# 
+# plot(colonies_ntwk[[25]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#D95F02",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[25]]*1,main="Hf 2 Real network")
+# 
+# plot(colonies_ntwk[[26]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#D95F02",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[26]]*1,main="Hf 3 Real network")
+# 
+# plot(Access_mst[[1]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#7570B3",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[1]]*1,main="Mortierella sp.3 MST")
+# 
+# ######
+# ecol<-E(Access_mst[[16]])$width
+# 
+# ecol[E(Access_mst[[16]])[type=="Inoculum"]]<-1
+# 
+# ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
+# 
+# ecol2[E(Access_mst[[16]])[type=="Inoculum"]]<-"bisque2"
+# 
+# plot(Access_mst[[16]],
+#      edge.arrow.size=1,edge.curved=0,
+#      #edge.width=2,
+#      edge.width=ecol/3,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color=ecol2,
+#      edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="Mucor sp MST")
+#      # edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      # vertex.label=NA,vertex.shape="none",
+#      # edge.color="#7570B3",
+#      # edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="Mucor sp MST")
+# 
+# #########
+# plot(Access_mst[[5]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#1B9E77",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[5]]*1,main="Fusarium sp.2 MST")
+# 
+# 
+# plot(Access_mst[[30]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#D95F02",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[30]]*1,main="Resinisium bicolor MST")
 
 ```
 Figure 2. Examples of representation of fungal mycelium as network graphs. Top: Graph based on the observed mycelium. Bottom: Graph based on baseline model for each corresponding colony. Cyan: Mortierellomycota; Magenta: Mucor; Orange: Ascomycete; Green: Basidiomycota.
@@ -527,8 +440,11 @@ Finally, we also identified mycelial archetypes as described in Alon et al. (200
 As for 14. May this figure would need to be updated. But this should be done just before submission because it is time consuming
 ```{r, eval=FALSE}
 #For this images I am using dimension 961 x 703 save as png images
-cet_pal(3,name = "cbl2")
-cet_pal(3,name = "d8")
+library(scales)
+library(igraph)
+library(cetcolor)
+# cet_pal(3,name = "cbl2")
+# cet_pal(3,name = "d8")
 
 #1. C34 C34(1)_t11 Mortierella sp.3
 par(mar=c(0,0,0,0))
@@ -585,7 +501,7 @@ plot(colonies_ntwk[[11]],
      edge.color=ecol,
      edge.size=150,vertex.size=0,layout=spatial.data[[11]]*1,main="Mortierella sp")
 
-#6. DF56 Mucor fragilis "DF56(6)_t09 
+#6. DF56 Mucor fragilis "DF56(6)_t09
 ecol<-E(colonies_ntwk[[16]])$width
 
 ecol[E(colonies_ntwk[[16]])[type=="Inoculum"]]<-1
@@ -684,24 +600,24 @@ show_col(viridis_pal()(100),labels = FALSE,ncol = 1,borders = NA)
 
 ```{r, eval=FALSE}
 #Plotting
-library(scales)
-
-
+# library(scales)
+# 
+# 
 To_plot<-bind_rows(
 Edge_Traits%>%
-      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>% select(c("name","Species","Width","phylum")) %>% rename(variable=Width) %>% 
+      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>% select(c("name","Species","Width","phylum")) %>% rename(variable=Width) %>%
   mutate(variable_name="width_tip"),
 
 Edge_Traits%>%
-      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% filter(EndNodes_1_Degree==3|EndNodes_2_Degree==3)%>% select(c("name","Species","Width","phylum")) %>% rename(variable=Width) %>% 
+      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% filter(EndNodes_1_Degree==3|EndNodes_2_Degree==3)%>% select(c("name","Species","Width","phylum")) %>% rename(variable=Width) %>%
   mutate(variable_name="width_main"),
 
 Edge_Traits%>%
-      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% select(c("name","Species","Length","phylum"))%>% rename(variable=Length) %>% 
+      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% select(c("name","Species","Length","phylum"))%>% rename(variable=Length) %>%
   mutate(variable_name="length"),
 
 Node_Traits%>%
-      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% select(c("name","Species","node_Omin_Omid","phylum"))%>% rename(variable=node_Omin_Omid) %>% 
+      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% select(c("name","Species","node_Omin_Omid","phylum"))%>% rename(variable=node_Omin_Omid) %>%
   mutate(variable_name="branching_angle")
 )
 
@@ -797,55 +713,25 @@ Ascos_zygos<-all_data_scaled[-which(all_data_scaled$phylum=="Basidiomycota"),]
 
 ```{r,echo=FALSE, warning=FALSE,message=FALSE}
 #Ascos & Zygos
-Model_Ascos_Zygos<-rda(Ascos_zygos[,c("Hyphal_length",
-                                                    "Hyphal_number",
-                                                     "Hyphal_tip_width",
-                                                     "Hyphal_main_width",
-                                                     "Hyphal_angle",                                                                              "Mycelial_area",
-                                                     "Hyphal_density",
-                                                     
-                                                     "alpha_coeff",
-                                                    
-                                                     "Root_eff",
-                                                     "Reff_tip",
-                                                     
-                                                     "Mycelia_Vol_MST",
-                                                     "Geff_MST",
-                                                     
-                                                     "des_length_robustness",
-                                                     
-                                                    
-                                                     "asc_width_robustness",                                                                      "des_width_robustness",
-                                                     
-                                                     "random_robustness",
-                                                     "spatial_robustness")]~Species + Condition(phylum),scale = TRUE,data = Ascos_zygos)
+Model_Ascos_Zygos<-rda(Ascos_zygos[,c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
+                                      "Hyphal_main_width","Hyphal_angle","Mycelial_area",
+                                      "Hyphal_density","alpha_coeff","Root_eff","Reff_tip",
+                                      "Mycelia_Vol_MST","Geff_MST","des_length_robustness",
+                                      "asc_width_robustness","des_width_robustness","random_robustness",
+                                      "spatial_robustness")]~Species+Condition(phylum),
+                       scale = TRUE,data = Ascos_zygos)
 
 #Basidios
 Basidios<-all_data_scaled[which(all_data_scaled$phylum=="Basidiomycota"),]
 #On 19 May, Mark suggested not to include hypholoma anymore
 hfb<-grep("hf",Basidios$name_col,ignore.case = T)
 
-Model_Basidios<-rda(Basidios[-hfb,c("Hyphal_length",
-                                                     "Hyphal_number",
-                                                     "Hyphal_tip_width",
-                                                     "Hyphal_main_width",
-                                                     "Hyphal_angle",                                                                              "Mycelial_area",
-                                                     "Hyphal_density",
-                                                     
-                                                     "alpha_coeff",
-                                             
-                                                     "Root_eff",
-                                                     "Reff_tip",
-                                                     
-                                                     "Mycelia_Vol_MST",
-                                                     "Geff_MST",
-                                                   
-                                                     "des_length_robustness",
-                                            
-                                                     "asc_width_robustness",                                                                      "des_width_robustness",
-                                                     
-                                                     "random_robustness",
-                                                     "spatial_robustness")]~Species ,scale = TRUE,data = Basidios[-hfb,])
+Model_Basidios<-rda(Basidios[-hfb,c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
+                                      "Hyphal_main_width","Hyphal_angle","Mycelial_area",
+                                      "Hyphal_density","alpha_coeff","Root_eff","Reff_tip",
+                                      "Mycelia_Vol_MST","Geff_MST","des_length_robustness",
+                               "asc_width_robustness","des_width_robustness","random_robustness",
+                                      "spatial_robustness")]~Species ,scale = TRUE,data = Basidios[-hfb,])
 
 #All data
 #Here I decided to use only the traits that are scaled (this came actually later, after I checked that the triangularity would not make sense if I had variables that depedended on total size)
@@ -856,27 +742,12 @@ all_data_scaled_c$Reff_tip_a_scaled<-all_data_scaled_c$Reff_tip/all_data_scaled_
 #On 19 May, Mark suggested not to include hypholoma anymore
 hf<-grep("hf",all_data_scaled_c$name_col,ignore.case = T)
 
-Model_network_traits_sps_scaled<-rda(all_data_scaled_c[-hf,c(
-                                                     "Hyphal_angle",                                                                            
-                                                     "Hyphal_density",
-                                                     
-                                                     "alpha_coeff",
-                                                    
-                                                     "Root_eff_a_scaled",
-                                                     "Reff_tip_a_scaled",
-                                                     
-                                                     "Mycelia_Vol_MST",
-                                                     "Geff_MST",
-                                                     
-                                                     
-                                                     "des_length_robustness",
-                                                     
-                                                     "asc_width_robustness",
-                                                     
-                                                     "des_width_robustness",
-                                                     
-                                                     "random_robustness",
-                                                     "spatial_robustness")]~Species + Condition(phylum),scale = TRUE,data = all_data_scaled_c[-hf,])
+Model_network_traits_sps_scaled<-
+  rda(all_data_scaled_c[-hf,c("Hyphal_angle","Hyphal_density","alpha_coeff","Root_eff_a_scaled",
+                  "Reff_tip_a_scaled","Mycelia_Vol_MST","Geff_MST","des_length_robustness",
+                  "asc_width_robustness","des_width_robustness","random_robustness","spatial_robustness")
+                        ]~Species + Condition(phylum),
+      scale = TRUE,data = all_data_scaled_c[-hf,])
 
 #rm(all_data_scaled_c)
 
@@ -1684,7 +1555,7 @@ ecol[E(rb)[type=="Inoculum"]]<-(quantile(ecol[E(rb)[type!="Inoculum"]])[2])/2
 ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
 ecol2[E(rb)[type=="Inoculum"]]<-"gray30"
 
-jpeg("Updated_Figures\\DF19(3)_t11_for_triangle.jpg",width = 961,height = 703)
+jpeg("Updated_Figures\\C34(3)_t23_for_triangle.jpg",width = 961,height = 703)
 par(mar=c(0.5,0.5,0.5,0.5))
 plot(rb,
      edge.arrow.size=1,edge.curved=0,
