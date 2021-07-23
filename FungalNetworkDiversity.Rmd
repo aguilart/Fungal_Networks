@@ -14,11 +14,6 @@ knitr::opts_chunk$set(fig.height = 10, fig.width = 15,echo = F)
 
 
 
-![Figure 1.  Left: Red hyphal tips, orange branching points. Hyphae connect two nodes on which several attributes are measured (here just depicted length and width).  Right. Translation into a graph object (nodes are numerated, colors do not refer to node types).](Updated_Figures/Explaing_nodes_edges.png)
-
-
-
-
 
 ```{r,echo=FALSE,warning=FALSE, eval=FALSE}
 # source_rmd <- function(file, local = FALSE, ...){
@@ -54,16 +49,56 @@ summaryTraits_Mark_AZB<-readRDS("summaryTraits_Mark_AZB.RDS")
 #All values as imported from the app
 Edge_Traits<-readRDS("Edge_Traits.RDS")
 Node_Traits<-readRDS("Node_Traits.RDS")
-```
 
-Temporal fixes
-```{r,echo=FALSE}
+#Temporal fixes
 #upadted mycelial area makes no sense
-#old_data_scaled<-readRDS("old_data/all_data_scaled.RDS")
-#all_data_scaled$Mycelial_area[3]<-old_data_scaled$Mycelial_area[3]
 
 all_data_scaled$Mycelial_area[3]<-mean(30.56246,29.87179)
 ```
+
+
+
+```{r,echo=FALSE, warning=FALSE,message=FALSE}
+
+# all_data_scaled$Species[all_data_scaled$Species=="Rb"]<-"Resinicium bicolor"
+# all_data_scaled$Species[all_data_scaled$Species=="Pv"]<-"Phanerochaete velutina"
+# all_data_scaled$Species[all_data_scaled$Species=="Pi"]<-"Phallus impudicus"
+
+all_data_scaled$easy_code<-NA
+all_data_scaled$easy_code[all_data_scaled$Species=="Alternaria sp"]<-"Alt."
+all_data_scaled$easy_code[all_data_scaled$Species=="Fusarium oxysporum"]<-"Fus.1"
+all_data_scaled$easy_code[all_data_scaled$Species=="Fusarium redolens"]<-"Fus.2"
+all_data_scaled$easy_code[all_data_scaled$Species=="Mortierella alpina"]<-"Mort.1"
+all_data_scaled$easy_code[all_data_scaled$Species=="Mortierella alpina2"]<-"Mort.2"
+all_data_scaled$easy_code[all_data_scaled$Species=="Mortierella elongata"]<-"Mort.3"
+all_data_scaled$easy_code[all_data_scaled$Species=="Mortierella elongata2"]<-"Mort.4"
+all_data_scaled$easy_code[all_data_scaled$Species=="Mucor fragilis"]<-"Muc."
+all_data_scaled$easy_code[all_data_scaled$Species=="Umbelopsis isabellina"]<-"Umb."
+all_data_scaled$easy_code[all_data_scaled$Species=="Resinicium bicolor"]<-"Res.b"
+all_data_scaled$easy_code[all_data_scaled$Species=="Phanerachaete ventulina"]<-"Phan.v"
+all_data_scaled$easy_code[all_data_scaled$Species=="Phallus impudicus"]<-"Phal.i"
+all_data_scaled$easy_code[all_data_scaled$Species=="Hypholoma fasiculare"]<-"H.f"
+
+all_data_scaled<-left_join(all_data_scaled,robustness,by="name_col")
+
+#all_data_scaled$Root_eff_area_scaled<-all_data_scaled$Root_eff/all_data_scaled$Mycelial_area
+#all_data_scaled$Reff_tip_area_scaled<-all_data_scaled$Reff_tip/all_data_scaled$Mycelial_area
+
+#Saving a copy of this dataframe that contains all data.
+all_data_scaled_original<-all_data_scaled
+
+#Now, here I will filter out colonies that do not match the criteria for subsequent analysis:
+
+all_data_scaled<-all_data_scaled[-grep("HfDD2",all_data_scaled$name_col),]#Hafolomas because according to Mark image processing is not good for this species
+
+all_data_scaled<-all_data_scaled[-grep("Pi_ctrl",all_data_scaled$name_col),]#Turns out that these Phallus impudicus were not control but they were eaten by Collembola
+
+all_data_scaled<-all_data_scaled[-grep("day 12|day 20",all_data_scaled$name_col),]#All Basidiomycota colonies that are not 8 days old. We use 8 days old to use a common time point across all the colonies.
+
+```
+
+
+
 
 Checking
 
@@ -331,99 +366,6 @@ Checking root efficiency scalings
 ```
 
 
-
-Outdated figure 2 (no longer necessary)
-```{r, echo=FALSE, warning=FALSE, message=FALSE,eval=FALSE}
-# library(igraph)
-# par(mfrow=c(1,1), mar=c(0,0,0,0)) 
-# 
-# plot(colonies_ntwk[[1]],
-#      edge.arrow.size=1,edge.curved=0,edge.width=2,
-#      vertex.label=NA,vertex.shape="none",
-#      edge.color="#7570B3",
-#      edge.size=150,vertex.size=0,layout=spatial.data[[1]]*1,main="Mortierella sp.3 Real Network")
-# 
-# plot(colonies_ntwk[[16]],
-#      edge.arrow.size=1,edge.curved=0,edge.width=2,
-#      vertex.label=NA,vertex.shape="none",
-#      edge.color="#7570B3",
-#      edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="Mucor sp Real Network")
-# 
-# plot(colonies_ntwk[[5]],
-#      edge.arrow.size=1,edge.curved=0,edge.width=2,
-#      vertex.label=NA,vertex.shape="none",
-#      edge.color="#1B9E77",
-#      edge.size=150,vertex.size=0,layout=spatial.data[[5]]*1,main="Fusarium sp.2 Real network")
-# 
-# plot(colonies_ntwk[[30]],
-#      edge.arrow.size=1,edge.curved=0,edge.width=2,
-#      vertex.label=NA,vertex.shape="none",
-#      edge.color="#D95F02",
-#      edge.size=150,vertex.size=0,layout=spatial.data[[30]]*1,main="Resinisium bicolor Real network")
-# 
-# 
-# plot(colonies_ntwk[[24]],
-#      edge.arrow.size=1,edge.curved=0,edge.width=2,
-#      vertex.label=NA,vertex.shape="none",
-#      edge.color="#D95F02",
-#      edge.size=150,vertex.size=0,layout=spatial.data[[24]]*1,main="Hf 1Real network")
-# 
-# plot(colonies_ntwk[[25]],
-#      edge.arrow.size=1,edge.curved=0,edge.width=2,
-#      vertex.label=NA,vertex.shape="none",
-#      edge.color="#D95F02",
-#      edge.size=150,vertex.size=0,layout=spatial.data[[25]]*1,main="Hf 2 Real network")
-# 
-# plot(colonies_ntwk[[26]],
-#      edge.arrow.size=1,edge.curved=0,edge.width=2,
-#      vertex.label=NA,vertex.shape="none",
-#      edge.color="#D95F02",
-#      edge.size=150,vertex.size=0,layout=spatial.data[[26]]*1,main="Hf 3 Real network")
-# 
-# plot(Access_mst[[1]],
-#      edge.arrow.size=1,edge.curved=0,edge.width=2,
-#      vertex.label=NA,vertex.shape="none",
-#      edge.color="#7570B3",
-#      edge.size=150,vertex.size=0,layout=spatial.data[[1]]*1,main="Mortierella sp.3 MST")
-# 
-# ######
-# ecol<-E(Access_mst[[16]])$width
-# 
-# ecol[E(Access_mst[[16]])[type=="Inoculum"]]<-1
-# 
-# ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
-# 
-# ecol2[E(Access_mst[[16]])[type=="Inoculum"]]<-"bisque2"
-# 
-# plot(Access_mst[[16]],
-#      edge.arrow.size=1,edge.curved=0,
-#      #edge.width=2,
-#      edge.width=ecol/3,
-#      vertex.label=NA,vertex.shape="none",
-#      edge.color=ecol2,
-#      edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="Mucor sp MST")
-#      # edge.arrow.size=1,edge.curved=0,edge.width=2,
-#      # vertex.label=NA,vertex.shape="none",
-#      # edge.color="#7570B3",
-#      # edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="Mucor sp MST")
-# 
-# #########
-# plot(Access_mst[[5]],
-#      edge.arrow.size=1,edge.curved=0,edge.width=2,
-#      vertex.label=NA,vertex.shape="none",
-#      edge.color="#1B9E77",
-#      edge.size=150,vertex.size=0,layout=spatial.data[[5]]*1,main="Fusarium sp.2 MST")
-# 
-# 
-# plot(Access_mst[[30]],
-#      edge.arrow.size=1,edge.curved=0,edge.width=2,
-#      vertex.label=NA,vertex.shape="none",
-#      edge.color="#D95F02",
-#      edge.size=150,vertex.size=0,layout=spatial.data[[30]]*1,main="Resinisium bicolor MST")
-
-```
-Figure 2. Examples of representation of fungal mycelium as network graphs. Top: Graph based on the observed mycelium. Bottom: Graph based on baseline model for each corresponding colony. Cyan: Mortierellomycota; Magenta: Mucor; Orange: Ascomycete; Green: Basidiomycota.
-
 ### Statistical analysis
 
 We performed redundancy analysis (RDA, a type-constrained multivariate ordination) in order to identify interspecific differences in terms of  mycelial traits. We used both descriptive and network traits as the response variables and species identity as explanatory (constraining) variables. Prior to RDA, we standardized all variables in units of standard deviations (Z scaling). By doing this, we are effectively removing obvious differences among species due to absolute size differences. Because we also are interested in determining to what extent interspecific differences in mycelial traits correlate with phylogeny, our RDA model included phylum affiliation as a condition (thus the full RDA model was in the form Mycelial traits ~ Species identity + Condition (Phylum)). To determine to what extent the variance explained by constrained ordination deviates from a random distribution, we repeated RDA as above after randomizing the mycelial traits dataset (999x times in total) and computed F values and associated p-values (i.e. statistical significance). Three rda models were fitted: one for microscopic networks (the ones seen in Ascomycota and Zygomycetous groups), one for the macroscopic networkd (formed by cord-forming basidiomycota) and one where we include both types of networks. Although grown in different conditions, we consider including both types of networks under the same analysis is useful and valid because: a) the mycelia in both cases is in exploration phase and thus the model of transport from the center to tips is appropriate, b) these are network abstractions  of how filaments are connected to each other that apply regardless of the size; c) the ordination is made on standardize (centered) variables not based on raw ones. Standardizations, RDA, and significance testing from randomized approach were performed using the functions “rda” and “anova.cca” in the R package vegan. 
@@ -549,14 +491,15 @@ plot(colonies_ntwk[[22]],
      edge.color=ecol,
      edge.size=150,vertex.size=0,layout=spatial.data[[22]]*1,main="Mortierella alpina2")
 
-#10.Pi Phallus impudicus Pi_ctrl1_d8_1
-ecol<-cscale(E(colonies_ntwk[[25]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
-ecol[E(colonies_ntwk[[25]])[type=="Inoculum"]]<-"bisque2"
-plot(colonies_ntwk[[25]],
+#10.Pi Phallus impudicus Pi 18C day 20 003
+n<-49
+ecol<-cscale(E(colonies_ntwk[[n]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
+ecol[E(colonies_ntwk[[n]])[type=="Inoculum"]]<-"bisque2"
+plot(colonies_ntwk[[n]],
      edge.arrow.size=1,edge.curved=0,edge.width=2,
      vertex.label=NA,vertex.shape="none",
      edge.color=ecol,
-     edge.size=150,vertex.size=0,layout=spatial.data[[25]]*1,main="Phallus impudicus")
+     edge.size=150,vertex.size=0,layout=spatial.data[[n]]*1,main="Phallus impudicus")
 
 #11. Pv Phanerochaete velutina Pv_ctrl1_d8_1
 #ecol<-cscale(E(colonies_ntwk[[27]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
@@ -682,36 +625,8 @@ We found support for the hypothesis that species differ in their mycelial traits
 ```{r,echo=FALSE, warning=FALSE,message=FALSE}
 library(vegan)
 
-# all_data_scaled$Species[all_data_scaled$Species=="Rb"]<-"Resinicium bicolor"
-# all_data_scaled$Species[all_data_scaled$Species=="Pv"]<-"Phanerochaete velutina"
-# all_data_scaled$Species[all_data_scaled$Species=="Pi"]<-"Phallus impudicus"
-
-all_data_scaled$easy_code<-NA
-all_data_scaled$easy_code[all_data_scaled$Species=="Alternaria sp"]<-"Alt."
-all_data_scaled$easy_code[all_data_scaled$Species=="Fusarium oxysporum"]<-"Fus.1"
-all_data_scaled$easy_code[all_data_scaled$Species=="Fusarium redolens"]<-"Fus.2"
-all_data_scaled$easy_code[all_data_scaled$Species=="Mortierella alpina"]<-"Mort.1"
-all_data_scaled$easy_code[all_data_scaled$Species=="Mortierella alpina2"]<-"Mort.2"
-all_data_scaled$easy_code[all_data_scaled$Species=="Mortierella elongata"]<-"Mort.3"
-all_data_scaled$easy_code[all_data_scaled$Species=="Mortierella elongata2"]<-"Mort.4"
-all_data_scaled$easy_code[all_data_scaled$Species=="Mucor fragilis"]<-"Muc."
-all_data_scaled$easy_code[all_data_scaled$Species=="Umbelopsis isabellina"]<-"Umb."
-all_data_scaled$easy_code[all_data_scaled$Species=="Resinicium bicolor"]<-"Res.b"
-all_data_scaled$easy_code[all_data_scaled$Species=="Phanerachaete ventulina"]<-"Phan.v"
-all_data_scaled$easy_code[all_data_scaled$Species=="Phallus impudicus"]<-"Phal.i"
-all_data_scaled$easy_code[all_data_scaled$Species=="Hypholoma fasiculare"]<-"H.f"
-
-all_data_scaled<-left_join(all_data_scaled,robustness,by="name_col")
-
-#all_data_scaled$Root_eff_area_scaled<-all_data_scaled$Root_eff/all_data_scaled$Mycelial_area
-#all_data_scaled$Reff_tip_area_scaled<-all_data_scaled$Reff_tip/all_data_scaled$Mycelial_area
-
 Ascos_zygos<-all_data_scaled[-which(all_data_scaled$phylum=="Basidiomycota"),]
 
-```
-
-
-```{r,echo=FALSE, warning=FALSE,message=FALSE}
 #Ascos & Zygos
 Model_Ascos_Zygos<-rda(Ascos_zygos[,c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
                                       "Hyphal_main_width","Hyphal_angle","Mycelial_area",
@@ -723,15 +638,14 @@ Model_Ascos_Zygos<-rda(Ascos_zygos[,c("Hyphal_length","Hyphal_number","Hyphal_ti
 
 #Basidios
 Basidios<-all_data_scaled[which(all_data_scaled$phylum=="Basidiomycota"),]
-#On 19 May, Mark suggested not to include hypholoma anymore
-hfb<-grep("hf",Basidios$name_col,ignore.case = T)
 
-Model_Basidios<-rda(Basidios[-hfb,c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
+
+Model_Basidios<-rda(Basidios[,c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
                                       "Hyphal_main_width","Hyphal_angle","Mycelial_area",
                                       "Hyphal_density","alpha_coeff","Root_eff","Reff_tip",
                                       "Mycelia_Vol_MST","Geff_MST","des_length_robustness",
                                "asc_width_robustness","des_width_robustness","random_robustness",
-                                      "spatial_robustness")]~Species ,scale = TRUE,data = Basidios[-hfb,])
+                                      "spatial_robustness")]~Species ,scale = TRUE,data = Basidios)
 
 #All data
 #Here I decided to use only the traits that are scaled (this came actually later, after I checked that the triangularity would not make sense if I had variables that depedended on total size)
@@ -739,15 +653,14 @@ Model_Basidios<-rda(Basidios[-hfb,c("Hyphal_length","Hyphal_number","Hyphal_tip_
 all_data_scaled_c<-all_data_scaled
 all_data_scaled_c$Root_eff_a_scaled<-all_data_scaled_c$Root_eff/all_data_scaled_c$Mycelial_area
 all_data_scaled_c$Reff_tip_a_scaled<-all_data_scaled_c$Reff_tip/all_data_scaled_c$Mycelial_area
-#On 19 May, Mark suggested not to include hypholoma anymore
-hf<-grep("hf",all_data_scaled_c$name_col,ignore.case = T)
+
 
 Model_network_traits_sps_scaled<-
-  rda(all_data_scaled_c[-hf,c("Hyphal_angle","Hyphal_density","alpha_coeff","Root_eff_a_scaled",
+  rda(all_data_scaled_c[,c("Hyphal_angle","Hyphal_density","alpha_coeff","Root_eff_a_scaled",
                   "Reff_tip_a_scaled","Mycelia_Vol_MST","Geff_MST","des_length_robustness",
                   "asc_width_robustness","des_width_robustness","random_robustness","spatial_robustness")
                         ]~Species + Condition(phylum),
-      scale = TRUE,data = all_data_scaled_c[-hf,])
+      scale = TRUE,data = all_data_scaled_c)
 
 #rm(all_data_scaled_c)
 
@@ -850,7 +763,7 @@ Basidios
 #Adding the two RDA axis to the dataframe
 temporal<-as.data.frame(scores(Model_Basidios,display = "sites",scaling = "sites",choices=c(1,2)))
 
-Basidios1<-cbind(Basidios[-hfb,],temporal);rm(temporal)
+Basidios1<-cbind(Basidios,temporal);rm(temporal)
 
 #Extracting the "site" or variable scores.
 e_vectors_traits_scaled_b<-as.data.frame(
@@ -883,7 +796,7 @@ Basidios1%>%
   labs(y=paste("RDA2",e2,"%",sep = " "),
          x=paste("RDA1",e1,"%",sep = " "))+
   
-  geom_text(size=3,aes(x=RDA1_species,y=RDA2_species,
+  geom_text(size=5,aes(x=RDA1_species,y=RDA2_species,
                        label=traits,fontface="bold"),
             #hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
             data = e_vectors_traits_scaled_b)+
@@ -959,7 +872,7 @@ Ascos_zygos1%>%
   
   geom_segment(aes(x=0, y=0, xend=RDA1_species/m, yend=RDA2_species/m),
         arrow = arrow(),color="gray",data = e_vectors_traits_scaled_a)+
-  geom_text(size=3,aes(x=RDA1_species/m,y=RDA2_species/m,label=traits,fontface="bold"),
+  geom_text(size=4,aes(x=RDA1_species/m,y=RDA2_species/m,label=traits,fontface="bold"),
             hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
             data = e_vectors_traits_scaled_a)+
   
@@ -1039,7 +952,7 @@ All fungi
 #Adding the two RDA axis to the dataframe
 temporal<-as.data.frame(scores(Model_network_traits_sps_scaled,display = "sites",scaling = "sites",choices=c(1,2)))
 
-all_data_scaled1<-cbind(all_data_scaled[-hf,],temporal);rm(temporal)
+all_data_scaled1<-cbind(all_data_scaled,temporal);rm(temporal)
 
 #Extracting the "site" or variable scores.
 e_vectors_traits_scaled<-as.data.frame(
@@ -1073,7 +986,7 @@ all_data_scaled1%>%
    labs(y=paste("RDA2",e2,"%",sep = " "),
          x=paste("RDA1",e1,"%",sep = " "))+
   
-  geom_text(size=3,aes(x=RDA1_species/m,y=RDA2_species/m,label=traits,fontface="bold"),
+  geom_text(size=5,aes(x=RDA1_species/m,y=RDA2_species/m,label=traits,fontface="bold"),
             #hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
             data = e_vectors_traits_scaled)+
   geom_segment(aes(x=0, y=0, xend=RDA1_species/m, yend=RDA2_species/m), 
@@ -1247,7 +1160,7 @@ Note: Orginally all variables were included. However I commented one variables o
 
 ```{r, eval=FALSE,echo=FALSE,warning=FALSE,message=FALSE,eval=FALSE}
 all_data_t<-#This one here is the same set of tratis used on Model_network_traits_sps_scaled
-all_data_scaled_c[-hf,c("Hyphal_number","Hyphal_angle","Hyphal_density","alpha_coeff",
+all_data_scaled_c[,c("Hyphal_number","Hyphal_angle","Hyphal_density","alpha_coeff",
                      "Root_eff_a_scaled","Reff_tip_a_scaled","Mycelia_Vol_MST",
                      "Geff_MST","des_length_robustness","asc_width_robustness",
                      "des_width_robustness","random_robustness","spatial_robustness")]
@@ -1276,7 +1189,7 @@ model_triangle1<-rda(all_data_t,scale=T)
 
 #Extracting the two RDA axis to the dataframe
 temporal1<-as.data.frame(scores(model_triangle1,display = "sites",scaling = "sites",choices=c(1,2)))
-temporal1<-cbind(temporal1,all_data_scaled_c[-hf,c("name_col")])
+temporal1<-cbind(temporal1,all_data_scaled_c[,c("name_col")])
 names(temporal1)[3]<-"name_col"
 
 #temporal2<-as.data.frame(scores(model_triangle2,display = "sites",scaling = "sites",choices=c(1,2)))
@@ -1299,7 +1212,7 @@ summary(model_triangle1)[["cont"]][["importance"]][,c(1:3)]
 
 Plotting the PCA
 ```{r,eval=FALSE}
-#Here I have to decide whether to plot temporal1 or temporal2
+
 e1<-round(summary(model_triangle1)[["cont"]][["importance"]][2,1],2)*100
 e2<-round(summary(model_triangle1)[["cont"]][["importance"]][2,2],2)*100
 
@@ -1995,3 +1908,98 @@ all_data_ord %>%
     my_theme
 #rmarkdown::render("FungalNetworkDiversity.Rmd", quiet = T)
 ```
+
+
+
+
+Outdated figure 2 (no longer necessary)
+```{r, echo=FALSE, warning=FALSE, message=FALSE,eval=FALSE}
+# library(igraph)
+# par(mfrow=c(1,1), mar=c(0,0,0,0)) 
+# 
+# plot(colonies_ntwk[[1]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#7570B3",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[1]]*1,main="Mortierella sp.3 Real Network")
+# 
+# plot(colonies_ntwk[[16]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#7570B3",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="Mucor sp Real Network")
+# 
+# plot(colonies_ntwk[[5]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#1B9E77",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[5]]*1,main="Fusarium sp.2 Real network")
+# 
+# plot(colonies_ntwk[[30]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#D95F02",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[30]]*1,main="Resinisium bicolor Real network")
+# 
+# 
+# plot(colonies_ntwk[[24]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#D95F02",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[24]]*1,main="Hf 1Real network")
+# 
+# plot(colonies_ntwk[[25]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#D95F02",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[25]]*1,main="Hf 2 Real network")
+# 
+# plot(colonies_ntwk[[26]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#D95F02",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[26]]*1,main="Hf 3 Real network")
+# 
+# plot(Access_mst[[1]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#7570B3",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[1]]*1,main="Mortierella sp.3 MST")
+# 
+# ######
+# ecol<-E(Access_mst[[16]])$width
+# 
+# ecol[E(Access_mst[[16]])[type=="Inoculum"]]<-1
+# 
+# ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
+# 
+# ecol2[E(Access_mst[[16]])[type=="Inoculum"]]<-"bisque2"
+# 
+# plot(Access_mst[[16]],
+#      edge.arrow.size=1,edge.curved=0,
+#      #edge.width=2,
+#      edge.width=ecol/3,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color=ecol2,
+#      edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="Mucor sp MST")
+#      # edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      # vertex.label=NA,vertex.shape="none",
+#      # edge.color="#7570B3",
+#      # edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,main="Mucor sp MST")
+# 
+# #########
+# plot(Access_mst[[5]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#1B9E77",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[5]]*1,main="Fusarium sp.2 MST")
+# 
+# 
+# plot(Access_mst[[30]],
+#      edge.arrow.size=1,edge.curved=0,edge.width=2,
+#      vertex.label=NA,vertex.shape="none",
+#      edge.color="#D95F02",
+#      edge.size=150,vertex.size=0,layout=spatial.data[[30]]*1,main="Resinisium bicolor MST")
+
+```
+Figure 2. Examples of representation of fungal mycelium as network graphs. Top: Graph based on the observed mycelium. Bottom: Graph based on baseline model for each corresponding colony. Cyan: Mortierellomycota; Magenta: Mucor; Orange: Ascomycete; Green: Basidiomycota.

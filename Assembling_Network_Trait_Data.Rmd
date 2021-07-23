@@ -10,10 +10,14 @@ In principle this is the only thing that need to be changed. Then the rest shoul
 ```{r}
 data_location<-"D:/Carlos_PicsToNetw/processed data/results/"#This is the latest data as it comes from the most updated app version Add version here:
 
-data_location_B<-"results_20210414/"#This is new basidiomycete data from Mark sent on 14 April 2020
+data_location_B<-"results_20210414/"
+
+data_location_Pi<-"Large networks/Don Pi T/processed data/results/"#This data comes after our discussion where we realize that the original Pi, images we came from a collembola treatment and not from the control treatment
+
+data_location_RB<-"Large networks/Don Rb T/processed data/results/"#This a completely new set of data on older images of Resinicium. (older thatn 8 days)
 
 #random datasets for testing the behavior of particular parameters
-data_location<-"D:/Carlos_miscelaneous/processed data/results/"
+#data_location_<-"D:/Carlos_miscelaneous/processed data/results/"
 ```
 
 # Loading the data
@@ -28,38 +32,57 @@ temp<-paste(data_location,temp,sep = "")
 temp_b = list.files(path=data_location_B,pattern="*-results.xlsx")
 temp_b<-paste(data_location_B,temp_b,sep = "")
 
+temp_Pi = list.files(path=data_location_Pi,pattern="*-results.xlsx")
+temp_Pi<-paste(data_location_Pi,temp_Pi,sep = "")
+
+temp_Rb = list.files(path=data_location_RB,pattern="*-results.xlsx")
+temp_Rb<-paste(data_location_RB,temp_Rb,sep = "")
 
 #Edges
 Edge_Traits = c(lapply(temp,function(x){read_excel(x,sheet = "Edges")} ),
-                lapply(temp_b,function(x){read_excel(x,sheet = "Edges")} ))
+                lapply(temp_b,function(x){read_excel(x,sheet = "Edges")} ),
+                lapply(temp_Pi,function(x){read_excel(x,sheet = "Edges")} ),
+                lapply(temp_Rb,function(x){read_excel(x,sheet = "Edges")} ))
 
 #Nodes
 Node_Traits = c(lapply(temp,function(x){read_excel(x,sheet = "Nodes")} ),
-                lapply(temp_b,function(x){read_excel(x,sheet = "Nodes")} ))
+                lapply(temp_b,function(x){read_excel(x,sheet = "Nodes")} ),
+                lapply(temp_Pi,function(x){read_excel(x,sheet = "Nodes")} ),
+                lapply(temp_Rb,function(x){read_excel(x,sheet = "Nodes")} ))
 
 #Summary_Tables
 summary_Traits = c(lapply(temp,function(x){read_excel(x,sheet = "Summary table")} ),
-                   lapply(temp_b,function(x){read_excel(x,sheet = "Summary table")} ))
+                   lapply(temp_b,function(x){read_excel(x,sheet = "Summary table")} ),
+                   lapply(temp_Pi,function(x){read_excel(x,sheet = "Summary table")} ),
+                   lapply(temp_Rb,function(x){read_excel(x,sheet = "Summary table")} ))
 
 
 summary_Traits_table_AZB<-bind_rows(summary_Traits)
-summary_Traits_table_AZB$name_col<-c(temp,temp_b)
+summary_Traits_table_AZB$name_col<-c(temp,temp_b,temp_Pi,temp_Rb)
 summary_Traits_table_AZB$name_col<-gsub(data_location,"",summary_Traits_table_AZB$name_col)
 summary_Traits_table_AZB$name_col<-gsub(data_location_B,"",summary_Traits_table_AZB$name_col)
+summary_Traits_table_AZB$name_col<-gsub(data_location_Pi,"",summary_Traits_table_AZB$name_col)
+summary_Traits_table_AZB$name_col<-gsub(data_location_RB,"",summary_Traits_table_AZB$name_col)
 
 summary_Traits_table_AZB$name_col<-gsub("\\-results\\.xlsx","",summary_Traits_table_AZB$name_col)
 
 #Ordered robustness
-Ordered_robustness = c(lapply(temp,function(x){read_excel(x,sheet = "Ordered Robustness")} ),
-                       lapply(temp_b,function(x){read_excel(x,sheet = "Ordered Robustness")} ))
+Ordered_robustness = c(lapply(temp,function(x){read_excel(x,sheet = "Ordered Robustness")}),
+                       lapply(temp_b,function(x){read_excel(x,sheet = "Ordered Robustness")}),
+                       lapply(temp_Pi,function(x){read_excel(x,sheet = "Ordered Robustness")}),
+                       lapply(temp_Rb,function(x){read_excel(x,sheet = "Ordered Robustness")}))
 
 #Spatial robustness
-Spatial_robustness = c(lapply(temp,function(x){read_excel(x,sheet = "Spatial Robustness")} ),
-                      lapply(temp_b,function(x){read_excel(x,sheet = "Spatial Robustness")} ))
+Spatial_robustness = c(lapply(temp,function(x){read_excel(x,sheet = "Spatial Robustness")}),
+                      lapply(temp_b,function(x){read_excel(x,sheet = "Spatial Robustness")}),
+                      lapply(temp_Pi,function(x){read_excel(x,sheet = "Spatial Robustness")}),
+                      lapply(temp_Rb,function(x){read_excel(x,sheet = "Spatial Robustness")}))
 
 #Random robustness
-Random_robustness = c(lapply(temp,function(x){read_excel(x,sheet = "Random Robustness")} ),
-                      lapply(temp_b,function(x){read_excel(x,sheet = "Random Robustness")} ))
+Random_robustness = c(lapply(temp,function(x){read_excel(x,sheet = "Random Robustness")}),
+                      lapply(temp_b,function(x){read_excel(x,sheet = "Random Robustness")}),
+                      lapply(temp_Pi,function(x){read_excel(x,sheet = "Random Robustness")}),
+                      lapply(temp_Rb,function(x){read_excel(x,sheet = "Random Robustness")}))
 
 ```
 
@@ -115,7 +138,6 @@ spatial.data<-lapply(spatial.data,function(l){norm_coords(l, ymin=-1, ymax=1, xm
 
 Calculating the summary (mean) values for each colony (hyphae traits like length and width)
 
-There might be the need to change this code. Instead of useing subgraph edges, just keep using subsetting 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
 #Calculating the summary values for each colony
 
@@ -169,6 +191,7 @@ Real_summary_Geff1<-#do.call(rbind,
     
   })
 
+saveRDS(Real_summary_Geff1,"Real_summary_Geff1.RDS")
 
 library(parallel)
 library(doParallel)
@@ -183,7 +206,7 @@ registerDoParallel(cl)
 result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
 stopCluster(cl)
 rm(cl)
-Real_summary_Geff9 <- mean(result);#saveRDS(Real_summary_Geff9,"Real_summary_Geff9.RDS")
+Real_summary_Geff9 <- mean(result);saveRDS(Real_summary_Geff9,"Real_summary_Geff9.RDS")
 result9<-result
 
 g<-colonies_ntwk[[10]]
@@ -196,11 +219,11 @@ result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopa
 stopCluster(cl)
 rm(cl)
 Real_summary_Geff10 <- mean(result)
-result10<-result; #saveRDS(Real_summary_Geff10,"Real_summary_Geff10.RDS")
+result10<-result; saveRDS(Real_summary_Geff10,"Real_summary_Geff10.RDS")
 rm(result)
 ```
 
-The previous chucnk was executed once, only if necessary (new data input) I run it again, otherwise I just import the output of the chunck that I saved it (I did this because it takes a lot of time to calculate global efficiney)
+The previous chucnk was executed once, I only run it again if necessary (e.g. new data input/updated data), otherwise I just import the output of the chunck that I saved it (I did this because it takes a lot of time to calculate global efficiney)
 
 ```{r}
 Real_summary_Geff1<-readRDS("Real_summary_Geff1.RDS")
@@ -283,7 +306,7 @@ MST_summary_Geff1<-#do.call(rbind,
 sapply(Access_mst[c(1:8,11:length(Access_mst))],function(net_ed){
       a<-efficiency(net_ed,type = "global")
   
-})
+});saveRDS(MST_summary_Geff1,"MST_summary_Geff1.RDS")
 
 #This is for the two networks that were so big, that I had to use a function that "partitions" #the operation
 # nodal efficiency function (from a forum in internet)
@@ -298,7 +321,7 @@ registerDoParallel(cl)
 result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
 stopCluster(cl)
 rm(cl)
-MST_summary_Geff9 <- mean(result);#saveRDS(MST_summary_Geff9,"MST_summary_Geff9.RDS")
+MST_summary_Geff9 <- mean(result);saveRDS(MST_summary_Geff9,"MST_summary_Geff9.RDS")
 result9<-result
 
 g<-Access_mst[[10]]
@@ -311,7 +334,7 @@ result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopa
 stopCluster(cl)
 rm(cl)
 MST_summary_Geff10 <- mean(result)
-result10<-result; #saveRDS(MST_summary_Geff10,"MST_summary_Geff10.RDS")
+result10<-result; saveRDS(MST_summary_Geff10,"MST_summary_Geff10.RDS")
 rm(result)
 ```
 
@@ -413,7 +436,7 @@ Ordered robustness
 Ordered_robustness<-
 lapply(
 Ordered_robustness,function(x){
-  x$dir_method<-paste(x$direction,x$method,sep = "_")
+  x$dir_method<-tolower(paste(x$direction,x$method,sep = "_"))
   x
 })
 
