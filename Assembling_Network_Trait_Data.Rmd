@@ -86,6 +86,24 @@ Random_robustness = c(lapply(temp,function(x){read_excel(x,sheet = "Random Robus
 
 ```
 
+Correcting the value of resistance for microscopic fungi
+
+```{r}
+#Colonies 1 to 15 correspond to microfungi (ascos and zygos). One can see that with commented out code: sapply(Edge_Traits[1:26],function(x){unique(x$name)}) Colony 26 is a basidio alerady
+
+#On July 2021 we realized that using Resistance_2ave, which is calcualted as 4*(Length/Width^4)
+#is mathematically not correct for microfungi, where it should follow instead: 16*(Length/Width^4). That relationship is already calculated in Resistance_4ave. Thus for simplicity in the analysis, I will just replaced all the values of Resistance_2ave with Resistance_4ave ONLY for the microfungi. In that way, the rest of the code follows unaltered.
+
+Edge_Traits[1:25]<-
+lapply(
+Edge_Traits[1:25],function(x){x$Resistance_2ave<-x$Resistance_4ave
+x
+})
+
+```
+
+
+
 Transforming it into igraph object
 
 ```{r, echo=FALSE, message=FALSE, warning=FALSE}
