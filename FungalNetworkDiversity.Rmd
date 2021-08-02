@@ -53,7 +53,11 @@ Node_Traits<-readRDS("Node_Traits.RDS")
 #Temporal fixes
 #upadted mycelial area makes no sense
 
-all_data_scaled$Mycelial_area[3]<-mean(30.56246,29.87179)
+all_data_scaled$Mycelial_area[3]<-mean(c(30.56246,29.87179))
+
+all_data_scaled$Hyphal_density<-all_data_scaled$Hyphal_number/all_data_scaled$Mycelial_area
+
+all_data_scaled$Length_density<-all_data_scaled$Mycelia_length/all_data_scaled$Mycelial_area
 ```
 
 
@@ -94,6 +98,21 @@ all_data_scaled<-all_data_scaled[-grep("HfDD2",all_data_scaled$name_col),]#Hafol
 all_data_scaled<-all_data_scaled[-grep("Pi_ctrl",all_data_scaled$name_col),]#Turns out that these Phallus impudicus were not control but they were eaten by Collembola
 
 all_data_scaled<-all_data_scaled[-grep("day 12|day 20",all_data_scaled$name_col),]#All Basidiomycota colonies that are not 8 days old. We use 8 days old to use a common time point across all the colonies.
+
+all_data_scaled<-all_data_scaled[-grep("Pi 18C day 8 005",all_data_scaled$name_col),]#Removing this Pi that looks very different from the others, it looks eaten!
+
+all_data_scaled<-all_data_scaled[-which(all_data_scaled$Mycelial_area<7000&
+                                 all_data_scaled$phylum=="Basidiomycota"),]#Removing species
+#that occupy less than 35% of the colony
+
+#This amount 35% can be derived from measuring the area of the colony as a perfect circle with a given radius. This radius can ba calculated from the distance variable as described in the code commented out below:
+# lapply(
+# split(Edge_Traits, Edge_Traits$name),
+# 
+# function(x){
+#   data.frame(name=unique(x$name),
+#              radius=max(x$Distance))})
+
 
 ```
 
@@ -548,19 +567,19 @@ show_col(viridis_pal()(100),labels = FALSE,ncol = 1,borders = NA)
 # 
 To_plot<-bind_rows(
 Edge_Traits%>%
-      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>% select(c("name","Species","Width","phylum")) %>% rename(variable=Width) %>%
+      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_3")%>% filter(EndNodes_1_Degree==1|EndNodes_2_Degree==1)%>% select(c("name","Species","Width","phylum")) %>% rename(variable=Width) %>%
   mutate(variable_name="width_tip"),
 
 Edge_Traits%>%
-      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% filter(EndNodes_1_Degree==3|EndNodes_2_Degree==3)%>% select(c("name","Species","Width","phylum")) %>% rename(variable=Width) %>%
+      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_3")%>% filter(EndNodes_1_Degree==3|EndNodes_2_Degree==3)%>% select(c("name","Species","Width","phylum")) %>% rename(variable=Width) %>%
   mutate(variable_name="width_main"),
 
 Edge_Traits%>%
-      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% select(c("name","Species","Length","phylum"))%>% rename(variable=Length) %>%
+      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_3")%>% select(c("name","Species","Length","phylum"))%>% rename(variable=Length) %>%
   mutate(variable_name="length"),
 
 Node_Traits%>%
-      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_1")%>% select(c("name","Species","node_Omin_Omid","phylum"))%>% rename(variable=node_Omin_Omid) %>%
+      filter(name=="C34(1)_t11"|name=="DF56(6)_t09"|name=="C41(1)_t25_c"|name=="Rb_ctrl1_d8_3")%>% select(c("name","Species","min_angle","phylum"))%>% rename(variable=min_angle) %>%
   mutate(variable_name="branching_angle")
 )
 
@@ -585,8 +604,9 @@ To_plot %>%
         facet_wrap(variable_name~Species, scales = "free",nrow = 4,ncol = 4)+
   scale_fill_manual(values=c("#1D91C0","#7FCDBB","#0C2C84"))+
         theme(legend.position = "none",
-              axis.title.x = element_blank(),
-              strip.background = element_blank()
+              axis.title = element_blank(),
+              strip.background = element_blank(),
+              strip.text.x = element_blank()
   ),
 
 To_plot %>% 
@@ -600,7 +620,8 @@ To_plot %>%
   scale_fill_manual(values=c("#1D91C0","#7FCDBB","#0C2C84"))+
         theme(legend.position = "none",
               strip.background = element_blank(),
-              axis.title.x = element_blank()
+              strip.text.x = element_blank(),
+              axis.title = element_blank(),
   ),align = "v",nrow = 2,rel_heights = c(1,1/3))
 
 dev.off()
@@ -625,27 +646,24 @@ We found support for the hypothesis that species differ in their mycelial traits
 ```{r,echo=FALSE, warning=FALSE,message=FALSE}
 library(vegan)
 
+variables<-
+  c("Hyphal_length","Hyphal_tip_width","Hyphal_main_width",
+    "Hyphal_angle","Length_density","alpha_coeff","Root_eff",
+    "Reff_tip","Mycelia_Vol_MST","Geff_MST","des_length_robustness",
+    "asc_width_robustness","des_width_robustness","random_robustness","spatial_robustness")
+
+
 Ascos_zygos<-all_data_scaled[-which(all_data_scaled$phylum=="Basidiomycota"),]
 
 #Ascos & Zygos
-Model_Ascos_Zygos<-rda(Ascos_zygos[,c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
-                                      "Hyphal_main_width","Hyphal_angle","Mycelial_area",
-                                      "Hyphal_density","alpha_coeff","Root_eff","Reff_tip",
-                                      "Mycelia_Vol_MST","Geff_MST","des_length_robustness",
-                                      "asc_width_robustness","des_width_robustness","random_robustness",
-                                      "spatial_robustness")]~Species+Condition(phylum),
+Model_Ascos_Zygos<-rda(Ascos_zygos[,variables]~Species+Condition(phylum),
                        scale = TRUE,data = Ascos_zygos)
 
 #Basidios
 Basidios<-all_data_scaled[which(all_data_scaled$phylum=="Basidiomycota"),]
 
 
-Model_Basidios<-rda(Basidios[,c("Hyphal_length","Hyphal_number","Hyphal_tip_width",
-                                      "Hyphal_main_width","Hyphal_angle","Mycelial_area",
-                                      "Hyphal_density","alpha_coeff","Root_eff","Reff_tip",
-                                      "Mycelia_Vol_MST","Geff_MST","des_length_robustness",
-                               "asc_width_robustness","des_width_robustness","random_robustness",
-                                      "spatial_robustness")]~Species ,scale = TRUE,data = Basidios)
+Model_Basidios<-rda(Basidios[,variables]~Species ,scale = TRUE,data = Basidios)
 
 #All data
 #Here I decided to use only the traits that are scaled (this came actually later, after I checked that the triangularity would not make sense if I had variables that depedended on total size)
@@ -654,12 +672,13 @@ all_data_scaled_c<-all_data_scaled
 all_data_scaled_c$Root_eff_a_scaled<-all_data_scaled_c$Root_eff/all_data_scaled_c$Mycelial_area
 all_data_scaled_c$Reff_tip_a_scaled<-all_data_scaled_c$Reff_tip/all_data_scaled_c$Mycelial_area
 
+scaled_variables<-c("alpha_coeff","Root_eff_a_scaled",
+                  "Reff_tip_a_scaled","Mycelia_Vol_MST","Geff_MST","des_length_robustness",
+                  "asc_width_robustness","des_width_robustness","random_robustness",
+                  "spatial_robustness")
 
 Model_network_traits_sps_scaled<-
-  rda(all_data_scaled_c[,c("Hyphal_angle","Hyphal_density","alpha_coeff","Root_eff_a_scaled",
-                  "Reff_tip_a_scaled","Mycelia_Vol_MST","Geff_MST","des_length_robustness",
-                  "asc_width_robustness","des_width_robustness","random_robustness","spatial_robustness")
-                        ]~Species + Condition(phylum),
+  rda(all_data_scaled_c[,scaled_variables]~Species + Condition(phylum),
       scale = TRUE,data = all_data_scaled_c)
 
 #rm(all_data_scaled_c)
@@ -736,8 +755,6 @@ anova.cca(Model_network_traits_sps_scaled,by="term",permutations = 9999)
 ```
 
 
-This strong effect can be easily visualized in constrained ordination space (Figure 3).
-
 ```{r, echo=FALSE, eval=FALSE}
 RsquareAdj(Model_network_traits_sps_scaled)$adj.r.squared#This the adjusted r squared to the number of variables, the more variables the smaller the r square gets.
 
@@ -758,6 +775,9 @@ summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][,c(1:2)]
 axes
 ```
 
+
+# PLOTTING
+
 Basidios
 ```{r, echo=FALSE, fig.height=10,fig.width=15}
 #Adding the two RDA axis to the dataframe
@@ -775,19 +795,11 @@ names(e_vectors_traits_scaled_b)[2]<-"RDA2_species"
 
 e1<-round(summary(Model_Basidios)[["cont"]][["importance"]][2,1],2)*100
 e2<-round(summary(Model_Basidios)[["cont"]][["importance"]][2,2],2)*100
-```
 
-
-```{r, echo=FALSE, fig.height=10,fig.width=15}
-
-pdf("Updated_Figures\\basidio_rda.pdf",
-    width = 14,
-    height = 8.5)
-
+basidio_rda<-
 Basidios1%>% 
   ggplot()+
   aes(x=RDA1,y=RDA2) +
-  #geom_point(size=2)+
   
   geom_segment(aes(x=0, y=0, xend=RDA1_species, yend=RDA2_species), 
         arrow = arrow(), color="gray",data = e_vectors_traits_scaled_b)+  
@@ -800,16 +812,20 @@ Basidios1%>%
                        label=traits,fontface="bold"),
             #hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
             data = e_vectors_traits_scaled_b)+
-  
-  
- # ggtitle(label = "Site scaling")+
-  
-    my_theme
+      my_theme
+
+basidio_rda
+
+pdf("Updated_Figures\\basidio_rda.pdf",
+    width = 14,
+    height = 8.5)
+
+basidio_rda
 
 dev.off()
 ```
 
-
+Relationship among variables
 ```{r, echo=FALSE, fig.height=10,fig.width=15,eval=FALSE}
 #"#1D91C0","#7FCDBB","#0C2C84"
 #Just the species scaling to check correlation among variables
@@ -851,16 +867,9 @@ names(e_vectors_traits_scaled_a)[2]<-"RDA2_species"
 
 e1<-round(summary(Model_Ascos_Zygos)[["cont"]][["importance"]][2,1],2)*100
 e2<-round(summary(Model_Ascos_Zygos)[["cont"]][["importance"]][2,2],2)*100
-```
-
-
-```{r, echo=FALSE, fig.height=10,fig.width=15}
-pdf("Updated_Figures\\ascos_zygos_rda.pdf",
-    width = 14,
-    height = 8.5)
 m<-1
 
-
+ascos_zygos_rda<-
 Ascos_zygos1%>% 
   ggplot()+
   aes(x=RDA1,y=RDA2) +
@@ -880,6 +889,14 @@ Ascos_zygos1%>%
   scale_color_manual(values=c("red","blue"))+
   
     my_theme
+
+ascos_zygos_rda
+
+pdf("Updated_Figures\\ascos_zygos_rda.pdf",
+    width = 14,
+    height = 8.5)
+
+ascos_zygos_rda
 
 dev.off()
 ```
@@ -920,7 +937,7 @@ all_data_scaled %>%
 ```
 
 
-
+Relationships among variables
 
 ```{r, echo=FALSE, fig.height=10,fig.width=15,eval=FALSE}
 #Just the species scaling to check correlation among variables
@@ -964,20 +981,9 @@ names(e_vectors_traits_scaled)[2]<-"RDA2_species"
 
 e1<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,1],2)*100
 e2<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,2],2)*100
-```
-
-
-```{r, echo=FALSE, fig.height=10,fig.width=15}
-
-e1<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,1],2)*100
-e2<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,2],2)*100
-
-pdf("Updated_Figures\\all_fungi_rda.pdf",
-    width = 14,
-    height = 8.5)
-
 m<-2.5
 
+all_fungi_rda<-
 all_data_scaled1%>% 
   ggplot()+
   aes(x=RDA1,y=RDA2) +
@@ -996,10 +1002,18 @@ all_data_scaled1%>%
   
     my_theme
 
+all_fungi_rda
+
+pdf("Updated_Figures\\all_fungi_rda.pdf",
+    width = 14,
+    height = 8.5)
+
+all_fungi_rda
+
 dev.off()
 ```
 
-
+Relationship among variables
 ```{r, echo=FALSE, fig.height=10,fig.width=15,eval=FALSE}
 #Just the species scaling to check correlation among variables
 
@@ -1025,28 +1039,20 @@ dev.off()
 ```
 
 
-Figure 3. Constrained (RDA) ordination based on mycelial trait. Each name corresponds to one colony and colors refers to phylum. Upper panel shows constrained ordination for the basidiomycota. Middle and lower panel shows ordination based on mycelial traits after taking into account phylogeny affiliation (i.e. correcting for taxonomy) for asocmycetous and zygomycetous groups (middle) and when all fungi are included (bottom).
-
-In addition, the constrained ordination was partly correlated with taxonomy. That is, when looking at the ascomycota and zygomycetous fungi having phylum as a conditional explained around a quarter of the variation which increases to almost half of the variation when including the basidiomycota (Table 2).
-
-Finally, the ordination was largely driven by network-traits contribution and not only by hyphal traits. For example, in all cases the loadings of the alpha coefficient, beta coefficient, scaled Global efficiency, and the scaled mycelial length had some of the highest loadings (scaled eigenvectors) for the first RDA axis, while both root-tip and root efficiency had large loadings for the second axis.
+LOADINGS
 
 
 Basidiomycetes
 ```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
+
+library(tidytext)
+
 e_vectors_traits_scaled_b$type<-NA
 e_vectors_traits_scaled_b$type[grep("Hyphal",e_vectors_traits_scaled_b$traits)]<-"Morphological"
 e_vectors_traits_scaled_b$type[which(e_vectors_traits_scaled_b$traits=="Mycelial_area")]<-"Morphological"
 e_vectors_traits_scaled_b$type[which(is.na(e_vectors_traits_scaled_b$type))]<-"Network"
-```
 
-
-```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
-library(tidytext)
-pdf("Updated_Figures\\basidio_loadings.pdf",
-    width = 14,
-    height = 8.5)
-
+basidio_loadings<-
 pivot_longer(e_vectors_traits_scaled_b,RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
   ggplot()+
   aes(x=reorder_within(traits,-abs(loading),Axis),y=abs(loading),fill=type)+
@@ -1068,6 +1074,15 @@ pivot_longer(e_vectors_traits_scaled_b,RDA1_species:RDA2_species,names_to = "Axi
         legend.position = "bottom"
   )
 
+basidio_loadings
+
+library(tidytext)
+pdf("Updated_Figures\\basidio_loadings.pdf",
+    width = 14,
+    height = 8.5)
+
+basidio_loadings
+
 dev.off()
 ```
 
@@ -1078,14 +1093,8 @@ e_vectors_traits_scaled_a$type<-NA
 e_vectors_traits_scaled_a$type[grep("Hyphal",e_vectors_traits_scaled_a$traits)]<-"Morphological"
 e_vectors_traits_scaled_a$type[which(e_vectors_traits_scaled_a$traits=="Mycelial_area")]<-"Morphological"
 e_vectors_traits_scaled_a$type[which(is.na(e_vectors_traits_scaled_a$type))]<-"Network"
-```
 
-
-```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
-pdf("Updated_Figures\\ascos_zygos_loadings.pdf",
-    width = 14,
-    height = 8.5)
-
+ascos_zygos_loadings<-
 pivot_longer(e_vectors_traits_scaled_a,RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
   ggplot()+
   aes(x=reorder_within(traits,-abs(loading),Axis),y=abs(loading),fill=type)+
@@ -1107,31 +1116,41 @@ pivot_longer(e_vectors_traits_scaled_a,RDA1_species:RDA2_species,names_to = "Axi
         legend.position = "bottom"
   )
 
+ascos_zygos_loadings
+
+pdf("Updated_Figures\\ascos_zygos_loadings.pdf",
+    width = 14,
+    height = 8.5)
+
+ascos_zygos_loadings
+
 dev.off()
 ```
 
 
 All fungi
 ```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
+
+e_vectors_traits_scaled<-as.data.frame(
+  scores(Model_network_traits_sps_scaled,display = "species",choices = c(1,2),scaling = "sites"));
+e_vectors_traits_scaled$traits<-rownames(e_vectors_traits_scaled)
+
+names(e_vectors_traits_scaled)[1]<-"RDA1_species"
+names(e_vectors_traits_scaled)[2]<-"RDA2_species"
+
 e_vectors_traits_scaled$type<-NA
 e_vectors_traits_scaled$type[grep("Hyphal",e_vectors_traits_scaled$traits)]<-"Morphological"
 e_vectors_traits_scaled$type[which(e_vectors_traits_scaled$traits=="Mycelial_area")]<-"Morphological"
 e_vectors_traits_scaled$type[which(is.na(e_vectors_traits_scaled$type))]<-"Network"
-```
 
-
-```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
-pdf("Updated_Figures\\all_fungi_loadings.pdf",
-    width = 14,
-    height = 8.5)
-
+all_fungi_loadings<-
 pivot_longer(e_vectors_traits_scaled,RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
     ggplot()+
   aes(x=reorder_within(traits,-abs(loading),Axis),y=abs(loading),fill=type)+
   geom_bar(stat="identity",position = "dodge")+
   facet_wrap(.~Axis,scales = "free_x")+
   labs(y="Loadings")+
-  scale_fill_manual(values = c("#7FCDBB","#0C2C84"))+
+  scale_fill_manual(values = c("#0C2C84"))+
   scale_x_reordered()+
   theme(title = element_text(size = 18),
         axis.title.x=element_blank(),
@@ -1146,6 +1165,14 @@ pivot_longer(e_vectors_traits_scaled,RDA1_species:RDA2_species,names_to = "Axis"
         legend.position = "bottom"
   )
 
+all_fungi_loadings
+
+pdf("Updated_Figures\\all_fungi_loadings.pdf",
+    width = 14,
+    height = 8.5)
+
+all_fungi_loadings
+
 dev.off()
 ```
 
@@ -1159,18 +1186,10 @@ This is done thrrough the Uri Alon´s softawer, thus I need to export the data a
 Note: Orginally all variables were included. However I commented one variables on Feb 21 because they still reflect differences in total size (this include root efficiencies that are not scaled to area). An alternative solution would have been to z scale the original variables, but that sounds a bit weird. In any case, here I left all the variables that are scalled and they should be irrespective of size. Beta coeff was left out because it has almost the same value as the alpha one.
 
 ```{r, eval=FALSE,echo=FALSE,warning=FALSE,message=FALSE,eval=FALSE}
-all_data_t<-#This one here is the same set of tratis used on Model_network_traits_sps_scaled
-all_data_scaled_c[,c("Hyphal_number","Hyphal_angle","Hyphal_density","alpha_coeff",
-                     "Root_eff_a_scaled","Reff_tip_a_scaled","Mycelia_Vol_MST",
-                     "Geff_MST","des_length_robustness","asc_width_robustness",
-                     "des_width_robustness","random_robustness","spatial_robustness")]
-
 #Note on March 5: I further created two dataset for Uri Alon´s software. One that contains root efficiency scaled to the area and the other scaled to the sqrt of area. The ordination looks better when scaled by area, but it "kind" of makes more sense to scale by sqrt of area.
 
-all_data_t_centered1<-sapply(all_data_t,function(x){(x-mean(x))/sd(x)})
-
-
-#write.csv2(all_data_t_centered,"Triangularity0.csv",row.names = F)#This one can ber read from the hp desktop at Uni
+all_data_t_centered1<-sapply(all_data_scaled_c[,scaled_variables],
+                             function(x){(x-mean(x))/sd(x)})
 
 write.csv(all_data_t_centered1,"Triangularity_Reff_Area.csv",row.names = F)#This one can be read in my laptop
 ```
@@ -1184,7 +1203,7 @@ In summary, I use Uri Alon´s software to: 1) identify the archetypes and 2) obt
 
 ```{r, eval=FALSE,echo=FALSE,warning=FALSE,message=FALSE,eval=FALSE}
 #Peforming the PCA
-model_triangle1<-rda(all_data_t,scale=T)
+model_triangle1<-rda(all_data_scaled_c[,scaled_variables],scale=T)
 #model_triangle2<-rda(all_data_t2,scale=T)
 
 #Extracting the two RDA axis to the dataframe
@@ -1201,9 +1220,6 @@ write.csv(temporal1,"axes_triangularity_Reff_Area.csv",row.names = F)
 
 Getting the importance of the axes
 ```{r,eval=FALSE}
-
-
-#all_data_scaled_t<-cbind(all_data_scaled,temporal1)#;rm(temporal)
 
 
 summary(model_triangle1)[["cont"]][["importance"]][,c(1:3)]
@@ -1233,29 +1249,40 @@ temporal1%>%
 
 
 Which is exactly the same as the one produced in the Uri Alon´software (produced on May 14 2021 in my Hp laptop). Here first the PCA (figure outdated, the new one should be from May 19):
-![](pca_May14_21.png)
+![](pca_July21.png)
 
 And now the triangle
 
 
-Here the location of the archetypes and the p value of the triangle as obtained through Uri Alon´s software. Date: 19 May 2021, Dataset without Hypholoma:
+Here the location of the archetypes and the p value of the triangle as obtained through Uri Alon´s software. Date: 23 July 2021.
 The archetypes in original coordinates:
-[1.225, 0.755]
-[0.268, -1.238]
-[-1.159, 0.663]
+[0.401,-1.363]
+[-1.864,0.083]
+[1.010,0.627]
+
 Please close the plot window to continue
 Would you like to find the p value?
 Please enter Y/N:Y
 How many repetitions would you like to perform?9999
 Checking P-Value with 9999 tries
-Pvalue is:  0.0872
+Pvalue is:  
 
 ```{r}
-#Here I have to decide whether to plot temporal1 or temporal2
+
 e1<-round(summary(model_triangle1)[["cont"]][["importance"]][2,1],2)*100
 e2<-round(summary(model_triangle1)[["cont"]][["importance"]][2,2],2)*100
 #archetypes based on scaled data only
-d1<-data.frame(x=c(1.225,0.268,-1.159),y=c(0.755,-1.238,0.663))
+d1<-data.frame(x=c(0.401,-1.864,1.010),y=c(-1.363,0.083,0.627))
+
+temporal1%>% 
+  ggplot()+
+  aes(x=PC1,y=PC2) +
+  geom_point(size=2)+
+  geom_polygon(data=d1,aes(x=x,y=y),alpha=0.50,fill="#21908CFF")+
+  labs(y=paste("PC 2",e2,"%",sep = " "),
+         x=paste("PC 1",e1,"%",sep = " "))+
+  my_theme#+
+
 
 pdf("Updated_Figures\\triangle_root_wArea.pdf",
     width = 14,
@@ -1280,7 +1307,7 @@ dev.off()
 
 Comparing again with the triangle produced by the software
 
-![](triangle_19May_21.png)
+![](pca_axes_triangle_July21.png)
 
 Identifying the colonies at the extremes
 ```{r, eval=FALSE}
@@ -1292,11 +1319,8 @@ names(e_vectors_triangle)[2]<-"PC2_s"
 
 library(ggrepel)
 
-pdf("Updated_Figures\\triangle_all_info.pdf",
-    width = 14,
-    height = 8.5)
-
-left_join(temporal1,all_data_scaled[,c("name_col","phylum")])%>% 
+triangle_all_info<-
+left_join(temporal1,all_data_scaled_c[,c("name_col","phylum")])%>% 
   ggplot()+
   aes(x=PC1,y=PC2) +
   geom_point(size=2)+
@@ -1311,9 +1335,129 @@ left_join(temporal1,all_data_scaled[,c("name_col","phylum")])%>%
       #labs(x="PCA 1 (39.20%)",y="PCA 2 (25.55%)")+
       my_theme
 
+triangle_all_info
+
+pdf("Updated_Figures\\triangle_all_info.pdf",
+    width = 14,
+    height = 8.5)
+
+triangle_all_info
+
 dev.off()
 ```
 
+
+
+
+Selecting the colonies that are closer to the archetypes predicted by Uri Alon´s program: 
+
+
+As for figure 3 (above), For this images I am using dimension 961 x 703 save as png images
+```{r,eval=FALSE}
+#DF56 Mucor fragilis "DF56(6)_t09 (the actual point is (5), however, it is not that nice looking to plot)
+
+rb<-colonies_ntwk[[16]]
+ecol<-E(rb)$width
+ecol[E(rb)[type=="Inoculum"]]<-(quantile(ecol[E(rb)[type!="Inoculum"]])[2])/2
+#ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
+ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
+ecol2[E(rb)[type=="Inoculum"]]<-"gray30"
+
+jpeg("Updated_Figures\\DF56(6)_t09_for_triangle.jpg",width = 961,height = 703)
+par(mar=c(0.5,0.5,0.5,0.5))
+plot(rb,
+     edge.arrow.size=1,edge.curved=0,
+     edge.width=2,
+     #edge.width=ecol/3,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol2,
+     edge.size=150,vertex.size=0,layout=spatial.data[[16]]*1,
+     main=unique(E(rb)$name))
+
+dev.off()
+
+#Pv_ctrl1_d8_1
+r<-which(all_data_scaled_original$name_col=="Pv_ctrl1_d8_1")
+
+rb<-colonies_ntwk[[r]]
+ecol<-E(rb)$width
+ecol[E(rb)[type=="Inoculum"]]<-(quantile(ecol[E(rb)[type!="Inoculum"]])[2])/2
+#ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
+ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
+ecol2[E(rb)[type=="Inoculum"]]<-"gray30"
+
+jpeg("Updated_Figures\\Pv_ctrl1_d8_1_for_triangle.jpg",width = 961,height = 703)
+par(mar=c(0.5,0.5,0.5,0.5))
+plot(rb,
+     edge.arrow.size=1,edge.curved=0,
+     edge.width=2,
+     #edge.width=ecol/3,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol2,
+     edge.size=150,vertex.size=0,layout=spatial.data[[r]]*1,
+     main=unique(E(rb)$name))
+
+dev.off()
+
+
+#"Pi 18C day 8 001"
+r<-which(all_data_scaled_original$name_col=="Pi 18C day 8 001")
+rb<-colonies_ntwk[[r]]
+ecol<-E(rb)$width
+ecol[E(rb)[type=="Inoculum"]]<-(quantile(ecol[E(rb)[type!="Inoculum"]])[2])/2
+#ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
+ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
+ecol2[E(rb)[type=="Inoculum"]]<-"gray30"
+
+jpeg("Updated_Figures\\Pi_18C_day_8_001_for_triangle.jpg",width = 961,height = 703)
+par(mar=c(0.5,0.5,0.5,0.5))
+plot(rb,
+     edge.arrow.size=1,edge.curved=0,
+     edge.width=2,
+     #edge.width=ecol/3,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol2,
+     edge.size=150,vertex.size=0,layout=spatial.data[[r]]*1,
+     main=unique(E(rb)$name))
+
+dev.off()
+
+
+#Rb ctrl_d8_1
+r<-38
+rb<-colonies_ntwk[[r]]
+ecol<-E(rb)$width
+ecol[E(rb)[type=="Inoculum"]]<-(quantile(ecol[E(rb)[type!="Inoculum"]])[2])/2
+#ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
+ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
+ecol2[E(rb)[type=="Inoculum"]]<-"gray30"
+
+jpeg("Updated_Figures\\Rb ctrl_d8_1_for_triangle.jpg",width = 961,height = 703)
+par(mar=c(0.5,0.5,0.5,0.5))
+plot(rb,
+     edge.arrow.size=1,edge.curved=0,
+     edge.width=2,
+     #edge.width=ecol/3,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol2,
+     edge.size=150,vertex.size=0,layout=spatial.data[[r]]*1,
+     main=unique(E(rb)$name))
+
+dev.off()
+
+#Old ones
+
+#Pi_ 18C d8 005; r<-52
+#DF19(3)_t11
+
+```
+
+
+
+
+
+
+## Supplementary material
 
 TRIANGLE BASED ON RDA AXES
 Note: 19 May 2021
@@ -1329,19 +1473,21 @@ The archetypes coming from the triangle using the RDA axes (the data just above)
 The archetypes in original coordinates:
 
 The archetypes in original coordinates:
-[1.185, -0.386]
-[-1.314, -0.566]
-[0.297, 0.917]
+[-0.311,-0.536]
+[-0.868,0.407]
+[1.879,0.124]
 Please close the plot window to continue
 Would you like to find the p value?
 Please enter Y/N:Y
 How many repetitions would you like to perform?9999
 Checking P-Value with 9999 tries
-Pvalue is:  0.0209
+Pvalue is:  0.2346
+
+rda one: 0.1197
 
 ```{r}
 #archetypes based on scaled data only
-d1<-data.frame(x=c(1.185,-1.314,0.297),y=c(-0.386,-0.566,0.917))
+d1<-data.frame(x=c(-0.311,-0.868,1.879),y=c(-0.536,0.407,0.124))
 
 e1<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,1],2)*100
 e2<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,2],2)*100
@@ -1381,11 +1527,15 @@ dev.off()
 
 againg, checking this is the same as the one produced by Uri Alon´s
 
-![](triangleRDA_19May21.png)
+![](rda_axes_triangle_July21.png)
 Identifiying species at the extremes
 
 
 ```{r}
+
+pdf("Updated_Figures\\triangle_rda_names_col.pdf",
+    width = 14,
+    height = 8.5)
 
 all_data_scaled1%>% 
   ggplot()+
@@ -1396,48 +1546,17 @@ all_data_scaled1%>%
    labs(y=paste("RDA2",e2,"%",sep = " "),
          x=paste("RDA1",e1,"%",sep = " "))+
   
-  # geom_text(size=3,aes(x=RDA1_species/m,y=RDA2_species/m,label=traits,fontface="bold"),
-  #           #hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
-  #           data = e_vectors_traits_scaled)+
-  # geom_segment(aes(x=0, y=0, xend=RDA1_species/m, yend=RDA2_species/m), 
-  #       arrow = arrow(),color="gray",data = e_vectors_traits_scaled)+
-  #ggtitle(label = "Taxonomy corrected")+
-  scale_color_manual(values=c("red","darkgreen","blue"))+
+    scale_color_manual(values=c("red","darkgreen","blue"))+
   
     my_theme
 
+dev.off()
 ```
 
-
-
-
-
-Selecting the colonies that are closer to the archetypes predicted by Uri Alon´s program: Pv_ctrl1_d8_1, DF56, C34(3)_t23, Pi_ctrl1_d8_3
-
+Selecting the colonies that are closer to the archetypes predicted by Uri Alon´s program: 
 
 As for figure 3 (above), For this images I am using dimension 961 x 703 save as png images
 ```{r,eval=FALSE}
-#Rb_ctrl1_d8_1
-rb<-colonies_ntwk[[35]]
-ecol<-E(rb)$width
-ecol[E(rb)[type=="Inoculum"]]<-(quantile(ecol[E(rb)[type!="Inoculum"]])[2])/2
-#ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
-ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
-ecol2[E(rb)[type=="Inoculum"]]<-"gray30"
-
-jpeg("Updated_Figures\\Pv_ctrl1_d8_1_for_triangle.jpg",width = 961,height = 703)
-par(mar=c(0.5,0.5,0.5,0.5))
-plot(rb,
-     edge.arrow.size=1,edge.curved=0,
-     edge.width=2,
-     #edge.width=ecol/3,
-     vertex.label=NA,vertex.shape="none",
-     edge.color=ecol2,
-     edge.size=150,vertex.size=0,layout=spatial.data[[35]]*1,
-     main=unique(E(rb)$name))
-
-dev.off()
-
 #DF56 Mucor fragilis "DF56(6)_t09 (the actual point is (5), however, it is not that nice looking to plot)
 
 rb<-colonies_ntwk[[16]]
@@ -1460,15 +1579,17 @@ plot(rb,
 
 dev.off()
 
-#C34(3)_t23
-rb<-colonies_ntwk[[3]]
+#Pv_ctrl1_d8_1
+r<-which(all_data_scaled_original$name_col=="Pv_ctrl1_d8_1")
+
+rb<-colonies_ntwk[[r]]
 ecol<-E(rb)$width
 ecol[E(rb)[type=="Inoculum"]]<-(quantile(ecol[E(rb)[type!="Inoculum"]])[2])/2
 #ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
 ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
 ecol2[E(rb)[type=="Inoculum"]]<-"gray30"
 
-jpeg("Updated_Figures\\C34(3)_t23_for_triangle.jpg",width = 961,height = 703)
+jpeg("Updated_Figures\\Pv_ctrl1_d8_1_for_triangle.jpg",width = 961,height = 703)
 par(mar=c(0.5,0.5,0.5,0.5))
 plot(rb,
      edge.arrow.size=1,edge.curved=0,
@@ -1476,21 +1597,22 @@ plot(rb,
      #edge.width=ecol/3,
      vertex.label=NA,vertex.shape="none",
      edge.color=ecol2,
-     edge.size=150,vertex.size=0,layout=spatial.data[[3]]*1,
+     edge.size=150,vertex.size=0,layout=spatial.data[[r]]*1,
      main=unique(E(rb)$name))
 
 dev.off()
 
 
-#Pi_ctrl1_d8_3
-rb<-colonies_ntwk[[34]]
+#"M(6)_t13
+r<-which(all_data_scaled_original$name_col=="M(6)_t13")
+rb<-colonies_ntwk[[r]]
 ecol<-E(rb)$width
 ecol[E(rb)[type=="Inoculum"]]<-(quantile(ecol[E(rb)[type!="Inoculum"]])[2])/2
 #ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
 ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
 ecol2[E(rb)[type=="Inoculum"]]<-"gray30"
 
-jpeg("Updated_Figures\\Pi_ctrl1_d8_3_for_triangle.jpg",width = 961,height = 703)
+jpeg("Updated_Figures\\M(6)_t13_for_triangle.jpg",width = 961,height = 703)
 par(mar=c(0.5,0.5,0.5,0.5))
 plot(rb,
      edge.arrow.size=1,edge.curved=0,
@@ -1498,11 +1620,48 @@ plot(rb,
      #edge.width=ecol/3,
      vertex.label=NA,vertex.shape="none",
      edge.color=ecol2,
-     edge.size=150,vertex.size=0,layout=spatial.data[[34]]*1,
+     edge.size=150,vertex.size=0,layout=spatial.data[[r]]*1,
      main=unique(E(rb)$name))
 
 dev.off()
+
+
+#Rb ctrl_d8_3
+r<-which(all_data_scaled_original$name_col=="Rb_ctrl1_d8_3")
+rb<-colonies_ntwk[[r]]
+ecol<-E(rb)$width
+ecol[E(rb)[type=="Inoculum"]]<-(quantile(ecol[E(rb)[type!="Inoculum"]])[2])/2
+#ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
+ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
+ecol2[E(rb)[type=="Inoculum"]]<-"gray30"
+
+jpeg("Updated_Figures\\Rb_ctrl1_d8_3_for_triangle.jpg",width = 961,height = 703)
+par(mar=c(0.5,0.5,0.5,0.5))
+plot(rb,
+     edge.arrow.size=1,edge.curved=0,
+     edge.width=2,
+     #edge.width=ecol/3,
+     vertex.label=NA,vertex.shape="none",
+     edge.color=ecol2,
+     edge.size=150,vertex.size=0,layout=spatial.data[[r]]*1,
+     main=unique(E(rb)$name))
+
+dev.off()
+
+#Old ones
+#"Pi 18C day 8 001"
+#Pi_ 18C d8 005; r<-52
+#DF19(3)_t11
+#"Pi 18C day 8 001"
+
 ```
+
+
+
+
+
+
+
 
 Checking the values of the archetypes
 ```{r,eval=FALSE}
@@ -1577,12 +1736,15 @@ pivot_longer(e_vectors_triangle,PC1_s:PC2_s,names_to = "Axis",values_to="loading
 
 Other stuff
 ```{r}
-rb<-colonies_ntwk[[34]]
+rb<-colonies_ntwk[[1]]
 ecol<-E(rb)$width
 ecol[E(rb)[type=="Inoculum"]]<-(quantile(ecol[E(rb)[type!="Inoculum"]])[2])/2
 #ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
 ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
 ecol2[E(rb)[type=="Inoculum"]]<-"gray30"
+
+angle<-c(V(rb)$angle[1:10],rep(NA,16925))
+id<-c(V(rb)$node_ID[1:10],rep(NA,16925))
 
 #jpeg("Updated_Figures\\DF19(3)_t11_for_triangle.jpg",width = 961,height = 703)
 par(mar=c(0.5,0.5,0.5,0.5))
@@ -1590,45 +1752,14 @@ plot(rb,
      edge.arrow.size=1,edge.curved=0,
      edge.width=2,
      #edge.width=ecol/3,
-     vertex.label=NA,vertex.shape="none",
+     vertex.label=id,vertex.shape="none",
+     #vertex.label.cex=0.5,
      edge.color=ecol2,
-     edge.size=150,vertex.size=0,layout=spatial.data[[34]]*1,
+     edge.size=150,vertex.size=0,layout=spatial.data[[1]]*1,
      main=unique(E(rb)$name))
 ```
 
 
-
-## Discussion
-
-Our results showed that: a) the species included in this study differ in terms of mycelial traits; b) such variation reflects to large extent phylogeny and c) a large proportion of the difference among species is due to network connectedness patterns (i.e. network traits) and not only due to hyphal descriptive traits. Although these results have very limited power due to the low number of species and conditions used, they showcase the potential of network traits in ecology.
-
-Thus, we are introducing a new set of quantitative traits that can be used to understand and compare the ecology of fungal species. This set of traits expands the limited list of phenotypic characteristics used as fungal functional traits beyond that of easy measurable traits of reproductive structures (e.g fruiting bodies or spore size dimensions) (Anne Pringle paper). While these latter traits are valuable to understand the reproductive, dispersal and early ecology of fungi (Aguilar-Trigueros et al 2019. other ref), they have only very limited power to understand the ecology of the vegetative phase of fungi, which happens to be the predominant phase in the lifetime of most fungi (particularly in saprotrophic species).
-
-In addition, using the network properties of this vegetative mycelia (i.e. properties that emerge from connectedness patterns of its parts) provides a common framework to measure mycelial phenotypic diversity and how it is related to differences in the ecology of species. Historically, vegetative mycelial phenotypes have been used to classify fungal species into fixed and subjective categories like "guerrilla" and "phalanx" strategies (borrowed from the work on clonal plants (ref)), or exploration types (which has only being applied to ectomycorrhizal fungi, see Agerer 2001). The use of quantitative traits, instead, has picked up not until recently after numerous calls for their need in order to capture the many shades of gray that fungal phenotypes exhibit in nature (my paper, Tresseder, Crowther). For example, Lehmann et al (200X) used hyphal traits (e.g. branching, extension rate and length) of soil fungi, while Boddy et al (200X) used "space filling" (e.g. fractal dimension) for wood decomposing fungi in order to identify potential resource acquisition strategies across species. As we shown here, the network traits  fulfill the purpose of inclusion of phenotypic diversity by translating it into a morphospace where species can be placed along gradients of fully connected mycelia but with poor transport efficiencies, to a less connected but with high transport efficiencies.  
-
-
-Based on this morphospace several hypothesis linking phenotypes and ecology emerge. For example, species allocated at the fully-connected-but-less-efficient end of the space would be able to preserve high levels connectivity after damage due to fungivory of physical disturbance (because there more chances for some connections to remain). This connectivity would allow those species from still benefiting of transporting patchily distributed resources which overall would reduce the impact of disturbance or fungivory on the overall fungal fitness. In contrast, species closer to the poorly-connected-but-high efficiency end, would be indicative of  phenotypes consisting of few but thick "transport highways" that allows faster transfer from a resources patch to subsidize faster growth of hyphae looking for new resources. As a result these fungi might benefit from being the first at using uncolonized resources patches avoiding competition and increase fitness. At the community level, the prevalence of either strategy over the other would reflect distinct ecological pressures (e.g. fungivory over competition) in a particular habitat. We think that also the deviations from these expectations would be interesting: highly efficient fungi might compensate for the disadvantages of their limited connectivity by decreasing the palatability of their hyphae (for example through melanization). This possibility highlights the need to correlate network properties with other mycelial traits to identify the full spectrum of strategies that have evolved in the fungal kingdom to withstand distinct environmental challenges.
-
-In addition the use of network properties to describe fungi opens the possibility to compare their networks to other types of biological networks. For example, while executing this work, it was clear that centrality metrics, which are commonly calculated network properties that measures how important (or central) a node (or a an edge) is in connecting elements, are not informative for fungi because there is little interspecific variation in this trait.  This is because for centrality to vary, the number of edges needs to change substantially across nodes and for fungi constructing new hyphal edges is a) metabolically costly b) it needs to fit into a transport flow dynamic and c) fungi produce edges via branching or anastomosis which a produce a reduced number of possibilities. This is unlike ecological networks, where edges are not physical entities but an interaction (e.g.symbiosis), thus one in community species can differ widely in their importance (i.e. centrality) to keep connectivity because they differ in the number of species they interact with. 
-
-Instead, we expect fungal networks to behave similarly as  other spatially explicit transport networks where there is an associated high cost of constructing new edges like the networks of vascular tissues of plants (e.g. xylem and phloem networks, leaf-vein networks). In plant ecology, information on those plant networks has been used as mechanisms behind metabolic scaling relationships which is the basis of the Metabolic Scaling Theory for Ecology. Fungi have remarkably been ignored from such a framework (Aguilar-Trigueros et al 2017). Thus, network properties like the ones we use here can also be used to smooth the path for researchers to include fungi under this theory.
-
-
-We consider our work as the beginning of a research program aimed at mapping the diversity of network properties in the fungal kingdom, understanding their evolutionary relationships and determining how they are linked to ecology. To develop this program, three research fronts need to be developed. First, developing standardized protocols during data acquisition (inoculum types, growth conditions, picture quality settings) similar to the ones developed in plant ecology. Such protocols would allow easier comparison of network traits across different studies (Aguilar-Trigueros et al 20XX). And in doing so, better communication among research groups who have successfully translated mycelia into network representations (e.g. Dickec et al 2019). Second, expand and improve the capacity of computational and analytical tools to capture a more realistic behavior of fungal networks in nature that goes beyond our current approach of 2D, snapshot networks operating in the exploration phase. In other words, having the capacity to analyze time series pictures of mycelial growth that are also 3D, and then able to distinguish areas of exploration and exploitation phase within the mycelia. More capacity does not only mean more computational power (which is definitely needed given the amount of data that a single mycelium would generate) but also exploring other types of network representation. For example, our current approach is to represent tips, branching, and anastomosis as nodes and the hyphae in between as edges. A different, and perhaps more realistic, approach would be to use the hyphal segments themselves as nodes which would allow identifying more easily main hyphae (hyphae from which many branching events occur). Such an approach is used in street or river networks in so-called dual graphs (ref). 
-
-
-As these two fronts are expanded, a scalable pipeline can emerge that would enable to measure network trait data from more species, with a wider in phylogenetic ad functional range and also under different conditions. A larger species pool would allow to uncover not only the real diversity of network traits but also determine to what extent such diversity arise due to few early evolutionary events that have been preserved among extant taxa (i.e. high phylogenetic conservatism) or whether differences among species arise due to ecological pressures multiple and independent times through fungal evolution (low phylogenetic conservatism) using state-of-the art phylogenetic comparative analytical tools. Our results, although limited, indicate that both hypotheses are equally likely. Similarly, including a wider functional diversity (say mycorrhizal groups), would allow to discover correlations between functional roles and network properties (incidentally, it would give a  more tangible meaning to the term "mycorrhizal network" which is commonly used more as a metaphor rather than an actual quantifiable structure (ref)). Finally, measuring network traits of the same species but under different conditions would allow us to understand the plasticity of those traits, and when compared among distinct genotypes, measure the level of intraspecific variability in fungal populations.
-
-
-
-
-
-
- 
-
-
-
-## Supplementary material
 
 
 Examples of robustness

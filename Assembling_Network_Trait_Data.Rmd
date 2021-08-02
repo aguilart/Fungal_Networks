@@ -99,9 +99,33 @@ lapply(
 Edge_Traits[1:25],function(x){x$Resistance_2ave<-x$Resistance_4ave
 x
 })
+```
+
+This code has to be run in the console only!!! It turns out rmarkdown gets caught up in a loop
+```{r, eval=FALSE}
+#Choosing the minimum branching angle
+#We agreed that the branching angle we should use is the smalles angle, initially we thought that it is the one contained in the column node_Omin_Omid (Nodes file), but that is not always true. So now I am picking the smallest value possible out these three: "node_Omin_Omaj","node_Omid_Omaj","node_Omin_Omid"
+
+Node_Traits_c<-
+lapply(Node_Traits,function(prueba){
+  
+  prueba$min_angle<-apply(
+        prueba[,c("node_Omin_Omaj","node_Omid_Omaj","node_Omin_Omid")],1,
+        function(x){y<-min(x,na.rm=T)})
+
+  prueba$min_angle[which(prueba$min_angle=="Inf")]<-NA
+  prueba
+  })
+
 
 ```
 
+
+Now replacing the Node_Traits
+```{r}
+all(Node_Traits_c[[1]]$node_Strength==Node_Traits[[1]]$node_Strength)
+Node_Traits<-Node_Traits_c;rm(Node_Traits_c)
+```
 
 
 Transforming it into igraph object
@@ -125,8 +149,9 @@ mapply(function(x,z){
     
     
                                                                 )
-    
-    V(y)$angle<-z$node_Omin_Omid
+    V(y)$node_ID<-z$node_ID
+    #V(y)$angle<-z$node_Omin_Omid
+    V(y)$angle<-z$min_angle
     
     E(y)$type<-"Main"
     
@@ -570,18 +595,3 @@ saveRDS(MST_summary_Geff10,"MST_summary_Geff10.RDS")
 
 ```
 
-
-
-QUestions for  Mark
-
-Lenght matches quite well for my data. for the basidios it´s bit off with pv
-
-Is resinicium ok? It differs widely in width and in efficiency estimates
-
-Problem with one single colony for area in the new data C34(3)_t23
-
-Accessibility did not match for 1 species (old data is really high) DF19(2)
-
-what is the name of Hf
-
-Data matches ok, much better the efficiencies, for some reason root tip efficiency does not
