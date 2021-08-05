@@ -530,14 +530,28 @@ plot(colonies_ntwk[[27]],
      edge.color=ecol,
      edge.size=150,vertex.size=0,layout=spatial.data[[27]]*1,main="Phanerochaete velutina")
 
-#12.Rb Resinicium bicolor, "Rb_ctrl1_d8_1 (postion 30))
-ecol<-cscale(E(colonies_ntwk[[31]])$width,palette = div_gradient_pal(low = "#FDE725FF",mid = "#1F968BFF",high = "#440154FF"))
-ecol[E(colonies_ntwk[[31]])[type=="Inoculum"]]<-"bisque2"
-plot(colonies_ntwk[[31]],
-     edge.arrow.size=1,edge.curved=0,edge.width=2,
+#12.Rb Resinicium bicolor, 
+#Rb ctrl_d8_3
+r<-which(all_data_scaled_original$name_col=="Rb_ctrl1_d8_3")
+rb<-colonies_ntwk[[r]]
+ecol<-E(rb)$width
+ecol[E(rb)[type=="Inoculum"]]<-(quantile(ecol[E(rb)[type!="Inoculum"]])[2])/2
+#ecol2<-cscale(ecol,palette = seq_gradient_pal(low="#F7FBFF", high = "#08306B"))
+ecol2<-cscale(ecol,palette = div_gradient_pal(low = "#FDE725FF",mid = "#21908CFF",high = "#440154FF"))
+ecol2[E(rb)[type=="Inoculum"]]<-"gray30"
+
+#jpeg("Updated_Figures\\Rb_ctrl1_d8_3_for_triangle.jpg",width = 961,height = 703)
+par(mar=c(0.5,0.5,0.5,0.5))
+plot(rb,
+     edge.arrow.size=1,edge.curved=0,
+     edge.width=2,
+     #edge.width=ecol/3,
      vertex.label=NA,vertex.shape="none",
-     edge.color=ecol,
-     edge.size=150,vertex.size=0,layout=spatial.data[[31]]*1,main="Resinicium bicolor")
+     edge.color=ecol2,
+     edge.size=150,vertex.size=0,layout=spatial.data[[r]]*1,
+     main=unique(E(rb)$name))
+
+#dev.off()
 
 
 ```
@@ -796,6 +810,10 @@ names(e_vectors_traits_scaled_b)[2]<-"RDA2_species"
 e1<-round(summary(Model_Basidios)[["cont"]][["importance"]][2,1],2)*100
 e2<-round(summary(Model_Basidios)[["cont"]][["importance"]][2,2],2)*100
 
+new_names<-c("Edge length","Tip edge width","Main edge width","Branching angle","Edge length density","Meshedness","Root transport eff.","Root-tip transport eff.","Volume-MST",
+  "Global eff.","Desc. length robustness","Asc. width robustness","Desc. width robustness",
+  "Random-single robustness","Random-chunk robustness")
+
 basidio_rda<-
 Basidios1%>% 
   ggplot()+
@@ -810,8 +828,8 @@ Basidios1%>%
   
   geom_text(size=5,aes(x=RDA1_species,y=RDA2_species,
                        label=traits,fontface="bold"),
-            #hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
-            data = e_vectors_traits_scaled_b)+
+                        data = e_vectors_traits_scaled_b %>% 
+          mutate(traits=new_names))+
       my_theme
 
 basidio_rda
@@ -867,7 +885,11 @@ names(e_vectors_traits_scaled_a)[2]<-"RDA2_species"
 
 e1<-round(summary(Model_Ascos_Zygos)[["cont"]][["importance"]][2,1],2)*100
 e2<-round(summary(Model_Ascos_Zygos)[["cont"]][["importance"]][2,2],2)*100
-m<-1
+m<-2.5
+
+new_names<-c("Edge length","Tip edge width","Main edge width","Branching angle","Edge length density","Meshedness","Root transport eff.","Root-tip transport eff.","Volume-MST",
+  "Global eff.","Desc. length robustness","Asc. width robustness","Desc. width robustness",
+  "Random-single robustness","Random-chunk robustness")
 
 ascos_zygos_rda<-
 Ascos_zygos1%>% 
@@ -882,8 +904,8 @@ Ascos_zygos1%>%
   geom_segment(aes(x=0, y=0, xend=RDA1_species/m, yend=RDA2_species/m),
         arrow = arrow(),color="gray",data = e_vectors_traits_scaled_a)+
   geom_text(size=4,aes(x=RDA1_species/m,y=RDA2_species/m,label=traits,fontface="bold"),
-            hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
-            data = e_vectors_traits_scaled_a)+
+            hjust = 1.1, vjust =-0.5,data = e_vectors_traits_scaled_a %>% 
+          mutate(traits=new_names))+
   
   #ggtitle(label = "Site scaled")+
   scale_color_manual(values=c("red","blue"))+
@@ -983,6 +1005,10 @@ e1<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,1
 e2<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,2],2)*100
 m<-2.5
 
+new_names2<-c("Meshedness","Root transport eff.","Root-tip transport eff.","Volume-MST",
+  "Global eff.","Desc. length robustness","Asc. width robustness","Desc. width robustness",
+  "Random-single robustness","Random-chunk robustness")
+
 all_fungi_rda<-
 all_data_scaled1%>% 
   ggplot()+
@@ -994,7 +1020,8 @@ all_data_scaled1%>%
   
   geom_text(size=5,aes(x=RDA1_species/m,y=RDA2_species/m,label=traits,fontface="bold"),
             #hjust = 1.1, vjust =-0.5,#segment.size = 0,segment.color = 'transparent',
-            data = e_vectors_traits_scaled)+
+            data = e_vectors_traits_scaled %>% 
+          mutate(traits=new_names2))+
   geom_segment(aes(x=0, y=0, xend=RDA1_species/m, yend=RDA2_species/m), 
         arrow = arrow(),color="gray",data = e_vectors_traits_scaled)+
   #ggtitle(label = "Taxonomy corrected")+
@@ -1052,8 +1079,15 @@ e_vectors_traits_scaled_b$type[grep("Hyphal",e_vectors_traits_scaled_b$traits)]<
 e_vectors_traits_scaled_b$type[which(e_vectors_traits_scaled_b$traits=="Mycelial_area")]<-"Morphological"
 e_vectors_traits_scaled_b$type[which(is.na(e_vectors_traits_scaled_b$type))]<-"Network"
 
+new_names<-c("Edge length","Tip edge width","Main edge width","Branching angle","Edge length density","Meshedness","Root transport eff.","Root-tip transport eff.","Volume-MST",
+  "Global eff.","Desc. length robustness","Asc. width robustness","Desc. width robustness",
+  "Random-single robustness","Random-chunk robustness")
+
+
 basidio_loadings<-
-pivot_longer(e_vectors_traits_scaled_b,RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
+  e_vectors_traits_scaled_b %>% 
+  mutate(traits=new_names) %>% 
+  pivot_longer(RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
   ggplot()+
   aes(x=reorder_within(traits,-abs(loading),Axis),y=abs(loading),fill=type)+
   geom_bar(stat="identity",position = "dodge")+
@@ -1094,8 +1128,14 @@ e_vectors_traits_scaled_a$type[grep("Hyphal",e_vectors_traits_scaled_a$traits)]<
 e_vectors_traits_scaled_a$type[which(e_vectors_traits_scaled_a$traits=="Mycelial_area")]<-"Morphological"
 e_vectors_traits_scaled_a$type[which(is.na(e_vectors_traits_scaled_a$type))]<-"Network"
 
+new_names<-c("Edge length","Tip edge width","Main edge width","Branching angle","Edge length density","Meshedness","Root transport eff.","Root-tip transport eff.","Volume-MST",
+  "Global eff.","Desc. length robustness","Asc. width robustness","Desc. width robustness",
+  "Random-single robustness","Random-chunk robustness")
+
 ascos_zygos_loadings<-
-pivot_longer(e_vectors_traits_scaled_a,RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
+  e_vectors_traits_scaled_a %>% 
+  mutate(traits=new_names) %>% 
+pivot_longer(RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
   ggplot()+
   aes(x=reorder_within(traits,-abs(loading),Axis),y=abs(loading),fill=type)+
   geom_bar(stat="identity",position = "dodge")+
@@ -1143,8 +1183,15 @@ e_vectors_traits_scaled$type[grep("Hyphal",e_vectors_traits_scaled$traits)]<-"Mo
 e_vectors_traits_scaled$type[which(e_vectors_traits_scaled$traits=="Mycelial_area")]<-"Morphological"
 e_vectors_traits_scaled$type[which(is.na(e_vectors_traits_scaled$type))]<-"Network"
 
+new_names2<-c("Meshedness","Root transport eff.","Root-tip transport eff.","Volume-MST",
+  "Global eff.","Desc. length robustness","Asc. width robustness","Desc. width robustness",
+  "Random-single robustness","Random-chunk robustness")
+
+
 all_fungi_loadings<-
-pivot_longer(e_vectors_traits_scaled,RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
+     e_vectors_traits_scaled %>% 
+  mutate(traits=new_names2) %>% 
+pivot_longer(RDA1_species:RDA2_species,names_to = "Axis",values_to="loading") %>% 
     ggplot()+
   aes(x=reorder_within(traits,-abs(loading),Axis),y=abs(loading),fill=type)+
   geom_bar(stat="identity",position = "dodge")+
@@ -1474,8 +1521,8 @@ The archetypes in original coordinates:
 
 The archetypes in original coordinates:
 [-0.311,-0.536]
-[-0.868,0.407]
-[1.879,0.124]
+[-0.867,0.406]
+[1.881,0.125]
 Please close the plot window to continue
 Would you like to find the p value?
 Please enter Y/N:Y
@@ -1487,7 +1534,7 @@ rda one: 0.1197
 
 ```{r}
 #archetypes based on scaled data only
-d1<-data.frame(x=c(-0.311,-0.868,1.879),y=c(-0.536,0.407,0.124))
+d1<-data.frame(x=c(-0.311,-0.867,1.881),y=c(-0.536,0.406,0.125))
 
 e1<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,1],2)*100
 e2<-round(summary(Model_network_traits_sps_scaled)[["cont"]][["importance"]][2,2],2)*100
@@ -1527,7 +1574,7 @@ dev.off()
 
 againg, checking this is the same as the one produced by Uri Alon´s
 
-![](rda_axes_triangle_July21.png)
+![](rda_axes_triangle_August21.png)
 Identifiying species at the extremes
 
 
