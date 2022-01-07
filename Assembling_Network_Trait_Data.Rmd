@@ -247,7 +247,7 @@ rm(cl)
 Geff<-mean(result);Geff
 }
 
-Real_summary_Geff1<-#it took 1 hour
+Real_summary_Geff1<-#it took 1 hour in my laptop (16GB) and 25 min in the FU desktop (64 GB)
   sapply(colonies_ntwk,global_eff)
 
 saveRDS(Real_summary_Geff1,"Real_summary_Geff.RDS")
@@ -257,7 +257,7 @@ saveRDS(Real_summary_Geff1,"Real_summary_Geff.RDS")
 
 ```{r}
 Real_summary_Geff<-readRDS("Real_summary_Geff.RDS")
-colony_sum$Geff<-Real_summary_Geff1
+colony_sum$Geff<-Real_summary_Geff
 ```
 
 
@@ -380,49 +380,62 @@ Access_mst_sum<-do.call("rbind",
 
 For the global efficiency, It was more computing demanding. I save the results for not having to do it again
 
-```{r,echo=FALSE, eval=FALSE}
-MST_summary_Geff1<-#do.call(rbind,
-sapply(Access_mst[c(1:8,11:length(Access_mst))],function(net_ed){
-      a<-efficiency(net_ed,type = "global")
+```{r}
+MST_summary_Geff1<-#do.call(rbind,#took 1 hour too in my laptop
+sapply(Access_mst,global_eff)
   
-});saveRDS(MST_summary_Geff1,"MST_summary_Geff1.RDS")
+saveRDS(MST_summary_Geff1,"MST_summary_Geff.RDS")
+```
 
-#This is for the two networks that were so big, that I had to use a function that "partitions" #the operation
-# nodal efficiency function (from a forum in internet)
+```{r}
+MST_summary_Geff<-readRDS("MST_summary_Geff.RDS")
+Access_mst_sum$Geff<-MST_summary_Geff
+```
 
-g<-Access_mst[[9]]
 
-
-get_eff <- function(i){return((1/(length(V(g)) - 1))*sum(1/distances(g, V(g)[i])[-i]))}
-no_cores <- detectCores() - 1 
-cl       <- makeCluster(no_cores)
-registerDoParallel(cl)  
-result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
-stopCluster(cl)
-rm(cl)
-MST_summary_Geff9 <- mean(result);saveRDS(MST_summary_Geff9,"MST_summary_Geff9.RDS")
-result9<-result
-
-g<-Access_mst[[10]]
-
-get_eff <- function(i){return((1/(length(V(g)) - 1))*sum(1/distances(g, V(g)[i])[-i]))}
-no_cores <- detectCores() - 1 
-cl       <- makeCluster(no_cores)
-registerDoParallel(cl)  
-result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
-stopCluster(cl)
-rm(cl)
-MST_summary_Geff10 <- mean(result)
-result10<-result; saveRDS(MST_summary_Geff10,"MST_summary_Geff10.RDS")
-rm(result)
+```{r,echo=FALSE, eval=FALSE}
+# MST_summary_Geff1<-#do.call(rbind,
+# sapply(Access_mst[c(1:8,11:length(Access_mst))],function(net_ed){
+#       a<-efficiency(net_ed,type = "global")
+#   
+# });saveRDS(MST_summary_Geff1,"MST_summary_Geff1.RDS")
+# 
+# #This is for the two networks that were so big, that I had to use a function that "partitions" #the operation
+# # nodal efficiency function (from a forum in internet)
+# 
+# g<-Access_mst[[9]]
+# 
+# 
+# get_eff <- function(i){return((1/(length(V(g)) - 1))*sum(1/distances(g, V(g)[i])[-i]))}
+# no_cores <- detectCores() - 1 
+# cl       <- makeCluster(no_cores)
+# registerDoParallel(cl)  
+# result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
+# stopCluster(cl)
+# rm(cl)
+# MST_summary_Geff9 <- mean(result);saveRDS(MST_summary_Geff9,"MST_summary_Geff9.RDS")
+# result9<-result
+# 
+# g<-Access_mst[[10]]
+# 
+# get_eff <- function(i){return((1/(length(V(g)) - 1))*sum(1/distances(g, V(g)[i])[-i]))}
+# no_cores <- detectCores() - 1 
+# cl       <- makeCluster(no_cores)
+# registerDoParallel(cl)  
+# result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
+# stopCluster(cl)
+# rm(cl)
+# MST_summary_Geff10 <- mean(result)
+# result10<-result; saveRDS(MST_summary_Geff10,"MST_summary_Geff10.RDS")
+# rm(result)
 ```
 
 AS before, I just load the outputs of this chunck
 
 ```{r}
-MST_summary_Geff1<-readRDS("MST_summary_Geff1.RDS")
-MST_summary_Geff9<-readRDS("MST_summary_Geff9.RDS")
-MST_summary_Geff10<-readRDS("MST_summary_Geff10.RDS")
+# MST_summary_Geff1<-readRDS("MST_summary_Geff1.RDS")
+# MST_summary_Geff9<-readRDS("MST_summary_Geff9.RDS")
+# MST_summary_Geff10<-readRDS("MST_summary_Geff10.RDS")
 ```
 
 
@@ -431,8 +444,8 @@ MST_summary_Geff10<-readRDS("MST_summary_Geff10.RDS")
 Here, I add the estimation of global efficieny from the two chuncks above to the MST´s.
 
 ```{r}
-Access_mst_sum$Geff<-c(MST_summary_Geff1[1:8],MST_summary_Geff9,MST_summary_Geff10,
-                       MST_summary_Geff1[9:length(MST_summary_Geff1)])
+# Access_mst_sum$Geff<-c(MST_summary_Geff1[1:8],MST_summary_Geff9,MST_summary_Geff10,
+#                        MST_summary_Geff1[9:length(MST_summary_Geff1)])
 ```
 
 
