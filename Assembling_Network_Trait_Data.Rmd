@@ -229,33 +229,13 @@ colonies_ntwk,function(x){
 
 
 Calculating global efficiency
-```{r,eval=FALSE}
-library(brainGraph)
-Real_summary_Geff1<-#do.call(rbind,
-  sapply(colonies_ntwk[c(1:8,11:length(colonies_ntwk))],function(net_ed){
-    a<-efficiency(net_ed,type = "global")
-    
-  })
 
-saveRDS(Real_summary_Geff1,"Real_summary_Geff1.RDS")
-
+```{r}
 library(parallel)
 library(doParallel)
 
-g<-colonies_ntwk[[9]]
-
-
-get_eff <- function(i){return((1/(length(V(g)) - 1))*sum(1/distances(g, V(g)[i])[-i]))}
-no_cores <- detectCores() - 1 
-cl       <- makeCluster(no_cores)
-registerDoParallel(cl)  
-result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
-stopCluster(cl)
-rm(cl)
-Real_summary_Geff9 <- mean(result);saveRDS(Real_summary_Geff9,"Real_summary_Geff9.RDS")
-result9<-result
-
-g<-colonies_ntwk[[10]]
+global_eff<-
+function(g){
 
 get_eff <- function(i){return((1/(length(V(g)) - 1))*sum(1/distances(g, V(g)[i])[-i]))}
 no_cores <- detectCores() - 1 
@@ -264,24 +244,77 @@ registerDoParallel(cl)
 result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
 stopCluster(cl)
 rm(cl)
-Real_summary_Geff10 <- mean(result)
-result10<-result; saveRDS(Real_summary_Geff10,"Real_summary_Geff10.RDS")
-rm(result)
+Geff<-mean(result);Geff
+}
+
+Real_summary_Geff1<-#it took 1 hour
+  sapply(colonies_ntwk,global_eff)
+
+saveRDS(Real_summary_Geff1,"Real_summary_Geff1.RDS")
+  
+```
+
+
+```{r}
+Real_summary_Geff1<-readRDS("Real_summary_Geff1.RDS")
+colony_sum$Geff<-Real_summary_Geff1
+```
+
+
+
+```{r,eval=FALSE}
+# library(brainGraph)
+# Real_summary_Geff1<-#do.call(rbind,
+#   sapply(colonies_ntwk[c(1:8,11:length(colonies_ntwk))],function(net_ed){
+#     a<-efficiency(net_ed,type = "global")
+#     
+#   })
+# 
+# saveRDS(Real_summary_Geff1,"Real_summary_Geff1.RDS")
+# 
+# library(parallel)
+# library(doParallel)
+# 
+# g<-colonies_ntwk[[9]]
+# 
+# 
+# get_eff <- function(i){return((1/(length(V(g)) - 1))*sum(1/distances(g, V(g)[i])[-i]))}
+# no_cores <- detectCores() - 1 
+# cl       <- makeCluster(no_cores)
+# registerDoParallel(cl)  
+# result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
+# stopCluster(cl)
+# rm(cl)
+# Real_summary_Geff9 <- mean(result);saveRDS(Real_summary_Geff9,"Real_summary_Geff9.RDS")
+# result9<-result
+# 
+# g<-colonies_ntwk[[10]]
+# 
+# get_eff <- function(i){return((1/(length(V(g)) - 1))*sum(1/distances(g, V(g)[i])[-i]))}
+# no_cores <- detectCores() - 1 
+# cl       <- makeCluster(no_cores)
+# registerDoParallel(cl)  
+# result <- foreach(i = seq_along(V(g)), .combine = c, .packages = "igraph") %dopar% get_eff(i)
+# stopCluster(cl)
+# rm(cl)
+# Real_summary_Geff10 <- mean(result)
+# result10<-result; saveRDS(Real_summary_Geff10,"Real_summary_Geff10.RDS")
+# rm(result)
 ```
 
 The previous chucnk was executed once, I only run it again if necessary (e.g. new data input/updated data), otherwise I just import the output of the chunck that I saved it (I did this because it takes a lot of time to calculate global efficiney)
 
 ```{r}
-Real_summary_Geff1<-readRDS("Real_summary_Geff1.RDS")
-Real_summary_Geff9<-readRDS("Real_summary_Geff9.RDS")
-Real_summary_Geff10<-readRDS("Real_summary_Geff10.RDS")
+# Real_summary_Geff1<-readRDS("Real_summary_Geff1.RDS")
+# Real_summary_Geff9<-readRDS("Real_summary_Geff9.RDS")
+# Real_summary_Geff10<-readRDS("Real_summary_Geff10.RDS")
 ```
 
 
 Here I am loading the results from the global efficiency and merging them with the other summary parameters
 ```{r, echo=FALSE}
-
-colony_sum$Geff<-c(Real_summary_Geff1[1:8],Real_summary_Geff9,Real_summary_Geff10,Real_summary_Geff1[9:length(Real_summary_Geff1)])
+# 
+# colony_sum$Geff<-c(Real_summary_Geff1[1:8],Real_summary_Geff9,Real_summary_Geff10,Real_summary_Geff1[9:length(Real_summary_Geff1)])
 
 ```
 
