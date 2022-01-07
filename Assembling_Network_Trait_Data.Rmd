@@ -8,7 +8,10 @@ output: html_notebook
 In principle this is the only thing that need to be changed. Then the rest should follow the same
 
 ```{r}
-data_location<-"D:/Carlos_PicsToNetw/processed data/results/"#This is the latest data as it comes from the most updated app version Add version here:
+#data_location<-"D:/Carlos_PicsToNetw/processed data/results/"#This is the latest data as it comes from the most updated app version Add version here:
+
+#A local copy of the files in the location above:
+data_location<-"results/"#This is the latest data as it comes from the most updated app version Add version here:
 
 data_location_B<-"results_20210414/"
 
