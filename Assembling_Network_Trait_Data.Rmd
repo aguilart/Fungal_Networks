@@ -250,13 +250,13 @@ Geff<-mean(result);Geff
 Real_summary_Geff1<-#it took 1 hour
   sapply(colonies_ntwk,global_eff)
 
-saveRDS(Real_summary_Geff1,"Real_summary_Geff1.RDS")
+saveRDS(Real_summary_Geff1,"Real_summary_Geff.RDS")
   
 ```
 
 
 ```{r}
-Real_summary_Geff1<-readRDS("Real_summary_Geff1.RDS")
+Real_summary_Geff<-readRDS("Real_summary_Geff.RDS")
 colony_sum$Geff<-Real_summary_Geff1
 ```
 
