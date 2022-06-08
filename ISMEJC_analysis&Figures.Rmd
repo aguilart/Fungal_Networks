@@ -528,7 +528,7 @@ Basidios1%>%
 
 basidio_rda
 
-pdf("ISME_C_J_figures\\Figure_4b.pdf",
+pdf("ISMEJ_C_figures\\Figure_4b.pdf",
     width = 14,
     height = 8.5)
 
@@ -596,7 +596,7 @@ dev.off()
 Figure 5. Absolute loadings (eigenvectors) of different mycelial traits for the first two main RDA axes.
 
 ```{r,echo=FALSE,message=FALSE,warning=FALSE,fig.height=10,fig.width=15}
-
+library(tidytext)
 # Figure 5a. Ascomycetes & Zygomycetous fungi
 e_vectors_traits_scaled_a$type<-NA
 e_vectors_traits_scaled_a$type[grep("Hyphal",e_vectors_traits_scaled_a$traits)]<-"Morphological"
