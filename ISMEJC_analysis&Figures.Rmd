@@ -64,6 +64,10 @@ all_data_scaled<-left_join(all_data_scaled,robustness,by="name_col")
 #Saving a copy of this dataframe that contains all data.
 all_data_scaled_original <- all_data_scaled
 
+# For Volume-MST, we actually used ratio of the total length of the real mycelia to the length of the MST mycelia
+# the trait should have called Length-MST, but I keep this term for consistency with the ISMEJ C paper.
+
+all_data_scaled$Mycelia_Vol_MST <- all_data_scaled$Mycelia_length_MST
 
 # Changing the format of a table
 
@@ -765,7 +769,7 @@ As input the, software requires 2 ordination axes.For constructing figure 6 we u
 
 Here I save the two axes that I used as input for Figure 6.
 ```{r}
-write.csv(all_data_scaled1[,c("RDA1","RDA2")],row.names = F,"RDA_axes_triangularity_Reff_Area.csv")
+write.csv(all_data_scaled1[,c("RDA1","RDA2")],row.names = F,"ISMEJ_C_output\\RDA_axes_triangularity_Reff_Area.csv")
 ```
 
 Based on the ordination axes of Figure 5c, the Pareto Front Software identified three archetypes with the following coordinates:
