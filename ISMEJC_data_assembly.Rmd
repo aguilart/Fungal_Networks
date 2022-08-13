@@ -8,6 +8,7 @@ output: html_notebook
 
 Data from the analysis of mycelial pictures using the network app from Mark Fricker
 ```{r}
+
 rm(list = ls())
 library(readxl)
 library(tidyverse)
@@ -102,6 +103,7 @@ mapply(function(x,z){
     E(y)$weight<-x$Resistance_2ave
     E(y)$length<-x$Length
     E(y)$width<-x$Width
+    E(y)$Volume <- x$Volume
     
     V(y)$Degrees<-degree(y)
     V(y)$Accessibility<-distances(y,v=as.numeric(V(y)[Degrees==max(V(y)$Degrees)])
